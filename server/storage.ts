@@ -1,4 +1,5 @@
 import Database from "better-sqlite3";
+import { NotificationService } from "./notifications";
 import type { 
   Product, Quote, Project, BlogPost, Contact, User,
   InsertProduct, InsertQuote, InsertProject, InsertBlogPost, InsertContact, InsertUser
@@ -32,18 +33,28 @@ db.exec(`
 
   CREATE TABLE IF NOT EXISTS quotes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    email TEXT NOT NULL,
-    phone TEXT,
-    company TEXT,
+    customer_name TEXT NOT NULL,
+    customer_email TEXT NOT NULL,
+    customer_phone TEXT NOT NULL,
     project_type TEXT NOT NULL,
-    farm_size REAL,
+    area_size TEXT NOT NULL,
     crop_type TEXT,
+    location TEXT NOT NULL,
     water_source TEXT,
+    distance_to_farm TEXT,
+    number_of_beds INTEGER,
+    soil_type TEXT,
     budget_range TEXT,
     timeline TEXT,
-    additional_requirements TEXT,
+    requirements TEXT,
     status TEXT DEFAULT 'pending',
+    total_amount REAL,
+    currency TEXT DEFAULT 'KSH',
+    items TEXT,
+    notes TEXT,
+    assigned_to INTEGER,
+    sent_at DATETIME,
+    delivery_method TEXT DEFAULT 'email',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
@@ -90,7 +101,7 @@ db.exec(`
 // Insert default admin user and sample data
 const adminExists = db.prepare("SELECT id FROM users WHERE email = ?").get("admin@driptech.co.ke");
 if (!adminExists) {
-  const bcrypt = require("bcrypt");
+  const bcrypt = await import("bcrypt");
   const hashedPassword = bcrypt.hashSync("admin123", 10);
 
   db.prepare(`
@@ -275,16 +286,49 @@ export class Storage {
 
   async createQuote(quoteData: InsertQuote): Promise<Quote> {
     const result = db.prepare(`
-      INSERT INTO quotes (name, email, phone, company, project_type, farm_size, crop_type, water_source, budget_range, timeline, additional_requirements, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO quotes (
+        customer_name, customer_email, customer_phone, project_type, area_size, 
+        crop_type, location, water_source, distance_to_farm, number_of_beds, 
+        soil_type, budget_range, timeline, requirements, status, delivery_method
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
-      quoteData.name, quoteData.email, quoteData.phone, quoteData.company,
-      quoteData.project_type, quoteData.farm_size, quoteData.crop_type,
-      quoteData.water_source, quoteData.budget_range, quoteData.timeline,
-      quoteData.additional_requirements, quoteData.status || 'pending'
+      quoteData.customerName, quoteData.customerEmail, quoteData.customerPhone,
+      quoteData.projectType, quoteData.areaSize, quoteData.cropType,
+      quoteData.location, quoteData.waterSource, quoteData.distanceToFarm,
+      quoteData.numberOfBeds, quoteData.soilType, quoteData.budgetRange,
+      quoteData.timeline, quoteData.requirements, 'pending', 'email'
     );
 
-    return this.getQuote(result.lastInsertRowid as number)!;
+    const quote = this.getQuote(result.lastInsertRowid as number)!;
+    
+    // Auto-send quote immediately
+    await this.sendQuoteToCustomer(quote);
+    
+    return quote;
+  }
+
+  async sendQuoteToCustomer(quote: Quote): Promise<void> {
+    try {
+      // Update status to sent
+      db.prepare(`
+        UPDATE quotes SET status = 'sent', sent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
+        WHERE id = ?
+      `).run(quote.id);
+      
+      // Send notifications through multiple channels
+      await NotificationService.sendQuoteEmail(quote);
+      await NotificationService.sendSMSNotification(quote);
+      
+      // Send WhatsApp if phone number is mobile
+      if (quote.customerPhone.includes('254') || quote.customerPhone.startsWith('07')) {
+        await NotificationService.sendWhatsAppNotification(quote);
+      }
+      
+      console.log(`✅ Quote #${quote.id} sent successfully to ${quote.customerEmail}`);
+    } catch (error) {
+      console.error('❌ Failed to send quote:', error);
+    }
   }
 
   async updateQuote(id: number, updateData: Partial<InsertQuote>): Promise<Quote> {

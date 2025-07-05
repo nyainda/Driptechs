@@ -21,6 +21,12 @@ const quoteSchema = z.object({
   areaSize: z.string().min(1, "Area size is required"),
   cropType: z.string().optional(),
   location: z.string().min(1, "Location is required"),
+  waterSource: z.string().min(1, "Water source is required"),
+  distanceToFarm: z.string().min(1, "Distance to farm is required"),
+  numberOfBeds: z.number().min(1, "Number of beds is required for drip irrigation").optional(),
+  soilType: z.string().optional(),
+  budgetRange: z.string().optional(),
+  timeline: z.string().optional(),
   requirements: z.string().optional(),
 });
 
@@ -53,8 +59,8 @@ export default function QuoteForm({ productId, onSuccess }: QuoteFormProps) {
     },
     onSuccess: () => {
       toast({
-        title: "Quote Request Submitted",
-        description: "We'll get back to you within 24 hours with a detailed quote.",
+        title: "Quote Sent Successfully!",
+        description: "Your detailed quote has been sent to your email immediately. Check your inbox and spam folder.",
       });
       reset();
       onSuccess?.();
@@ -148,6 +154,123 @@ export default function QuoteForm({ productId, onSuccess }: QuoteFormProps) {
               {errors.location && (
                 <p className="text-sm text-red-500">{errors.location.message}</p>
               )}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="waterSource">Water Source *</Label>
+              <Select
+                onValueChange={(value) => setValue("waterSource", value)}
+                defaultValue=""
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select water source" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="borehole">Borehole</SelectItem>
+                  <SelectItem value="well">Well</SelectItem>
+                  <SelectItem value="river">River</SelectItem>
+                  <SelectItem value="dam">Dam</SelectItem>
+                  <SelectItem value="municipal">Municipal Water</SelectItem>
+                  <SelectItem value="rainwater">Rainwater Harvesting</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.waterSource && (
+                <p className="text-sm text-red-500">{errors.waterSource.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="distanceToFarm">Distance to Farm *</Label>
+              <Input
+                id="distanceToFarm"
+                placeholder="e.g., 500 meters, 2 km"
+                {...register("distanceToFarm")}
+              />
+              {errors.distanceToFarm && (
+                <p className="text-sm text-red-500">{errors.distanceToFarm.message}</p>
+              )}
+            </div>
+          </div>
+
+          {projectType === "greenhouse" || projectType === "open_field" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="numberOfBeds">Number of Beds (for Drip Irrigation)</Label>
+                <Input
+                  id="numberOfBeds"
+                  type="number"
+                  min="1"
+                  placeholder="e.g., 20"
+                  {...register("numberOfBeds", { valueAsNumber: true })}
+                />
+                {errors.numberOfBeds && (
+                  <p className="text-sm text-red-500">{errors.numberOfBeds.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="soilType">Soil Type</Label>
+                <Select
+                  onValueChange={(value) => setValue("soilType", value)}
+                  defaultValue=""
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select soil type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="clay">Clay</SelectItem>
+                    <SelectItem value="loam">Loam</SelectItem>
+                    <SelectItem value="sand">Sandy</SelectItem>
+                    <SelectItem value="silt">Silt</SelectItem>
+                    <SelectItem value="mixed">Mixed</SelectItem>
+                    <SelectItem value="unknown">Not Sure</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="budgetRange">Budget Range (Optional)</Label>
+              <Select
+                onValueChange={(value) => setValue("budgetRange", value)}
+                defaultValue=""
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select budget range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="under_100k">Under KSh 100,000</SelectItem>
+                  <SelectItem value="100k_500k">KSh 100,000 - 500,000</SelectItem>
+                  <SelectItem value="500k_1m">KSh 500,000 - 1,000,000</SelectItem>
+                  <SelectItem value="1m_5m">KSh 1,000,000 - 5,000,000</SelectItem>
+                  <SelectItem value="over_5m">Over KSh 5,000,000</SelectItem>
+                  <SelectItem value="flexible">Flexible</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="timeline">Project Timeline</Label>
+              <Select
+                onValueChange={(value) => setValue("timeline", value)}
+                defaultValue=""
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="When do you need this?" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="asap">As soon as possible</SelectItem>
+                  <SelectItem value="1_month">Within 1 month</SelectItem>
+                  <SelectItem value="3_months">Within 3 months</SelectItem>
+                  <SelectItem value="6_months">Within 6 months</SelectItem>
+                  <SelectItem value="flexible">Timeline is flexible</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

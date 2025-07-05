@@ -219,8 +219,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const quoteData = insertQuoteSchema.parse(req.body);
       const quote = await storage.createQuote(quoteData);
-      res.json(quote);
+      
+      // Send immediate confirmation
+      res.json({ 
+        ...quote, 
+        message: "Quote has been generated and sent to your email immediately!" 
+      });
     } catch (error) {
+      console.error("Quote creation error:", error);
       res.status(400).json({ message: "Invalid quote data" });
     }
   });

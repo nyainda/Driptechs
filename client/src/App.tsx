@@ -17,6 +17,7 @@ import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import Blog from "@/pages/blog";
 import Quote from "@/pages/quote";
+import Home from "@/pages/home";
 
 // Admin Pages
 import AdminLogin from "@/pages/admin/login";

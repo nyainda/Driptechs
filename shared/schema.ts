@@ -39,13 +39,21 @@ export const quotes = pgTable("quotes", {
   areaSize: text("area_size").notNull(),
   cropType: text("crop_type"),
   location: text("location").notNull(),
+  waterSource: text("water_source"),
+  distanceToFarm: text("distance_to_farm"),
+  numberOfBeds: integer("number_of_beds"),
+  soilType: text("soil_type"),
+  budgetRange: text("budget_range"),
+  timeline: text("timeline"),
   requirements: text("requirements"),
-  status: text("status").notNull().default("pending"), // pending, in_progress, completed, cancelled
+  status: text("status").notNull().default("pending"), // pending, in_progress, completed, cancelled, sent
   totalAmount: decimal("total_amount", { precision: 12, scale: 2 }),
   currency: text("currency").notNull().default("KSH"),
   items: jsonb("items").default([]), // Array of quote items
   notes: text("notes"),
   assignedTo: integer("assigned_to").references(() => users.id),
+  sentAt: timestamp("sent_at"),
+  deliveryMethod: text("delivery_method").default("email"), // email, whatsapp, sms
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
