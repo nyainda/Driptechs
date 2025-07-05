@@ -1,8 +1,7 @@
-import { Link } from "wouter";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Check, Eye } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 import type { Product } from "@shared/schema";
 
 interface ProductCardProps {
@@ -123,7 +122,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       <CardFooter className="pt-0">
         <div className="flex w-full gap-2">
-          <Link href={`/products/${product.id}`} className="flex-1">
+          <Link href={`/products/${product.id}`}>
             <Button variant="outline" className="w-full">
               <Eye className="h-4 w-4 mr-2" />
               View Details

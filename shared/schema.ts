@@ -139,6 +139,22 @@ export const loginSchema = z.object({
   password: z.string().min(6),
 });
 
+// Product schema
+export const insertProductSchema1 = z.object({
+  name: z.string().min(1, "Product name is required"),
+  category: z.string().min(1, "Category is required"),
+  price: z.number().min(0, "Price must be positive"),
+  description: z.string().optional(),
+  image_url: z.string().optional(),
+  specifications: z.string().optional(),
+});
+
+export const productSchema = insertProductSchema1.extend({
+  id: z.number(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;

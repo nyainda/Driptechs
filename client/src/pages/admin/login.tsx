@@ -143,11 +143,14 @@ export default function AdminLogin() {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 bg-muted rounded-lg">
-            <h4 className="font-semibold text-sm mb-2">Demo Credentials:</h4>
-            <div className="text-xs space-y-1 text-muted-foreground">
+          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <h4 className="font-semibold text-sm mb-2 text-blue-800 dark:text-blue-200">Admin Access:</h4>
+            <div className="text-xs space-y-1 text-blue-700 dark:text-blue-300">
               <p><strong>Email:</strong> admin@driptech.co.ke</p>
               <p><strong>Password:</strong> admin123</p>
+              <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">
+                Use these credentials to access the admin dashboard
+              </p>
             </div>
           </div>
 

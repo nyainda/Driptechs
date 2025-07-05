@@ -9,8 +9,8 @@ import Footer from "@/components/footer";
 import NotFound from "@/pages/not-found";
 
 // Public Pages
-import Home from "@/pages/home";
 import Products from "@/pages/products";
+import ProductDetails from "@/pages/product-details";
 import Services from "@/pages/services";
 import Projects from "@/pages/projects";
 import About from "@/pages/about";
@@ -31,20 +31,21 @@ function Router() {
       {/* Public Routes */}
       <Route path="/" component={Home} />
       <Route path="/products" component={Products} />
+      <Route path="/products/:id" component={ProductDetails} />
       <Route path="/services" component={Services} />
       <Route path="/projects" component={Projects} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
       <Route path="/blog" component={Blog} />
       <Route path="/quote" component={Quote} />
-      
+
       {/* Admin Routes */}
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/products" component={AdminProducts} />
       <Route path="/admin/quotes" component={AdminQuotes} />
       <Route path="/admin/users" component={AdminUsers} />
-      
+
       {/* Fallback to 404 */}
       <Route component={NotFound} />
     </Switch>
