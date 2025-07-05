@@ -1,9 +1,9 @@
-import { pgTable, text, serial, integer, boolean, decimal, timestamp, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, decimal, timestamp, jsonb, uuid } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
   name: text("name").notNull(),
@@ -13,7 +13,7 @@ export const users = pgTable("users", {
 });
 
 export const products = pgTable("products", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   category: text("category").notNull(), // drip_irrigation, sprinkler, filtration, control, fertigation, accessories
   model: text("model").notNull(),
@@ -31,7 +31,7 @@ export const products = pgTable("products", {
 });
 
 export const quotes = pgTable("quotes", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   customerName: text("customer_name").notNull(),
   customerEmail: text("customer_email").notNull(),
   customerPhone: text("customer_phone").notNull(),
@@ -59,7 +59,7 @@ export const quotes = pgTable("quotes", {
 });
 
 export const projects = pgTable("projects", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
   description: text("description").notNull(),
   location: text("location").notNull(),
@@ -78,7 +78,7 @@ export const projects = pgTable("projects", {
 });
 
 export const blogPosts = pgTable("blog_posts", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
   slug: text("slug").notNull().unique(),
   content: text("content").notNull(),
@@ -93,7 +93,7 @@ export const blogPosts = pgTable("blog_posts", {
 });
 
 export const contacts = pgTable("contacts", {
-  id: serial("id").primaryKey(),
+  id: uuid("id").primaryKey().defaultRandom(),
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email").notNull(),
@@ -158,7 +158,7 @@ export const insertProductSchema1 = z.object({
 });
 
 export const productSchema = insertProductSchema1.extend({
-  id: z.number(),
+  id: z.string(),
   created_at: z.string(),
   updated_at: z.string(),
 });

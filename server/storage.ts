@@ -4,13 +4,14 @@ import type {
   Product, Quote, Project, BlogPost, Contact, User,
   InsertProduct, InsertQuote, InsertProject, InsertBlogPost, InsertContact, InsertUser
 } from "@shared/schema";
+import { v4 as uuidv4 } from 'uuid';
 
 const db = new Database("driptech.db");
 
 // Initialize database tables
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
@@ -20,7 +21,7 @@ db.exec(`
   );
 
   CREATE TABLE IF NOT EXISTS products (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     category TEXT NOT NULL,
     price REAL NOT NULL,
@@ -32,7 +33,7 @@ db.exec(`
   );
 
   CREATE TABLE IF NOT EXISTS quotes (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     customer_name TEXT NOT NULL,
     customer_email TEXT NOT NULL,
     customer_phone TEXT NOT NULL,
@@ -60,7 +61,7 @@ db.exec(`
   );
 
   CREATE TABLE IF NOT EXISTS projects (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     description TEXT,
     image_url TEXT,
@@ -73,7 +74,7 @@ db.exec(`
   );
 
   CREATE TABLE IF NOT EXISTS blog_posts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     title TEXT NOT NULL,
     slug TEXT UNIQUE NOT NULL,
     content TEXT NOT NULL,
@@ -87,7 +88,7 @@ db.exec(`
   );
 
   CREATE TABLE IF NOT EXISTS contacts (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     email TEXT NOT NULL,
     phone TEXT,
@@ -105,9 +106,9 @@ if (!adminExists) {
   const hashedPassword = bcrypt.hashSync("admin123", 10);
 
   db.prepare(`
-    INSERT INTO users (name, email, password, role)
-    VALUES (?, ?, ?, ?)
-  `).run("Admin User", "admin@driptech.co.ke", hashedPassword, "super_admin");
+    INSERT INTO users (id, name, email, password, role)
+    VALUES (?, ?, ?, ?, ?)
+  `).run(uuidv4(), "Admin User", "admin@driptech.co.ke", hashedPassword, "super_admin");
 }
 
 // Insert sample projects if none exist
@@ -144,12 +145,12 @@ if (projectCount.count === 0) {
   ];
 
   const insertProject = db.prepare(`
-    INSERT INTO projects (title, description, image_url, category, location, completion_date, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO projects (id, title, description, image_url, category, location, completion_date, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   for (const project of sampleProjects) {
-    insertProject.run(project.title, project.description, project.image_url, project.category, project.location, project.completion_date, project.status);
+    insertProject.run(uuidv4(), project.title, project.description, project.image_url, project.category, project.location, project.completion_date, project.status);
   }
 }
 
@@ -192,12 +193,12 @@ if (productCount.count === 0) {
   ];
 
   const insertProduct = db.prepare(`
-    INSERT INTO products (name, category, price, description, image_url, specifications)
-    VALUES (?, ?, ?, ?, ?, ?)
+    INSERT INTO products (id, name, category, price, description, image_url, specifications)
+    VALUES (?, ?, ?, ?, ?, ?, ?)
   `);
 
   for (const product of sampleProducts) {
-    insertProduct.run(product.name, product.category, product.price, product.description, product.image_url, product.specifications);
+    insertProduct.run(uuidv4(), product.name, product.category, product.price, product.description, product.image_url, product.specifications);
   }
 }
 
@@ -208,7 +209,7 @@ export class Storage {
     return db.prepare("SELECT * FROM users ORDER BY created_at DESC").all() as User[];
   }
 
-  async getUser(id: number): Promise<User | null> {
+  async getUser(id: string): Promise<User | null> {
     return db.prepare("SELECT * FROM users WHERE id = ?").get(id) as User | null;
   }
 
@@ -217,15 +218,16 @@ export class Storage {
   }
 
   async createUser(userData: InsertUser): Promise<User> {
-    const result = db.prepare(`
-      INSERT INTO users (name, email, password, role)
-      VALUES (?, ?, ?, ?)
-    `).run(userData.name, userData.email, userData.password, userData.role || 'user');
+    const id = uuidv4();
+    db.prepare(`
+      INSERT INTO users (id, name, email, password, role)
+      VALUES (?, ?, ?, ?, ?)
+    `).run(id, userData.name, userData.email, userData.password, userData.role || 'user');
 
-    return this.getUser(result.lastInsertRowid as number)!;
+    return this.getUser(id)!;
   }
 
-  async updateUser(id: number, updateData: Partial<InsertUser>): Promise<User> {
+  async updateUser(id: string, updateData: Partial<InsertUser>): Promise<User> {
     const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
     const values = Object.values(updateData);
 
@@ -235,7 +237,7 @@ export class Storage {
     return this.getUser(id)!;
   }
 
-  async deleteUser(id: number): Promise<void> {
+  async deleteUser(id: string): Promise<void> {
     db.prepare("DELETE FROM users WHERE id = ?").run(id);
   }
 
@@ -244,7 +246,7 @@ export class Storage {
     return db.prepare("SELECT * FROM products ORDER BY created_at DESC").all() as Product[];
   }
 
-  async getProduct(id: number): Promise<Product | null> {
+  async getProduct(id: string): Promise<Product | null> {
     return db.prepare("SELECT * FROM products WHERE id = ?").get(id) as Product | null;
   }
 
@@ -253,15 +255,16 @@ export class Storage {
   }
 
   async createProduct(productData: InsertProduct): Promise<Product> {
-    const result = db.prepare(`
-      INSERT INTO products (name, category, price, description, image_url, specifications)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(productData.name, productData.category, productData.price, productData.description, productData.image_url, productData.specifications);
+    const id = uuidv4();
+    db.prepare(`
+      INSERT INTO products (id, name, category, price, description, image_url, specifications)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(id, productData.name, productData.category, productData.price, productData.description, productData.image_url, productData.specifications);
 
-    return this.getProduct(result.lastInsertRowid as number)!;
+    return this.getProduct(id)!;
   }
 
-  async updateProduct(id: number, updateData: Partial<InsertProduct>): Promise<Product> {
+  async updateProduct(id: string, updateData: Partial<InsertProduct>): Promise<Product> {
     const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
     const values = Object.values(updateData);
 
@@ -271,7 +274,7 @@ export class Storage {
     return this.getProduct(id)!;
   }
 
-  async deleteProduct(id: number): Promise<void> {
+  async deleteProduct(id: string): Promise<void> {
     db.prepare("DELETE FROM products WHERE id = ?").run(id);
   }
 
@@ -280,31 +283,32 @@ export class Storage {
     return db.prepare("SELECT * FROM quotes ORDER BY created_at DESC").all() as Quote[];
   }
 
-  async getQuote(id: number): Promise<Quote | null> {
+  async getQuote(id: string): Promise<Quote | null> {
     return db.prepare("SELECT * FROM quotes WHERE id = ?").get(id) as Quote | null;
   }
 
   async createQuote(quoteData: InsertQuote): Promise<Quote> {
+    const id = uuidv4();
     const result = db.prepare(`
       INSERT INTO quotes (
-        customer_name, customer_email, customer_phone, project_type, area_size, 
+        id, customer_name, customer_email, customer_phone, project_type, area_size, 
         crop_type, location, water_source, distance_to_farm, number_of_beds, 
         soil_type, budget_range, timeline, requirements, status, delivery_method
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
-      quoteData.customerName, quoteData.customerEmail, quoteData.customerPhone,
+      id, quoteData.customerName, quoteData.customerEmail, quoteData.customerPhone,
       quoteData.projectType, quoteData.areaSize, quoteData.cropType,
       quoteData.location, quoteData.waterSource, quoteData.distanceToFarm,
       quoteData.numberOfBeds, quoteData.soilType, quoteData.budgetRange,
       quoteData.timeline, quoteData.requirements, 'pending', 'email'
     );
 
-    const quote = this.getQuote(result.lastInsertRowid as number)!;
-    
+    const quote = this.getQuote(id)!;
+
     // Auto-send quote immediately
     await this.sendQuoteToCustomer(quote);
-    
+
     return quote;
   }
 
@@ -315,23 +319,23 @@ export class Storage {
         UPDATE quotes SET status = 'sent', sent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
         WHERE id = ?
       `).run(quote.id);
-      
+
       // Send notifications through multiple channels
       await NotificationService.sendQuoteEmail(quote);
       await NotificationService.sendSMSNotification(quote);
-      
+
       // Send WhatsApp if phone number is mobile
       if (quote.customerPhone.includes('254') || quote.customerPhone.startsWith('07')) {
         await NotificationService.sendWhatsAppNotification(quote);
       }
-      
+
       console.log(`✅ Quote #${quote.id} sent successfully to ${quote.customerEmail}`);
     } catch (error) {
       console.error('❌ Failed to send quote:', error);
     }
   }
 
-  async updateQuote(id: number, updateData: Partial<InsertQuote>): Promise<Quote> {
+  async updateQuote(id: string, updateData: Partial<InsertQuote>): Promise<Quote> {
     const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
     const values = Object.values(updateData);
 
@@ -347,16 +351,17 @@ export class Storage {
   }
 
   async createProject(projectData: InsertProject): Promise<Project> {
-    const result = db.prepare(`
-      INSERT INTO projects (title, description, image_url, category, location, completion_date, status)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+    const id = uuidv4();
+    db.prepare(`
+      INSERT INTO projects (id, title, description, image_url, category, location, completion_date, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
-      projectData.title, projectData.description, projectData.image_url,
+      id, projectData.title, projectData.description, projectData.image_url,
       projectData.category, projectData.location, projectData.completion_date,
       projectData.status || 'active'
     );
 
-    return db.prepare("SELECT * FROM projects WHERE id = ?").get(result.lastInsertRowid) as Project;
+    return db.prepare("SELECT * FROM projects WHERE id = ?").get(id) as Project;
   }
 
   // Blog methods
@@ -369,15 +374,16 @@ export class Storage {
   }
 
   async createBlogPost(postData: InsertBlogPost): Promise<BlogPost> {
+    const id = uuidv4();
     const result = db.prepare(`
-      INSERT INTO blog_posts (title, slug, content, excerpt, image_url, author_id, published)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO blog_posts (id, title, slug, content, excerpt, image_url, author_id, published)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
-      postData.title, postData.slug, postData.content, postData.excerpt,
+      id, postData.title, postData.slug, postData.content, postData.excerpt,
       postData.image_url, postData.author_id, postData.published || false
     );
 
-    return db.prepare("SELECT * FROM blog_posts WHERE id = ?").get(result.lastInsertRowid) as BlogPost;
+    return db.prepare("SELECT * FROM blog_posts WHERE id = ?").get(id) as BlogPost;
   }
 
   // Contact methods
@@ -386,15 +392,16 @@ export class Storage {
   }
 
   async createContact(contactData: InsertContact): Promise<Contact> {
+    const id = uuidv4();
     const result = db.prepare(`
-      INSERT INTO contacts (name, email, phone, company, subject, message)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO contacts (id, name, email, phone, company, subject, message)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(
-      contactData.name, contactData.email, contactData.phone,
+      id, contactData.name, contactData.email, contactData.phone,
       contactData.company, contactData.subject, contactData.message
     );
 
-    return db.prepare("SELECT * FROM contacts WHERE id = ?").get(result.lastInsertRowid) as Contact;
+    return db.prepare("SELECT * FROM contacts WHERE id = ?").get(id) as Contact;
   }
 }
 
