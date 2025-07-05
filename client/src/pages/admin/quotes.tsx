@@ -27,8 +27,11 @@ import {
   MapPin,
   Package,
   Droplets,
-  ArrowLeft
+  ArrowLeft,
+  Search,
+  DollarSign
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
 import type { Quote } from "@shared/schema";
 

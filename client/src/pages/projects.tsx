@@ -117,26 +117,36 @@ export default function Projects() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {projects.map((project) => (
                 <Card key={project.id} className="overflow-hidden admin-card">
-                  {project.images && project.images.length > 0 && (
-                    <div className="aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                  <div className="aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                    {project.image_url ? (
                       <img
-                        src={project.images[0]}
-                        alt={project.name}
+                        src={project.image_url}
+                        alt={project.name || project.title}
                         className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
                       />
+                    ) : null}
+                    <div className={`w-full h-full flex items-center justify-center ${project.image_url ? 'hidden' : ''}`}>
+                      <div className="text-center text-muted-foreground">
+                        <TrendingUp className="h-12 w-12 mx-auto mb-2" />
+                        <p className="text-sm">No image available</p>
+                      </div>
                     </div>
-                  )}
+                  </div>
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <Badge className={getStatusColor(project.status)}>
                           {project.status.replace('_', ' ').toUpperCase()}
                         </Badge>
-                        <CardTitle className="mt-2 text-xl">{project.name}</CardTitle>
+                        <CardTitle className="mt-2 text-xl">{project.title || project.name}</CardTitle>
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-blue-600">
-                          {formatCurrency(project.value, project.currency)}
+                          {project.value ? `KSh ${Number(project.value).toLocaleString()}` : 'Contact for pricing'}
                         </div>
                       </div>
                     </div>
@@ -153,29 +163,23 @@ export default function Projects() {
                       </div>
                       <div className="flex items-center space-x-2 text-sm">
                         <TrendingUp className="h-4 w-4 text-green-600" />
-                        <span>{project.projectType} - {project.areaSize}</span>
+                        <span>{project.category || 'General'}</span>
                       </div>
-                      {project.startDate && (
+                      {project.completion_date && (
                         <div className="flex items-center space-x-2 text-sm">
                           <Calendar className="h-4 w-4 text-purple-600" />
-                          <span>{new Date(project.startDate).toLocaleDateString()}</span>
+                          <span>Completed: {new Date(project.completion_date).toLocaleDateString()}</span>
                         </div>
                       )}
                     </div>
 
-                    {project.results && typeof project.results === 'object' && (
-                      <div className="space-y-2 mb-4">
-                        <h4 className="text-sm font-semibold">Results:</h4>
-                        <div className="grid grid-cols-1 gap-1 text-xs">
-                          {Object.entries(project.results).map(([key, value]) => (
-                            <div key={key} className="flex items-center space-x-2">
-                              <CheckCircle className="h-3 w-3 text-green-600" />
-                              <span>{String(value)}</span>
-                            </div>
-                          ))}
-                        </div>
+                    <div className="space-y-2 mb-4">
+                      <h4 className="text-sm font-semibold">Status:</h4>
+                      <div className="flex items-center space-x-2">
+                        <CheckCircle className="h-3 w-3 text-green-600" />
+                        <span className="text-sm capitalize">{project.status}</span>
                       </div>
-                    )}
+                    </div>
 
                     <Link href={`/contact?project=${project.id}`}>
                       <Button variant="outline" className="w-full">

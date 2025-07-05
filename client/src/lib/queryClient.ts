@@ -9,17 +9,14 @@ async function throwIfResNotOk(res: Response) {
 
 import { getAuthToken } from "./auth";
 
-export async function apiRequest(
-  method: string,
-  url: string,
-  data?: any
-): Promise<Response> {
-  const token = getAuthToken();
+export async function apiRequest(method: string, url: string, data?: any) {
+  const token = localStorage.getItem('auth_token');
+
   const config: RequestInit = {
     method,
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(token && { "Authorization": `Bearer ${token}` }),
     },
   };
 
@@ -28,10 +25,11 @@ export async function apiRequest(
   }
 
   const response = await fetch(url, config);
+
   if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.message || "Request failed");
+    throw new Error(`HTTP error! status: ${response.status}`);
   }
+
   return response;
 }
 

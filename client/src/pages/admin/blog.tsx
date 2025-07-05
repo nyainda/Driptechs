@@ -22,7 +22,8 @@ import {
   Eye,
   Calendar,
   User,
-  ArrowLeft
+  ArrowLeft,
+  Search
 } from "lucide-react";
 import { Link } from "wouter";
 import type { BlogPost } from "@shared/schema";
