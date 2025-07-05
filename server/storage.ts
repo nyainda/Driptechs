@@ -345,6 +345,10 @@ export class Storage {
     return this.getQuote(id)!;
   }
 
+  async deleteQuote(id: string): Promise<void> {
+    db.prepare("DELETE FROM quotes WHERE id = ?").run(id);
+  }
+
   // Project methods
   async getProjects(): Promise<Project[]> {
     return db.prepare("SELECT * FROM projects ORDER BY created_at DESC").all() as Project[];
@@ -384,6 +388,20 @@ export class Storage {
     );
 
     return db.prepare("SELECT * FROM blog_posts WHERE id = ?").get(id) as BlogPost;
+  }
+
+  async updateBlogPost(id: string, updateData: Partial<InsertBlogPost>): Promise<BlogPost> {
+    const fields = Object.keys(updateData).map(key => `${key} = ?`).join(', ');
+    const values = Object.values(updateData);
+
+    db.prepare(`UPDATE blog_posts SET ${fields}, updated_at = CURRENT_TIMESTAMP WHERE id = ?`)
+      .run(...values, id);
+
+    return db.prepare("SELECT * FROM blog_posts WHERE id = ?").get(id) as BlogPost;
+  }
+
+  async deleteBlogPost(id: string): Promise<void> {
+    db.prepare("DELETE FROM blog_posts WHERE id = ?").run(id);
   }
 
   // Contact methods

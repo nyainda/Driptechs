@@ -12,16 +12,19 @@ import { getAuthToken, getUser } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import QuotePDF from "@/components/admin/quote-pdf";
 import { 
+  Plus, 
+  Edit, 
+  Trash2, 
   Search, 
   ArrowLeft,
   FileText,
   Download,
-  Edit,
   Eye,
   Calendar,
   DollarSign,
   User,
-  MapPin
+  MapPin,
+  Send
 } from "lucide-react";
 import type { Quote } from "@shared/schema";
 
@@ -67,15 +70,56 @@ export default function AdminQuotes() {
     },
   });
 
+  const deleteQuoteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/admin/quotes/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
+      toast({
+        title: "Quote Deleted",
+        description: "Quote has been successfully removed.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to delete quote. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const sendQuoteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const response = await apiRequest("POST", `/api/admin/quotes/${id}/send`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
+      toast({
+        title: "Quote Sent",
+        description: "Quote has been sent to the customer successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to send quote. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const filteredQuotes = quotes?.filter((quote) => {
     const matchesSearch = 
       quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       quote.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
       quote.projectType.toLowerCase().includes(searchTerm.toLowerCase()) ||
       quote.location.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === "all" || quote.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   }) || [];
 
@@ -84,6 +128,18 @@ export default function AdminQuotes() {
       id: quoteId,
       data: { status: newStatus }
     });
+  };
+
+  const handleDelete = (quote: Quote) => {
+    if (window.confirm(`Are you sure you want to delete the quote for ${quote.customerName}?`)) {
+      deleteQuoteMutation.mutate(quote.id);
+    }
+  };
+
+  const handleSendQuote = (quote: Quote) => {
+    if (window.confirm(`Send quote to ${quote.customerEmail}?`)) {
+      sendQuoteMutation.mutate(quote.id);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -271,7 +327,7 @@ export default function AdminQuotes() {
                           {quote.status.replace('_', ' ').toUpperCase()}
                         </Badge>
                       </div>
-                      
+
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center space-x-2">
                           <User className="h-4 w-4" />
@@ -313,15 +369,18 @@ export default function AdminQuotes() {
                           <SelectItem value="cancelled">Cancelled</SelectItem>
                         </SelectContent>
                       </Select>
-                      
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setSelectedQuote(quote)}
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      
+
+                      {quote.status !== 'sent' && (
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => handleSendQuote(quote)}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <Send className="h-4 w-4 mr-1" />
+                          Send
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"

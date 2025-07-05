@@ -6,6 +6,8 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Separator } from "@/components/ui/separator";
 import { Eye, ShoppingCart, Check } from "lucide-react";
 import type { Product } from "@shared/schema";
+import { useState } from "react";
+import { useLocation } from "wouter";
 
 interface ProductCardProps {
   product: Product;
@@ -51,6 +53,8 @@ export default function ProductCard({ product }: ProductCardProps) {
         return category;
     }
   };
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [, setLocation] = useLocation();
 
   return (
     <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
@@ -125,17 +129,20 @@ export default function ProductCard({ product }: ProductCardProps) {
 
       <CardFooter className="pt-0">
         <div className="flex w-full gap-2">
-          <Link href={`/products/${product.id}`}>
-            <Button variant="outline" className="w-full">
-              <Eye className="h-4 w-4 mr-2" />
-              View Details
-            </Button>
-          </Link>
-          <Link href={`/quote?product=${product.id}`} className="flex-1">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700">
-              Get Quote
-            </Button>
-          </Link>
+          <Button 
+            variant="outline" 
+            className="w-full"
+            onClick={() => setLocation(`/products/${product.id}`)}
+          >
+            <Eye className="h-4 w-4 mr-2" />
+            View Details
+          </Button>
+          <Button 
+            className="w-full bg-blue-600 hover:bg-blue-700"
+            onClick={() => setLocation("/quote")}
+          >
+            Get Quote
+          </Button>
         </div>
       </CardFooter>
     </Card>

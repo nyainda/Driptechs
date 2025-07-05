@@ -95,7 +95,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/products/:id", async (req, res) => {
     try {
-      const product = await storage.getProduct(parseInt(req.params.id));
+      const product = await storage.getProduct(req.params.id);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
@@ -118,7 +118,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/products/:id", authenticate, requireAdmin, async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const updateData = req.body;
       const product = await storage.updateProduct(id, updateData);
       res.json(product);
@@ -129,7 +129,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/admin/products/:id", authenticate, requireAdmin, async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       await storage.deleteProduct(id);
       res.json({ message: "Product deleted successfully" });
     } catch (error) {
@@ -254,12 +254,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/admin/quotes/:id", authenticate, requireAdmin, async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const updateData = req.body;
       const quote = await storage.updateQuote(id, updateData);
       res.json(quote);
     } catch (error) {
       res.status(400).json({ message: "Failed to update quote" });
+    }
+  });
+
+  app.post("/api/admin/quotes/:id/send", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const quote = await storage.getQuote(id);
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+      
+      await storage.sendQuoteToCustomer(quote);
+      res.json({ message: "Quote sent successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to send quote" });
+    }
+  });
+
+  app.delete("/api/admin/quotes/:id", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const id = req.params.id;
+      await storage.deleteQuote(id);
+      res.json({ message: "Quote deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete quote" });
     }
   });
 
@@ -329,11 +354,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/blog", authenticate, requireAdmin, async (req: any, res) => {
     try {
-      const postData = { ...insertBlogPostSchema.parse(req.body), authorId: req.user.id };
+      const postData = { ...insertBlogPostSchema.parse(req.body), author_id: req.user.id };
       const post = await storage.createBlogPost(postData);
       res.json(post);
     } catch (error) {
       res.status(400).json({ message: "Invalid blog post data" });
+    }
+  });
+
+  app.put("/api/admin/blog/:id", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const updateData = req.body;
+      const post = await storage.updateBlogPost(id, updateData);
+      res.json(post);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update blog post" });
+    }
+  });
+
+  app.delete("/api/admin/blog/:id", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const id = req.params.id;
+      await storage.deleteBlogPost(id);
+      res.json({ message: "Blog post deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete blog post" });
     }
   });
 

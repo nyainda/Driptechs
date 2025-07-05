@@ -9,33 +9,18 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { 
-  Plus, 
-  Minus, 
-  Save, 
-  X,
-  Upload,
-  Image as ImageIcon
-} from "lucide-react";
+import { Save, Upload, Image as ImageIcon } from "lucide-react";
 import type { Product } from "@shared/schema";
 
 const productSchema = z.object({
   name: z.string().min(2, "Product name must be at least 2 characters"),
   category: z.string().min(1, "Category is required"),
-  model: z.string().min(1, "Model is required"),
+  price: z.number().min(0, "Price must be positive"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  price: z.string().min(1, "Price is required"),
-  currency: z.string().default("KSH"),
-  images: z.array(z.string()).default([]),
-  specifications: z.record(z.string()).default({}),
-  features: z.array(z.string()).default([]),
-  applications: z.array(z.string()).default([]),
-  inStock: z.boolean().default(true),
-  stockQuantity: z.number().min(0, "Stock quantity must be non-negative").default(0),
+  image_url: z.string().optional(),
+  specifications: z.string().optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -49,12 +34,8 @@ interface ProductFormProps {
 export default function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const [newFeature, setNewFeature] = useState("");
-  const [newApplication, setNewApplication] = useState("");
-  const [newImage, setNewImage] = useState("");
-  const [specKey, setSpecKey] = useState("");
-  const [specValue, setSpecValue] = useState("");
+  const [imageUrl, setImageUrl] = useState(product?.image_url || "");
+  const [dragActive, setDragActive] = useState(false);
 
   const {
     register,
@@ -62,34 +43,19 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     formState: { errors },
     setValue,
     watch,
-    getValues,
   } = useForm<ProductFormData>({
     resolver: zodResolver(productSchema),
-    defaultValues: product ? {
-      name: product.name,
-      category: product.category,
-      model: product.model,
-      description: product.description,
-      price: product.price,
-      currency: product.currency,
-      images: product.images || [],
-      specifications: (product.specifications as Record<string, string>) || {},
-      features: product.features || [],
-      applications: product.applications || [],
-      inStock: product.inStock,
-      stockQuantity: product.stockQuantity || 0,
-    } : {
-      currency: "KSH",
-      inStock: true,
-      stockQuantity: 0,
-      images: [],
-      specifications: {},
-      features: [],
-      applications: [],
+    defaultValues: {
+      name: product?.name || "",
+      category: product?.category || "",
+      price: product ? parseFloat(product.price) : 0,
+      description: product?.description || "",
+      image_url: product?.image_url || "",
+      specifications: product?.specifications || "",
     },
   });
 
-  const watchedFields = watch();
+  const watchedCategory = watch("category");
 
   const createProductMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
@@ -143,68 +109,43 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     }
   };
 
-  const addFeature = () => {
-    if (newFeature.trim()) {
-      const currentFeatures = getValues("features");
-      setValue("features", [...currentFeatures, newFeature.trim()]);
-      setNewFeature("");
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
     }
   };
 
-  const removeFeature = (index: number) => {
-    const currentFeatures = getValues("features");
-    setValue("features", currentFeatures.filter((_, i) => i !== index));
-  };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
 
-  const addApplication = () => {
-    if (newApplication.trim()) {
-      const currentApplications = getValues("applications");
-      setValue("applications", [...currentApplications, newApplication.trim()]);
-      setNewApplication("");
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      if (file.type.startsWith('image/')) {
+        // In a real app, you'd upload this to a cloud service
+        // For demo purposes, we'll use a placeholder
+        const demoUrl = `https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop`;
+        setImageUrl(demoUrl);
+        setValue("image_url", demoUrl);
+        toast({
+          title: "Image Added",
+          description: "Demo image has been set. In production, this would upload your file.",
+        });
+      }
     }
-  };
-
-  const removeApplication = (index: number) => {
-    const currentApplications = getValues("applications");
-    setValue("applications", currentApplications.filter((_, i) => i !== index));
-  };
-
-  const addImage = () => {
-    if (newImage.trim()) {
-      const currentImages = getValues("images");
-      setValue("images", [...currentImages, newImage.trim()]);
-      setNewImage("");
-    }
-  };
-
-  const removeImage = (index: number) => {
-    const currentImages = getValues("images");
-    setValue("images", currentImages.filter((_, i) => i !== index));
-  };
-
-  const addSpecification = () => {
-    if (specKey.trim() && specValue.trim()) {
-      const currentSpecs = getValues("specifications");
-      setValue("specifications", { ...currentSpecs, [specKey.trim()]: specValue.trim() });
-      setSpecKey("");
-      setSpecValue("");
-    }
-  };
-
-  const removeSpecification = (key: string) => {
-    const currentSpecs = getValues("specifications");
-    const newSpecs = { ...currentSpecs };
-    delete newSpecs[key];
-    setValue("specifications", newSpecs);
   };
 
   const categories = [
-    { value: "drip_irrigation", label: "Drip Irrigation" },
-    { value: "sprinkler", label: "Sprinkler Systems" },
-    { value: "filtration", label: "Filtration Systems" },
-    { value: "control", label: "Control Systems" },
-    { value: "fertigation", label: "Fertigation Systems" },
-    { value: "accessories", label: "Accessories" },
+    { value: "Drip Irrigation", label: "Drip Irrigation" },
+    { value: "Sprinkler Systems", label: "Sprinkler Systems" },
+    { value: "Water Treatment", label: "Water Treatment" },
+    { value: "Automation", label: "Automation" },
+    { value: "Accessories", label: "Accessories" },
   ];
 
   return (
@@ -229,22 +170,11 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="model">Model *</Label>
-              <Input
-                id="model"
-                placeholder="Enter model number"
-                {...register("model")}
-              />
-              {errors.model && (
-                <p className="text-sm text-red-500">{errors.model.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
-              <Select onValueChange={(value) => setValue("category", value)}>
+              <Select 
+                value={watchedCategory} 
+                onValueChange={(value) => setValue("category", value)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
@@ -260,20 +190,20 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 <p className="text-sm text-red-500">{errors.category.message}</p>
               )}
             </div>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="price">Price (KSh) *</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                placeholder="Enter price"
-                {...register("price")}
-              />
-              {errors.price && (
-                <p className="text-sm text-red-500">{errors.price.message}</p>
-              )}
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="price">Price (KSh) *</Label>
+            <Input
+              id="price"
+              type="number"
+              step="0.01"
+              placeholder="Enter price"
+              {...register("price", { valueAsNumber: true })}
+            />
+            {errors.price && (
+              <p className="text-sm text-red-500">{errors.price.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -291,79 +221,62 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         </CardContent>
       </Card>
 
-      {/* Stock Information */}
+      {/* Product Image */}
       <Card className="admin-card">
         <CardHeader>
-          <CardTitle>Stock Information</CardTitle>
+          <CardTitle>Product Image</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Switch
-              checked={watchedFields.inStock}
-              onCheckedChange={(checked) => setValue("inStock", checked)}
-            />
-            <Label>In Stock</Label>
-          </div>
-
           <div className="space-y-2">
-            <Label htmlFor="stockQuantity">Stock Quantity</Label>
+            <Label htmlFor="image_url">Image URL</Label>
             <Input
-              id="stockQuantity"
-              type="number"
-              min="0"
-              placeholder="Enter stock quantity"
-              {...register("stockQuantity", { valueAsNumber: true })}
+              id="image_url"
+              placeholder="Enter image URL or drag and drop image below"
+              value={imageUrl}
+              onChange={(e) => {
+                setImageUrl(e.target.value);
+                setValue("image_url", e.target.value);
+              }}
             />
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Images */}
-      <Card className="admin-card">
-        <CardHeader>
-          <CardTitle>Product Images</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Enter image URL"
-              value={newImage}
-              onChange={(e) => setNewImage(e.target.value)}
-            />
-            <Button type="button" onClick={addImage} variant="outline">
-              <Plus className="h-4 w-4" />
-            </Button>
+          {/* Drag and Drop Area */}
+          <div
+            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+              dragActive 
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-950" 
+                : "border-gray-300 dark:border-gray-600"
+            }`}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+          >
+            <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <p className="text-lg font-medium">Drag and drop an image here</p>
+            <p className="text-sm text-muted-foreground">or use the URL field above</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {watchedFields.images?.map((image, index) => (
-              <div key={index} className="relative group">
-                <div className="aspect-video bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
-                  <img
-                    src={image}
-                    alt={`Product image ${index + 1}`}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                    }}
-                  />
-                  <div className="hidden w-full h-full flex items-center justify-center">
-                    <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                  </div>
+          {/* Image Preview */}
+          {imageUrl && (
+            <div className="mt-4">
+              <p className="text-sm font-medium mb-2">Preview:</p>
+              <div className="aspect-video max-w-md bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+                <img
+                  src={imageUrl}
+                  alt="Product preview"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                    e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <div className="hidden w-full h-full flex items-center justify-center">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => removeImage(index)}
-                >
-                  <X className="h-3 w-3" />
-                </Button>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -373,109 +286,14 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
           <CardTitle>Technical Specifications</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Specification name"
-              value={specKey}
-              onChange={(e) => setSpecKey(e.target.value)}
-            />
-            <Input
-              placeholder="Specification value"
-              value={specValue}
-              onChange={(e) => setSpecValue(e.target.value)}
-            />
-            <Button type="button" onClick={addSpecification} variant="outline">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-
           <div className="space-y-2">
-            {Object.entries(watchedFields.specifications || {}).map(([key, value]) => (
-              <div key={key} className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                <div>
-                  <span className="font-medium">{key}:</span> {value}
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeSpecification(key)}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Features */}
-      <Card className="admin-card">
-        <CardHeader>
-          <CardTitle>Key Features</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Enter feature"
-              value={newFeature}
-              onChange={(e) => setNewFeature(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addFeature())}
+            <Label htmlFor="specifications">Specifications</Label>
+            <Textarea
+              id="specifications"
+              rows={4}
+              placeholder="Enter technical specifications (e.g., Flow rate: 2-4 L/h, Pressure range: 0.5-4 bar)"
+              {...register("specifications")}
             />
-            <Button type="button" onClick={addFeature} variant="outline">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {watchedFields.features?.map((feature, index) => (
-              <Badge key={index} variant="secondary" className="flex items-center gap-1">
-                {feature}
-                <button
-                  type="button"
-                  onClick={() => removeFeature(index)}
-                  className="text-red-600 hover:text-red-700 ml-1"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Applications */}
-      <Card className="admin-card">
-        <CardHeader>
-          <CardTitle>Applications</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex gap-2">
-            <Input
-              placeholder="Enter application"
-              value={newApplication}
-              onChange={(e) => setNewApplication(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addApplication())}
-            />
-            <Button type="button" onClick={addApplication} variant="outline">
-              <Plus className="h-4 w-4" />
-            </Button>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {watchedFields.applications?.map((application, index) => (
-              <Badge key={index} variant="outline" className="flex items-center gap-1">
-                {application}
-                <button
-                  type="button"
-                  onClick={() => removeApplication(index)}
-                  className="text-red-600 hover:text-red-700 ml-1"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </Badge>
-            ))}
           </div>
         </CardContent>
       </Card>

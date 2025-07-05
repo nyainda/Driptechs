@@ -17,12 +17,13 @@ import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import Blog from "@/pages/blog";
 import Quote from "@/pages/quote";
-import Home from "@/pages/home";
+import Home from "./pages/home";
 
 // Admin Pages
 import AdminLogin from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminProducts from "@/pages/admin/products";
+import AdminBlog from "./pages/admin/blog";
 import AdminQuotes from "@/pages/admin/quotes";
 import AdminUsers from "@/pages/admin/users";
 
@@ -44,6 +45,7 @@ function Router() {
       <Route path="/admin" component={AdminLogin} />
       <Route path="/admin/dashboard" component={AdminDashboard} />
       <Route path="/admin/products" component={AdminProducts} />
+      <Route path="/admin/blog" component={AdminBlog} />
       <Route path="/admin/quotes" component={AdminQuotes} />
       <Route path="/admin/users" component={AdminUsers} />
 
