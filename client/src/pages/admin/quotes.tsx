@@ -92,14 +92,13 @@ export default function AdminQuotes() {
 
   const sendQuoteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await apiRequest("POST", `/api/admin/quotes/${id}/send`);
-      return response.json();
+      await apiRequest("POST", `/api/admin/quotes/${id}/send`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
       toast({
         title: "Quote Sent",
-        description: "Quote has been sent to the customer successfully.",
+        description: "Quote has been successfully sent to the customer.",
       });
     },
     onError: () => {
@@ -110,6 +109,31 @@ export default function AdminQuotes() {
       });
     },
   });
+
+  const handleDownloadQuote = (quote: Quote) => {
+    const quoteData = {
+      id: quote.id,
+      customerName: quote.customerName || 'N/A',
+      customerEmail: quote.customerEmail || 'N/A',
+      customerPhone: quote.customerPhone || 'N/A',
+      projectType: quote.projectType || 'N/A',
+      areaSize: quote.areaSize || 'N/A',
+      location: quote.location || 'N/A',
+      totalAmount: quote.totalAmount || 'TBD',
+      status: quote.status || 'pending',
+      createdAt: quote.createdAt || new Date().toISOString()
+    };
+
+    const dataStr = JSON.stringify(quoteData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+
+    const exportFileDefaultName = `quote-${quote.id}.json`;
+
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+  };
 
   const filteredQuotes = quotes?.filter((quote) => {
     const matchesSearch = 
@@ -384,13 +408,7 @@ export default function AdminQuotes() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => {
-                          // Generate and download PDF
-                          toast({
-                            title: "PDF Generation",
-                            description: "PDF download feature will be available soon.",
-                          });
-                        }}
+                        onClick={() => handleDownloadQuote(quote)}
                       >
                         <Download className="h-4 w-4" />
                       </Button>

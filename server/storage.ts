@@ -306,14 +306,22 @@ export class Storage {
 
     const quote = this.getQuote(id)!;
 
-    // Auto-send quote immediately
-    await this.sendQuoteToCustomer(quote);
+    // Auto-send quote immediately only if customer data exists
+    if (quote.customerEmail && quote.customerName) {
+      await this.sendQuoteToCustomer(quote);
+    }
 
     return quote;
   }
 
   async sendQuoteToCustomer(quote: Quote): Promise<void> {
     try {
+      // Validate required fields
+      if (!quote.customerEmail || !quote.customerName) {
+        console.error('❌ Quote missing required customer information');
+        return;
+      }
+
       // Update status to sent
       db.prepare(`
         UPDATE quotes SET status = 'sent', sent_at = CURRENT_TIMESTAMP, updated_at = CURRENT_TIMESTAMP 
@@ -322,11 +330,15 @@ export class Storage {
 
       // Send notifications through multiple channels
       await NotificationService.sendQuoteEmail(quote);
-      await NotificationService.sendSMSNotification(quote);
-
-      // Send WhatsApp if phone number is mobile
-      if (quote.customerPhone.includes('254') || quote.customerPhone.startsWith('07')) {
-        await NotificationService.sendWhatsAppNotification(quote);
+      
+      // Only send SMS if phone number exists
+      if (quote.customerPhone) {
+        await NotificationService.sendSMSNotification(quote);
+        
+        // Send WhatsApp if phone number is mobile
+        if (quote.customerPhone.includes('254') || quote.customerPhone.startsWith('07')) {
+          await NotificationService.sendWhatsAppNotification(quote);
+        }
       }
 
       console.log(`✅ Quote #${quote.id} sent successfully to ${quote.customerEmail}`);

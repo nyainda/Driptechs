@@ -23,7 +23,7 @@ import Home from "./pages/home";
 import AdminLogin from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
 import AdminProducts from "@/pages/admin/products";
-import AdminBlog from "./pages/admin/blog";
+import AdminBlog from "@/pages/admin/blog";
 import AdminQuotes from "@/pages/admin/quotes";
 import AdminUsers from "@/pages/admin/users";
 
