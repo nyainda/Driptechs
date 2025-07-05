@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ProductCard from "@/components/product-card";
-import { ArrowRight, Droplets, Leaf, TrendingUp, CheckCircle } from "lucide-react";
+import { ArrowRight, Droplets, Leaf, TrendingUp, CheckCircle, Wrench, Award, Phone, Mail } from "lucide-react";
 import { Link } from "wouter";
 import type { Product, Project } from "@shared/schema";
 
