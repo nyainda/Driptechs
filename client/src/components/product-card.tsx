@@ -68,13 +68,18 @@ export default function ProductCard({ product }: ProductCardProps) {
     <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
       <CardHeader className="pb-4">
         {product.images && product.images.length > 0 && (
-          <div className="aspect-video w-full overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
-            <img
-              src={product.images[0]}
-              alt={product.name}
-              className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-            />
-          </div>
+          <div className="relative aspect-video overflow-hidden rounded-lg mb-4">
+          <img
+            src={product.image_url || `https://images.unsplash.com/photo-1586953983027-d7508a64f4bb?w=400&h=300&fit=crop`}
+            alt={product.name}
+            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+            loading="lazy"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = `https://images.unsplash.com/photo-1586953983027-d7508a64f4bb?w=400&h=300&fit=crop`;
+            }}
+          />
+        </div>
         )}
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -85,9 +90,14 @@ export default function ProductCard({ product }: ProductCardProps) {
             <p className="text-sm text-muted-foreground">{product.model}</p>
           </div>
           <div className="text-right">
-            <div className="text-lg font-bold text-blue-600">
-              {formatPrice(product.price, product.currency)}
-            </div>
+            <div className="flex items-center justify-between">
+            <span className="text-2xl font-bold text-blue-600">
+              ${product.price || "TBD"}
+            </span>
+            <Badge variant="secondary" className="text-xs">
+              {product.category || "General"}
+            </Badge>
+          </div>
             {product.inStock ? (
               <Badge variant="secondary" className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
                 In Stock

@@ -10,7 +10,7 @@ async function throwIfResNotOk(res: Response) {
 import { getAuthToken } from "./auth";
 
 export async function apiRequest(method: string, url: string, data?: any) {
-  const token = localStorage.getItem('auth_token');
+  const token = getAuthToken();
 
   const config: RequestInit = {
     method,
@@ -39,8 +39,14 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
+    const token = getAuthToken();
+    
     const res = await fetch(queryKey[0] as string, {
       credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { "Authorization": `Bearer ${token}` }),
+      },
     });
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
