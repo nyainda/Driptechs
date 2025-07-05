@@ -330,11 +330,11 @@ export class Storage {
 
       // Send notifications through multiple channels
       await NotificationService.sendQuoteEmail(quote);
-      
+
       // Only send SMS if phone number exists
       if (quote.customerPhone) {
         await NotificationService.sendSMSNotification(quote);
-        
+
         // Send WhatsApp if phone number is mobile
         if (quote.customerPhone.includes('254') || quote.customerPhone.startsWith('07')) {
           await NotificationService.sendWhatsAppNotification(quote);

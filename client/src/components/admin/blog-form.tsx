@@ -1,19 +1,18 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Save, Upload, Image as ImageIcon } from "lucide-react";
+import { insertBlogPostSchema } from "@shared/schema";
 import type { BlogPost } from "@shared/schema";
+import { z } from "zod";
+import { Save, Upload, Image as ImageIcon } from "lucide-react";
 
 const blogSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),

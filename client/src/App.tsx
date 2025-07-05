@@ -26,6 +26,7 @@ import AdminProducts from "@/pages/admin/products";
 import AdminBlog from "@/pages/admin/blog";
 import AdminQuotes from "@/pages/admin/quotes";
 import AdminUsers from "@/pages/admin/users";
+import AdminSettings from "@/pages/admin/settings";
 
 function Router() {
   return (
@@ -48,6 +49,7 @@ function Router() {
       <Route path="/admin/blog" component={AdminBlog} />
       <Route path="/admin/quotes" component={AdminQuotes} />
       <Route path="/admin/users" component={AdminUsers} />
+      <Route path="/admin/settings" component={AdminSettings} />
 
       {/* Fallback to 404 */}
       <Route component={NotFound} />

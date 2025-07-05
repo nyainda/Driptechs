@@ -1,25 +1,33 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { getAuthToken, getUser } from "@/lib/auth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { getAuthToken, getUser, clearAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import ProductForm from "@/components/admin/product-form";
 import { 
+  Package, 
   Plus, 
   Edit, 
   Trash2, 
-  Search, 
-  ArrowLeft,
-  Package,
   Eye,
-  DollarSign
+  Search,
+  Filter,
+  ArrowLeft,
+  DollarSign,
+  Tag
 } from "lucide-react";
+import { Link } from "wouter";
 import type { Product } from "@shared/schema";
 
 export default function AdminProducts() {
@@ -41,6 +49,11 @@ export default function AdminProducts() {
 
   const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/products");
+      return response.json();
+    },
+    enabled: !!token,
   });
 
   const deleteProductMutation = useMutation({

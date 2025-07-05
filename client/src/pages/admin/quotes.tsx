@@ -1,31 +1,35 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
-import { getAuthToken, getUser } from "@/lib/auth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { getAuthToken, getUser, clearAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
-import QuotePDF from "@/components/admin/quote-pdf";
+import { useToast } from "@/hooks/use-toast";
+import { generateQuotePDF } from "@/lib/pdf";
 import { 
-  Plus, 
+  FileText, 
+  Download, 
+  Send, 
   Edit, 
   Trash2, 
-  Search, 
-  ArrowLeft,
-  FileText,
-  Download,
   Eye,
   Calendar,
-  DollarSign,
   User,
+  Mail,
+  Phone,
   MapPin,
-  Send
+  Package,
+  Droplets,
+  ArrowLeft
 } from "lucide-react";
+import { Link } from "wouter";
 import type { Quote } from "@shared/schema";
 
 export default function AdminQuotes() {
@@ -47,6 +51,11 @@ export default function AdminQuotes() {
 
   const { data: quotes, isLoading } = useQuery<Quote[]>({
     queryKey: ["/api/admin/quotes"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/quotes");
+      return response.json();
+    },
+    enabled: !!token,
   });
 
   const updateQuoteMutation = useMutation({

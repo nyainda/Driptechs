@@ -3,10 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { Link } from "wouter";
-import { ArrowRight, Droplets, Wrench, Award, Users, CheckCircle, Star, Phone, Mail } from "lucide-react";
 import ProductCard from "@/components/product-card";
+import { ArrowRight, Droplets, Leaf, TrendingUp, CheckCircle } from "lucide-react";
+import { Link } from "wouter";
 import type { Product, Project } from "@shared/schema";
 
 export default function Home() {

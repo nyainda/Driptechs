@@ -1,26 +1,30 @@
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
-import { getAuthToken, getUser } from "@/lib/auth";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Switch } from "@/components/ui/switch";
+import { getAuthToken, getUser, clearAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import BlogForm from "@/components/admin/blog-form";
 import { 
+  FileText, 
   Plus, 
   Edit, 
   Trash2, 
-  Search, 
-  ArrowLeft,
-  FileText,
   Eye,
-  Calendar
+  Calendar,
+  User,
+  ArrowLeft
 } from "lucide-react";
+import { Link } from "wouter";
 import type { BlogPost } from "@shared/schema";
 
 export default function AdminBlog() {
@@ -42,6 +46,11 @@ export default function AdminBlog() {
 
   const { data: posts, isLoading } = useQuery<BlogPost[]>({
     queryKey: ["/api/admin/blog"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/blog");
+      return response.json();
+    },
+    enabled: !!token,
   });
 
   const deletePostMutation = useMutation({
