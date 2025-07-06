@@ -347,6 +347,12 @@ export default function AdminDashboard() {
                     Create Blog Post
                   </Button>
                 </Link>
+                <Link href="/admin/team">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Users className="h-4 w-4 mr-2" />
+                    Manage Team
+                  </Button>
+                </Link>
               </div>
             </CardContent>
           </Card>

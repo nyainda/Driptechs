@@ -3,7 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { 
   insertProductSchema, insertQuoteSchema, insertProjectSchema, 
-  insertBlogPostSchema, insertContactSchema, loginSchema, insertUserSchema 
+  insertBlogPostSchema, insertContactSchema, insertTeamMemberSchema, 
+  loginSchema, insertUserSchema 
 } from "@shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -498,6 +499,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(contacts);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch contacts" });
+    }
+  });
+
+  // Team member routes
+  app.get("/api/team", async (req, res) => {
+    try {
+      const teamMembers = await storage.getTeamMembers();
+      res.json(teamMembers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch team members" });
+    }
+  });
+
+  app.get("/api/admin/team", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const teamMembers = await storage.getTeamMembers();
+      res.json(teamMembers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch team members" });
+    }
+  });
+
+  app.post("/api/admin/team", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const memberData = insertTeamMemberSchema.parse(req.body);
+      const member = await storage.createTeamMember(memberData);
+      res.json(member);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid team member data" });
+    }
+  });
+
+  app.put("/api/admin/team/:id", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const updateData = req.body;
+      const member = await storage.updateTeamMember(id, updateData);
+      res.json(member);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update team member" });
+    }
+  });
+
+  app.delete("/api/admin/team/:id", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const id = req.params.id;
+      await storage.deleteTeamMember(id);
+      res.json({ message: "Team member deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete team member" });
     }
   });
 

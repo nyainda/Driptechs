@@ -40,32 +40,13 @@ export default function About() {
     }
   ];
 
-  const team = [
-    {
-      name: "John Kamau",
-      position: "Chief Executive Officer",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
-      bio: "15+ years experience in agricultural engineering and irrigation systems design."
+  const { data: team = [], isLoading: teamLoading } = useQuery<TeamMember[]>({
+    queryKey: ["/api/team"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/team");
+      return response.json();
     },
-    {
-      name: "Sarah Wanjiku",
-      position: "Technical Director",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face",
-      bio: "Expert in smart irrigation technology and sustainable water management systems."
-    },
-    {
-      name: "David Mwangi",
-      position: "Operations Manager",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
-      bio: "Specializes in project management and large-scale irrigation installations."
-    },
-    {
-      name: "Grace Akinyi",
-      position: "Customer Success Manager",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
-      bio: "Dedicated to ensuring customer satisfaction and long-term success."
-    }
-  ];
+  });
 
   const certifications = [
     {
@@ -199,7 +180,7 @@ export default function About() {
                   </p>
                 </CardContent>
               </Card>
-              
+
               <Card className="admin-card">
                 <CardContent className="p-6">
                   <div className="flex items-center space-x-4 mb-4">

@@ -117,76 +117,32 @@ export default function Projects() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {projects.map((project) => (
                 <Card key={project.id} className="overflow-hidden admin-card">
-                  <div className="aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                    {project.image_url ? (
-                      <img
-                        src={project.image_url}
-                        alt={project.name || project.title}
-                        className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                    ) : null}
-                    <div className={`w-full h-full flex items-center justify-center ${project.image_url ? 'hidden' : ''}`}>
-                      <div className="text-center text-muted-foreground">
-                        <TrendingUp className="h-12 w-12 mx-auto mb-2" />
-                        <p className="text-sm">No image available</p>
+                  <CardContent className="p-0">
+                    {project.images && project.images.length > 0 && (
+                      <div className="aspect-video w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+                        <img
+                          src={project.images[0]}
+                          alt={project.name}
+                          className="h-full w-full object-cover transition-transform duration-300 hover:scale-105"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
+                        />
                       </div>
-                    </div>
-                  </div>
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <Badge className={getStatusColor(project.status)}>
-                          {project.status.replace('_', ' ').toUpperCase()}
+                    )}
+                    <div className="p-6">
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-xl font-semibold">{project.name}</h3>
+                        <Badge className={
+                          project.status === 'completed' ? 'bg-green-100 text-green-800' :
+                          project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }>
+                          {project.status.replace('_', ' ')}
                         </Badge>
-                        <CardTitle className="mt-2 text-xl">{project.title || project.name}</CardTitle>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-blue-600">
-                          {project.value ? `KSh ${Number(project.value).toLocaleString()}` : 'Contact for pricing'}
-                        </div>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-muted-foreground mb-4 line-clamp-3">
-                      {project.description}
-                    </p>
-
-                    <div className="space-y-3 mb-4">
-                      <div className="flex items-center space-x-2 text-sm">
-                        <MapPin className="h-4 w-4 text-blue-600" />
-                        <span>{project.location}</span>
-                      </div>
-                      <div className="flex items-center space-x-2 text-sm">
-                        <TrendingUp className="h-4 w-4 text-green-600" />
-                        <span>{project.category || 'General'}</span>
-                      </div>
-                      {project.completion_date && (
-                        <div className="flex items-center space-x-2 text-sm">
-                          <Calendar className="h-4 w-4 text-purple-600" />
-                          <span>Completed: {new Date(project.completion_date).toLocaleDateString()}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-2 mb-4">
-                      <h4 className="text-sm font-semibold">Status:</h4>
-                      <div className="flex items-center space-x-2">
-                        <CheckCircle className="h-3 w-3 text-green-600" />
-                        <span className="text-sm capitalize">{project.status}</span>
-                      </div>
-                    </div>
-
-                    <Link href={`/contact?project=${project.id}`}>
-                      <Button variant="outline" className="w-full">
-                        Similar Project
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
                   </CardContent>
                 </Card>
               ))}

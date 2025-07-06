@@ -54,12 +54,12 @@ export default function AdminLogin() {
     onError: (error: any) => {
       let errorMessage = "Invalid credentials. Please try again.";
       let errorTitle = "Login Failed";
-      
+
       if (error.response?.data?.message) {
         errorTitle = error.response.data.message;
         errorMessage = error.response.data.details || errorMessage;
       }
-      
+
       toast({
         title: errorTitle,
         description: errorMessage,
@@ -149,6 +149,22 @@ export default function AdminLogin() {
               )}
               {loginMutation.isPending ? "Signing In..." : "Sign In"}
             </Button>
+
+            <div className="text-center mt-4">
+              <Button
+                type="button"
+                variant="link"
+                className="text-sm text-blue-600 hover:text-blue-700"
+                onClick={() => {
+                  toast({
+                    title: "Password Reset",
+                    description: "Please contact the system administrator to reset your password.",
+                  });
+                }}
+              >
+                Forgot your password?
+              </Button>
+            </div>
           </form>
 
           <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">

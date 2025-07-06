@@ -158,99 +158,106 @@ export default function Contact() {
           <Card className="admin-card">
             <CardHeader>
               <CardTitle className="text-2xl">Send us a Message</CardTitle>
-              <p className="text-muted-foreground">
-                Fill out the form below and we'll get back to you within 24 hours
+              <p className="text-muted-foreground text-lg">
+                Get in touch with our team for personalized assistance. We'll respond within 24 hours.
               </p>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name *</Label>
+                  <div>
+                    <Label htmlFor="firstName" className="text-sm font-medium">First Name *</Label>
                     <Input
                       id="firstName"
-                      placeholder="Your first name"
-                      {...register("firstName")}
-                      className="form-input"
+                      {...register("firstName", { required: "First name is required" })}
+                      className="mt-1"
+                      placeholder="Enter your first name"
                     />
                     {errors.firstName && (
-                      <p className="text-sm text-red-500">{errors.firstName.message}</p>
+                      <p className="text-sm text-red-600 mt-1">{errors.firstName.message}</p>
                     )}
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name *</Label>
+                  <div>
+                    <Label htmlFor="lastName" className="text-sm font-medium">Last Name *</Label>
                     <Input
                       id="lastName"
-                      placeholder="Your last name"
-                      {...register("lastName")}
-                      className="form-input"
+                      {...register("lastName", { required: "Last name is required" })}
+                      className="mt-1"
+                      placeholder="Enter your last name"
                     />
                     {errors.lastName && (
-                      <p className="text-sm text-red-500">{errors.lastName.message}</p>
+                      <p className="text-sm text-red-600 mt-1">{errors.lastName.message}</p>
                     )}
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    {...register("email")}
-                    className="form-input"
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-red-500">{errors.email.message}</p>
-                  )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="email" className="text-sm font-medium">Email Address *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      {...register("email", { 
+                        required: "Email is required",
+                        pattern: {
+                          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                          message: "Please enter a valid email"
+                        }
+                      })}
+                      className="mt-1"
+                      placeholder="your.email@example.com"
+                    />
+                    {errors.email && (
+                      <p className="text-sm text-red-600 mt-1">{errors.email.message}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      {...register("phone")}
+                      className="mt-1"
+                      placeholder="+254 700 000 000"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">Optional - for faster response</p>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone Number *</Label>
+                <div>
+                  <Label htmlFor="subject" className="text-sm font-medium">Subject *</Label>
                   <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+254 700 123 456"
-                    {...register("phone")}
-                    className="form-input"
+                    id="subject"
+                    {...register("subject", { required: "Subject is required" })}
+                    className="mt-1"
+                    placeholder="What can we help you with?"
                   />
-                  {errors.phone && (
-                    <p className="text-sm text-red-500">{errors.phone.message}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="subject">Subject *</Label>
-                  <Select onValueChange={(value) => setValue("subject", value)}>
-                    <SelectTrigger className="form-input">
-                      <SelectValue placeholder="Select subject" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="general">General Inquiry</SelectItem>
-                      <SelectItem value="quote">Request Quote</SelectItem>
-                      <SelectItem value="support">Technical Support</SelectItem>
-                      <SelectItem value="partnership">Partnership</SelectItem>
-                      <SelectItem value="maintenance">Maintenance Service</SelectItem>
-                      <SelectItem value="training">Training Program</SelectItem>
-                    </SelectContent>
-                  </Select>
                   {errors.subject && (
-                    <p className="text-sm text-red-500">{errors.subject.message}</p>
+                    <p className="text-sm text-red-600 mt-1">{errors.subject.message}</p>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="message">Message *</Label>
+                <div>
+                  <Label htmlFor="message" className="text-sm font-medium">Message *</Label>
                   <Textarea
                     id="message"
                     rows={6}
-                    placeholder="Tell us about your project, requirements, or questions..."
-                    {...register("message")}
-                    className="form-input"
+                    {...register("message", { 
+                      required: "Message is required",
+                      minLength: {
+                        value: 10,
+                        message: "Message must be at least 10 characters"
+                      }
+                    })}
+                    className="mt-1"
+                    placeholder="Please provide details about your irrigation needs, project scope, location, and any specific requirements..."
                   />
                   {errors.message && (
-                    <p className="text-sm text-red-500">{errors.message.message}</p>
+                    <p className="text-sm text-red-600 mt-1">{errors.message.message}</p>
                   )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Minimum 10 characters. Include project details for better assistance.
+                  </p>
                 </div>
 
                 <Button

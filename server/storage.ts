@@ -1,10 +1,10 @@
 import { db } from "./db";
-import { users, products, quotes, projects, blogPosts, contacts } from "@shared/schema";
+import { users, products, quotes, projects, blogPosts, contacts, teamMembers } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { NotificationService } from "./notifications";
 import type { 
   Product, Quote, Project, BlogPost, Contact, User,
-  InsertProduct, InsertQuote, InsertProject, InsertBlogPost, InsertContact, InsertUser
+  InsertProduct, InsertQuote, InsertProject, InsertBlogPost, InsertContact, InsertUser, TeamMember, InsertTeamMember
 } from "@shared/schema";
 
 export class Storage {
@@ -83,11 +83,11 @@ export class Storage {
 
   async createQuote(quoteData: InsertQuote): Promise<Quote> {
     const [quote] = await db.insert(quotes).values(quoteData).returning();
-    
+
     // Send notifications asynchronously
     NotificationService.sendQuoteEmail(quote);
     NotificationService.sendWhatsAppNotification(quote);
-    
+
     return quote;
   }
 
@@ -152,6 +152,28 @@ export class Storage {
   async createContact(contactData: InsertContact): Promise<Contact> {
     const [contact] = await db.insert(contacts).values(contactData).returning();
     return contact;
+  }
+
+  // Team Members
+  async getTeamMembers(): Promise<TeamMember[]> {
+    return await db.select().from(teamMembers);
+  }
+
+  async createTeamMember(data: InsertTeamMember): Promise<TeamMember> {
+    const [member] = await db.insert(teamMembers).values(data).returning();
+    return member;
+  }
+
+  async updateTeamMember(id: string, data: Partial<InsertTeamMember>): Promise<TeamMember> {
+    const [member] = await db.update(teamMembers)
+      .set(data)
+      .where(eq(teamMembers.id, id))
+      .returning();
+    return member;
+  }
+
+  async deleteTeamMember(id: string): Promise<void> {
+    await db.delete(teamMembers).where(eq(teamMembers.id, id));
   }
 }
 
