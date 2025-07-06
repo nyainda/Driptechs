@@ -25,8 +25,14 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 text-white">
-        <div className="absolute inset-0 bg-black/10"></div>
+      <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 dark:from-blue-950 dark:via-blue-900 dark:to-blue-800 text-white">
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1525498128493-380d1990a112?w=1600&h=900&fit=crop')",
+          }}
+        />
+        <div className="absolute inset-0 bg-blue-900/80 dark:bg-blue-950/85"></div>
         <div className="relative container mx-auto px-4 py-20 lg:py-32">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
@@ -55,13 +61,13 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Why Choose DripTech Irrigation?
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               We combine cutting-edge technology with proven agricultural expertise to deliver irrigation solutions that work.
             </p>
           </div>
@@ -122,10 +128,10 @@ export default function Home() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Featured Products
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               Discover our most popular irrigation solutions designed for efficiency and reliability.
             </p>
           </div>
@@ -138,7 +144,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="text-center py-12">
-              <p className="text-gray-500">Loading featured products...</p>
+              <p className="text-gray-500 dark:text-gray-400">Loading featured products...</p>
             </div>
           )}
 
@@ -154,13 +160,13 @@ export default function Home() {
       </section>
 
       {/* Recent Projects */}
-      <section className="py-20 bg-gray-50">
+      <section className="py-20 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Recent Projects
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
               See how we've helped farmers transform their agricultural operations.
             </p>
           </div>
@@ -173,14 +179,14 @@ export default function Home() {
                     <div className="aspect-video overflow-hidden">
                       <img
                         src={project.images[0]}
-                        alt={project.title}
+                        alt={project.name}
                         className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
                       />
                     </div>
                   )}
                   <CardHeader>
-                    <Badge className="w-fit mb-2">{project.type}</Badge>
-                    <CardTitle className="text-lg">{project.title}</CardTitle>
+                    <Badge className="w-fit mb-2">{project.projectType}</Badge>
+                    <CardTitle className="text-lg">{project.name}</CardTitle>
                     <CardDescription>{project.location}</CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -188,7 +194,7 @@ export default function Home() {
                       {project.description}
                     </p>
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500">Farm Size: {project.farmSize}</span>
+                      <span className="text-gray-500">Area Size: {project.areaSize}</span>
                       <Badge variant="secondary">{project.status}</Badge>
                     </div>
                   </CardContent>

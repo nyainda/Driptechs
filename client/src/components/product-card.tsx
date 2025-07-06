@@ -67,10 +67,9 @@ export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Card className="h-full transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
       <CardHeader className="pb-4">
-        {product.images && product.images.length > 0 && (
-          <div className="relative aspect-video overflow-hidden rounded-lg mb-4">
+        <div className="relative aspect-video overflow-hidden rounded-lg mb-4">
           <img
-            src={product.image_url || `https://images.unsplash.com/photo-1586953983027-d7508a64f4bb?w=400&h=300&fit=crop`}
+            src={(product.images && product.images.length > 0) ? product.images[0] : `https://images.unsplash.com/photo-1586953983027-d7508a64f4bb?w=400&h=300&fit=crop`}
             alt={product.name}
             className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
@@ -80,7 +79,6 @@ export default function ProductCard({ product }: ProductCardProps) {
             }}
           />
         </div>
-        )}
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <Badge className={getCategoryBadgeColor(product.category)}>
@@ -134,7 +132,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <div className="mt-4 space-y-1">
             <h4 className="text-sm font-semibold">Specifications:</h4>
             <div className="grid grid-cols-1 gap-1 text-xs text-muted-foreground">
-              {Object.entries(product.specifications).slice(0, 2).map(([key, value]) => (
+              {Object.entries(product.specifications as Record<string, string | number>).slice(0, 2).map(([key, value]) => (
                 <div key={key} className="flex justify-between">
                   <span className="capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
                   <span>{String(value)}</span>

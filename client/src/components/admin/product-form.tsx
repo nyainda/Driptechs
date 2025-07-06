@@ -19,10 +19,13 @@ import { Save, Upload, Image as ImageIcon } from "lucide-react";
 const productSchema = z.object({
   name: z.string().min(2, "Product name must be at least 2 characters"),
   category: z.string().min(1, "Category is required"),
+  model: z.string().min(1, "Model is required"),
   price: z.number().min(0, "Price must be positive"),
   description: z.string().min(10, "Description must be at least 10 characters"),
-  image_url: z.string().optional(),
-  specifications: z.string().optional(),
+  images: z.array(z.string()).optional(),
+  specifications: z.record(z.any()).optional(),
+  features: z.array(z.string()).optional(),
+  applications: z.array(z.string()).optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -36,7 +39,7 @@ interface ProductFormProps {
 export default function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [imageUrl, setImageUrl] = useState(product?.image_url || "");
+  const [imageUrl, setImageUrl] = useState((product?.images && product.images.length > 0) ? product.images[0] : "");
   const [dragActive, setDragActive] = useState(false);
 
   const {
@@ -50,10 +53,13 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     defaultValues: {
       name: product?.name || "",
       category: product?.category || "",
+      model: product?.model || "",
       price: product ? parseFloat(product.price) : 0,
       description: product?.description || "",
-      image_url: product?.image_url || "",
-      specifications: product?.specifications || "",
+      images: product?.images || [],
+      specifications: product?.specifications || {},
+      features: product?.features || [],
+      applications: product?.applications || [],
     },
   });
 
@@ -104,10 +110,19 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
   });
 
   const onSubmit = (data: ProductFormData) => {
+    // Transform specifications from string to object if needed
+    const transformedData = {
+      ...data,
+      specifications: data.specifications || {},
+      images: data.images || [],
+      features: data.features || [],
+      applications: data.applications || [],
+    };
+    
     if (product) {
-      updateProductMutation.mutate(data);
+      updateProductMutation.mutate(transformedData);
     } else {
-      createProductMutation.mutate(data);
+      createProductMutation.mutate(transformedData);
     }
   };
 
@@ -133,7 +148,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         // For demo purposes, we'll use a placeholder
         const demoUrl = `https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop`;
         setImageUrl(demoUrl);
-        setValue("image_url", demoUrl);
+        setValue("images", [demoUrl]);
         toast({
           title: "Image Added",
           description: "Demo image has been set. In production, this would upload your file.",
@@ -143,11 +158,12 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
   };
 
   const categories = [
-    { value: "Drip Irrigation", label: "Drip Irrigation" },
-    { value: "Sprinkler Systems", label: "Sprinkler Systems" },
-    { value: "Water Treatment", label: "Water Treatment" },
-    { value: "Automation", label: "Automation" },
-    { value: "Accessories", label: "Accessories" },
+    { value: "drip_irrigation", label: "Drip Irrigation" },
+    { value: "sprinkler", label: "Sprinkler Systems" },
+    { value: "filtration", label: "Water Treatment" },
+    { value: "control", label: "Automation" },
+    { value: "fertigation", label: "Fertigation" },
+    { value: "accessories", label: "Accessories" },
   ];
 
   return (
@@ -168,6 +184,18 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
               />
               {errors.name && (
                 <p className="text-sm text-red-500">{errors.name.message}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="model">Model *</Label>
+              <Input
+                id="model"
+                placeholder="Enter product model"
+                {...register("model")}
+              />
+              {errors.model && (
+                <p className="text-sm text-red-500">{errors.model.message}</p>
               )}
             </div>
 
@@ -237,7 +265,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
               value={imageUrl}
               onChange={(e) => {
                 setImageUrl(e.target.value);
-                setValue("image_url", e.target.value);
+                setValue("images", e.target.value ? [e.target.value] : []);
               }}
             />
           </div>
@@ -289,12 +317,20 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="specifications">Specifications</Label>
+            <Label htmlFor="specifications">Specifications (JSON format)</Label>
             <Textarea
               id="specifications"
               rows={4}
-              placeholder="Enter technical specifications (e.g., Flow rate: 2-4 L/h, Pressure range: 0.5-4 bar)"
-              {...register("specifications")}
+              placeholder='Enter technical specifications as JSON (e.g., {"flowRate": "2-4 L/h", "pressure": "0.5-4 bar"})'
+              defaultValue={product?.specifications ? JSON.stringify(product.specifications, null, 2) : '{}'}
+              onChange={(e) => {
+                try {
+                  const parsed = JSON.parse(e.target.value);
+                  setValue("specifications", parsed);
+                } catch {
+                  // Invalid JSON, keep the string value
+                }
+              }}
             />
           </div>
         </CardContent>
