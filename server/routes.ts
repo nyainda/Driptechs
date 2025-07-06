@@ -573,6 +573,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/admin/analytics", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const analytics = await storage.getAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch analytics" });
+    }
+  });
+
   app.post("/api/admin/success-stories", authenticate, requireAdmin, async (req, res) => {
     try {
       const storyData = insertSuccessStorySchema.parse(req.body);

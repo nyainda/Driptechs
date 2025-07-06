@@ -28,6 +28,8 @@ import AdminBlog from "@/pages/admin/blog";
 import AdminQuotes from "@/pages/admin/quotes";
 import AdminUsers from "@/pages/admin/users";
 import AdminSettings from "@/pages/admin/settings";
+import AdminSuccessStories from "@/pages/admin/success-stories";
+import AdminTeam from "@/pages/admin/team";
 
 function Router() {
   return (
@@ -52,6 +54,8 @@ function Router() {
       <Route path="/admin/quotes" component={AdminQuotes} />
       <Route path="/admin/users" component={AdminUsers} />
       <Route path="/admin/settings" component={AdminSettings} />
+      <Route path="/admin/success-stories" component={AdminSuccessStories} />
+      <Route path="/admin/team" component={AdminTeam} />
 
       {/* Fallback to 404 */}
       <Route component={NotFound} />

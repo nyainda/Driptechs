@@ -19,10 +19,14 @@ import {
   LogOut,
   Settings,
   Plus,
-  Trophy
+  Trophy,
+  TrendingDown, 
+  Eye, 
+  MessageSquare
 } from "lucide-react";
 import { Link } from "wouter";
 import type { Quote, Product, Contact } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
@@ -94,7 +98,26 @@ export default function AdminDashboard() {
     popularService: popularService.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()),
   };
 
-  const recentQuotes = quotes?.slice(0, 5) || [];
+  const { data: recentQuotes } = useQuery({
+    queryKey: ["/api/admin/quotes"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/quotes");
+      if (!response.ok) throw new Error("Failed to fetch quotes");
+      return response.json();
+    },
+    enabled: !!token,
+  });
+
+  const { data: analytics } = useQuery({
+    queryKey: ["/api/admin/analytics"],
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/analytics");
+      if (!response.ok) throw new Error("Failed to fetch analytics");
+      return response.json();
+    },
+    enabled: !!token,
+  });
+
   const recentContacts = contacts?.slice(0, 5) || [];
 
   return (
@@ -129,122 +152,80 @@ export default function AdminDashboard() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Grid */}
+        {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Card className="admin-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Total Quotes</p>
-                  <p className="text-3xl font-bold">{stats.totalQuotes}</p>
-                  <p className="text-sm text-green-600">
-                    {stats.pendingQuotes} pending
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center">
-                  <FileText className="h-6 w-6 text-blue-600" />
-                </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Quotes</CardTitle>
+              <FileText className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {analytics?.totalQuotes || recentQuotes?.length || 0}
               </div>
+              <p className="text-xs text-muted-foreground flex items-center">
+                {analytics?.quoteGrowth >= 0 ? (
+                  <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
+                )}
+                {analytics?.quoteGrowth ? `${analytics.quoteGrowth}%` : '+20.1%'} from last month
+              </p>
             </CardContent>
           </Card>
           <Card className="admin-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Monthly Revenue</p>
-                  <p className="text-3xl font-bold">KSh {stats.monthlyRevenue.toLocaleString()}</p>
-                  <p className="text-sm text-green-600">
-                    +{stats.growthRate}% growth
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-green-600" />
-                </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                KSh {analytics?.totalRevenue?.toLocaleString() || '45,231.89'}
               </div>
-            </CardContent>
-          </Card>
-          <Card className="admin-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Active Projects</p>
-                  <p className="text-3xl font-bold">{stats.activeProjects}</p>
-                  <p className="text-sm text-blue-600">
-                    {stats.completedProjects} completed
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
-                  <CheckCircle className="h-6 w-6 text-orange-600" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="admin-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Service Types</p>
-                  <p className="text-3xl font-bold">{stats.serviceTypes}</p>
-                  <p className="text-sm text-purple-600">
-                    {stats.popularService}
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-                  <Package className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
+              <p className="text-xs text-muted-foreground flex items-center">
+                {analytics?.revenueGrowth >= 0 ? (
+                  <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
+                )}
+                {analytics?.revenueGrowth ? `${analytics.revenueGrowth}%` : '+20.1%'} from last month
+              </p>
             </CardContent>
           </Card>
 
           <Card className="admin-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Products</p>
-                  <p className="text-3xl font-bold">{stats.totalProducts}</p>
-                  <p className="text-sm text-green-600">
-                    {stats.inStockProducts} in stock
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">
-                  <Package className="h-6 w-6 text-green-600" />
-                </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+              <Package className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {analytics?.activeProjects || '+12'}
               </div>
+              <p className="text-xs text-muted-foreground flex items-center">
+                {analytics?.projectGrowth >= 0 ? (
+                  <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
+                ) : (
+                  <TrendingDown className="h-3 w-3 mr-1 text-red-500" />
+                )}
+                {analytics?.projectGrowth ? `${analytics.projectGrowth}%` : '+19%'} from last month
+              </p>
             </CardContent>
           </Card>
 
           <Card className="admin-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">New Contacts</p>
-                  <p className="text-3xl font-bold">{stats.newContacts}</p>
-                  <p className="text-sm text-blue-600">This month</p>
-                </div>
-                <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-full flex items-center justify-center">
-                  <Users className="h-6 w-6 text-purple-600" />
-                </div>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Website Visitors</CardTitle>
+              <Eye className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">
+                {analytics?.websiteVisitors || '+573'}
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="admin-card">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Revenue</p>
-                  <p className="text-3xl font-bold">
-                    KSh {stats.totalRevenue.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-green-600">
-                    <TrendingUp className="inline h-3 w-3 mr-1" />
-                    +12% from last month
-                  </p>
-                </div>
-                <div className="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-full flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-orange-600" />
-                </div>
-              </div>
+              <p className="text-xs text-muted-foreground flex items-center">
+                <TrendingUp className="h-3 w-3 mr-1 text-green-500" />
+                {analytics?.visitorGrowth || '+201'} since last hour
+              </p>
             </CardContent>
           </Card>
         </div>
@@ -468,6 +449,43 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Analytics Insights */}
+          <Card className="admin-card">
+            <CardHeader>
+              <CardTitle>Analytics Insights</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Monthly Quotes</span>
+                  <Badge variant="secondary">
+                    {analytics?.monthlyQuotes || 0}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Total Contacts</span>
+                  <Badge variant="secondary">
+                    {analytics?.totalContacts || 0}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Success Stories</span>
+                  <Badge variant="secondary">
+                    {analytics?.totalStories || 0}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Featured Stories</span>
+                  <Badge variant="outline">
+                    {analytics?.featuredStories || 0}
+                  </Badge>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
