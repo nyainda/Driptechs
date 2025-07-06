@@ -366,7 +366,7 @@ export default function AdminDashboard() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {recentQuotes.length === 0 ? (
+              {!recentQuotes || recentQuotes.length === 0 ? (
                 <p className="text-muted-foreground text-center py-8">
                   No quotes yet
                 </p>
