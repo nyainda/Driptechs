@@ -55,16 +55,16 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
         id: item.id || Math.random().toString(36).substr(2, 9),
         name: item.name || `${quote.projectType} System`,
         description: item.description || getServiceDescription(quote.projectType),
-        quantity: item.quantity || 1,
-        unit: item.unit || 'service',
+        quantity: parseFloat(item.quantity) || 1,
+        unit: item.unit || 'pcs',
         unitPrice: parseFloat(item.unitPrice || "0"),
-        total: parseFloat(item.total || item.unitPrice || "0")
+        total: parseFloat(item.total || (parseFloat(item.unitPrice || "0") * parseFloat(item.quantity || "1")))
       }));
     }
     
     // Default items based on project type
     const defaultItems = [];
-    const basePrice = parseFloat(quote.totalAmount || "50000");
+    const basePrice = parseFloat(quote.totalAmount || "100000");
     
     if (quote.projectType === 'system_design') {
       defaultItems.push({
@@ -72,9 +72,9 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
         name: 'System Design & Engineering',
         description: 'Complete irrigation system design with technical drawings and specifications',
         quantity: 1,
-        unit: 'system',
-        unitPrice: basePrice * 0.3,
-        total: basePrice * 0.3
+        unit: 'service',
+        unitPrice: basePrice * 0.4,
+        total: basePrice * 0.4
       });
       defaultItems.push({
         id: '2',
@@ -82,32 +82,60 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
         description: 'Professional site assessment and soil analysis',
         quantity: 1,
         unit: 'service',
-        unitPrice: basePrice * 0.2,
-        total: basePrice * 0.2
+        unitPrice: basePrice * 0.3,
+        total: basePrice * 0.3
+      });
+      defaultItems.push({
+        id: '3',
+        name: 'Technical Documentation',
+        description: 'Detailed drawings, specifications, and installation manual',
+        quantity: 1,
+        unit: 'set',
+        unitPrice: basePrice * 0.3,
+        total: basePrice * 0.3
       });
     } else if (quote.projectType === 'installation') {
       defaultItems.push({
         id: '1',
-        name: 'Drip Irrigation System',
-        description: `Complete drip irrigation system for ${quote.areaSize} area`,
+        name: 'Drip Irrigation Kit',
+        description: `Complete drip irrigation system for ${quote.areaSize}`,
         quantity: 1,
         unit: 'system',
-        unitPrice: basePrice * 0.6,
-        total: basePrice * 0.6
+        unitPrice: basePrice * 0.5,
+        total: basePrice * 0.5
       });
       defaultItems.push({
         id: '2',
-        name: 'Installation & Setup',
+        name: 'Installation Labor',
         description: 'Professional installation, testing, and commissioning',
         quantity: 1,
         unit: 'service',
-        unitPrice: basePrice * 0.4,
-        total: basePrice * 0.4
+        unitPrice: basePrice * 0.3,
+        total: basePrice * 0.3
+      });
+      defaultItems.push({
+        id: '3',
+        name: 'Materials & Fittings',
+        description: 'Pipes, connectors, emitters, and other installation materials',
+        quantity: 1,
+        unit: 'lot',
+        unitPrice: basePrice * 0.2,
+        total: basePrice * 0.2
+      });
+    } else if (quote.projectType === 'maintenance') {
+      defaultItems.push({
+        id: '1',
+        name: 'System Maintenance Service',
+        description: 'Complete system inspection, cleaning, and optimization',
+        quantity: 1,
+        unit: 'service',
+        unitPrice: basePrice,
+        total: basePrice
       });
     } else {
       defaultItems.push({
         id: '1',
-        name: `${quote.projectType} Service`,
+        name: `${quote.projectType.replace('_', ' ').toUpperCase()} Service`,
         description: getServiceDescription(quote.projectType),
         quantity: 1,
         unit: 'service',
@@ -185,14 +213,29 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
   };
 
   const addItem = () => {
+    const materialSuggestions = [
+      { name: 'Drip Irrigation Kit', description: 'Complete drip irrigation system kit', unit: 'set', unitPrice: 25000 },
+      { name: 'Main Water Tank', description: 'Water storage tank for irrigation system', unit: 'pcs', unitPrice: 15000 },
+      { name: 'Pressure Pump', description: 'Water pressure pump for system', unit: 'pcs', unitPrice: 35000 },
+      { name: 'Drip Lines', description: 'Drip irrigation lines and emitters', unit: 'meters', unitPrice: 50 },
+      { name: 'PVC Pipes', description: 'Main distribution pipes', unit: 'meters', unitPrice: 150 },
+      { name: 'Control Valves', description: 'System control and distribution valves', unit: 'pcs', unitPrice: 2500 },
+      { name: 'Filter System', description: 'Water filtration system', unit: 'set', unitPrice: 8000 },
+      { name: 'Installation Labor', description: 'Professional installation service', unit: 'service', unitPrice: 20000 },
+      { name: 'System Testing', description: 'Complete system testing and commissioning', unit: 'service', unitPrice: 5000 },
+      { name: 'User Training', description: 'Training on system operation and maintenance', unit: 'service', unitPrice: 3000 }
+    ];
+    
+    const randomSuggestion = materialSuggestions[Math.floor(Math.random() * materialSuggestions.length)];
+    
     const newItem: QuoteItem = {
       id: Math.random().toString(36).substr(2, 9),
-      name: '',
-      description: '',
+      name: randomSuggestion.name,
+      description: randomSuggestion.description,
       quantity: 1,
-      unit: 'pcs',
-      unitPrice: 0,
-      total: 0
+      unit: randomSuggestion.unit,
+      unitPrice: randomSuggestion.unitPrice,
+      total: randomSuggestion.unitPrice
     };
     setItems([...items, newItem]);
   };
@@ -228,10 +271,15 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
 
   const handleSave = () => {
     const subtotal = calculateSubtotal();
+    const vat = calculateVAT();
+    const total = calculateTotal();
+    
     const updatedQuoteData = {
       ...editedQuote,
       items: items,
       totalAmount: subtotal.toString(),
+      vatAmount: vat.toString(),
+      finalTotal: total.toString(),
       updatedAt: new Date().toISOString()
     };
     updateQuoteMutation.mutate(updatedQuoteData);
@@ -472,25 +520,30 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
               if (isEditing) {
                 setIsEditing(false);
                 setEditedQuote(quote);
-                setItems(quote.items && Array.isArray(quote.items) && quote.items.length > 0 
-                  ? quote.items.map((item: any) => ({
-                      id: item.id || Math.random().toString(36).substr(2, 9),
-                      name: item.name || `${quote.projectType} System`,
-                      description: item.description || 'Complete irrigation system design and installation',
-                      quantity: item.quantity || 1,
-                      unit: item.unit || 'system',
-                      unitPrice: parseFloat(item.unitPrice || quote.totalAmount || "0"),
-                      total: parseFloat(item.total || quote.totalAmount || "0")
-                    }))
-                  : [{
-                      id: '1',
-                      name: `${quote.projectType} Irrigation System`,
-                      description: `Complete irrigation system design and installation for ${quote.areaSize}`,
-                      quantity: 1,
-                      unit: 'system',
-                      unitPrice: parseFloat(quote.totalAmount || "0"),
-                      total: parseFloat(quote.totalAmount || "0")
-                    }]);
+                // Reset items to original state
+                if (quote.items && Array.isArray(quote.items) && quote.items.length > 0) {
+                  setItems(quote.items.map((item: any) => ({
+                    id: item.id || Math.random().toString(36).substr(2, 9),
+                    name: item.name || `${quote.projectType} System`,
+                    description: item.description || getServiceDescription(quote.projectType),
+                    quantity: parseFloat(item.quantity) || 1,
+                    unit: item.unit || 'pcs',
+                    unitPrice: parseFloat(item.unitPrice || "0"),
+                    total: parseFloat(item.total || (parseFloat(item.unitPrice || "0") * parseFloat(item.quantity || "1")))
+                  })));
+                } else {
+                  // Reset to default items
+                  const basePrice = parseFloat(quote.totalAmount || "100000");
+                  setItems([{
+                    id: '1',
+                    name: `${quote.projectType.replace('_', ' ').toUpperCase()} Service`,
+                    description: getServiceDescription(quote.projectType),
+                    quantity: 1,
+                    unit: 'service',
+                    unitPrice: basePrice,
+                    total: basePrice
+                  }]);
+                }
               } else {
                 setIsEditing(true);
               }

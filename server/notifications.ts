@@ -49,28 +49,34 @@ Check your email for the detailed quote. Questions? Reply to this message!
   const total = subtotal + vat;
 
   const itemsHTML = quote.items && Array.isArray(quote.items) && quote.items.length > 0
-    ? quote.items.map((item: any) => `
+    ? quote.items.map((item: any) => {
+        const itemQuantity = parseFloat(item.quantity) || 1;
+        const itemUnitPrice = parseFloat(item.unitPrice) || 0;
+        const itemTotal = parseFloat(item.total) || (itemQuantity * itemUnitPrice);
+        
+        return `
         <tr style="border-bottom: 1px solid #e5e7eb;">
-          <td style="padding: 8px; text-align: left;">
-            <strong>${item.name}</strong><br>
-            <small style="color: #6b7280;">${item.description}</small>
+          <td style="padding: 12px 8px; text-align: left;">
+            <strong style="color: #1f2937; font-size: 14px;">${item.name}</strong><br>
+            <small style="color: #6b7280; font-size: 12px; line-height: 1.4;">${item.description}</small>
           </td>
-          <td style="padding: 8px; text-align: center;">${item.quantity}</td>
-          <td style="padding: 8px; text-align: center;">${item.unit}</td>
-          <td style="padding: 8px; text-align: right;">KSh ${parseFloat(item.unitPrice || 0).toLocaleString()}</td>
-          <td style="padding: 8px; text-align: right; font-weight: bold;">KSh ${parseFloat(item.total || 0).toLocaleString()}</td>
+          <td style="padding: 12px 8px; text-align: center; font-weight: 500;">${itemQuantity}</td>
+          <td style="padding: 12px 8px; text-align: center; color: #6b7280;">${item.unit}</td>
+          <td style="padding: 12px 8px; text-align: right; color: #374151;">KSh ${itemUnitPrice.toLocaleString()}</td>
+          <td style="padding: 12px 8px; text-align: right; font-weight: bold; color: #1f2937;">KSh ${itemTotal.toLocaleString()}</td>
         </tr>
-      `).join('')
+      `;
+      }).join('')
     : `
         <tr style="border-bottom: 1px solid #e5e7eb;">
-          <td style="padding: 8px; text-align: left;">
-            <strong>${quote.projectType} Irrigation System</strong><br>
-            <small style="color: #6b7280;">Complete irrigation system design and installation for ${quote.areaSize}</small>
+          <td style="padding: 12px 8px; text-align: left;">
+            <strong style="color: #1f2937; font-size: 14px;">${quote.projectType.replace('_', ' ').toUpperCase()} Irrigation System</strong><br>
+            <small style="color: #6b7280; font-size: 12px; line-height: 1.4;">Complete irrigation system design and installation for ${quote.areaSize}</small>
           </td>
-          <td style="padding: 8px; text-align: center;">1</td>
-          <td style="padding: 8px; text-align: center;">system</td>
-          <td style="padding: 8px; text-align: right;">KSh ${subtotal.toLocaleString()}</td>
-          <td style="padding: 8px; text-align: right; font-weight: bold;">KSh ${subtotal.toLocaleString()}</td>
+          <td style="padding: 12px 8px; text-align: center; font-weight: 500;">1</td>
+          <td style="padding: 12px 8px; text-align: center; color: #6b7280;">system</td>
+          <td style="padding: 12px 8px; text-align: right; color: #374151;">KSh ${subtotal.toLocaleString()}</td>
+          <td style="padding: 12px 8px; text-align: right; font-weight: bold; color: #1f2937;">KSh ${subtotal.toLocaleString()}</td>
         </tr>
       `;
 

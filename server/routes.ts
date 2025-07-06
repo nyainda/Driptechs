@@ -289,25 +289,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const id = req.params.id;
       const updateData = req.body;
       
-      // Calculate total from items if items are provided
+      // Calculate totals from items if items are provided
       if (updateData.items && Array.isArray(updateData.items)) {
-        const subtotal = updateData.items.reduce((sum: number, item: any) => sum + (parseFloat(item.total) || 0), 0);
-        updateData.totalAmount = subtotal.toString();
+        // Ensure items have proper structure and calculations
+        updateData.items = updateData.items.map((item: any) => {
+          const quantity = parseFloat(item.quantity) || 1;
+          const unitPrice = parseFloat(item.unitPrice) || 0;
+          const total = quantity * unitPrice;
+          
+          return {
+            id: item.id || Math.random().toString(36).substr(2, 9),
+            name: item.name || '',
+            description: item.description || '',
+            quantity: quantity,
+            unit: item.unit || 'pcs',
+            unitPrice: unitPrice,
+            total: total
+          };
+        });
         
-        // Ensure items have proper structure
-        updateData.items = updateData.items.map((item: any) => ({
-          id: item.id || Math.random().toString(36).substr(2, 9),
-          name: item.name || '',
-          description: item.description || '',
-          quantity: parseInt(item.quantity) || 1,
-          unit: item.unit || 'pcs',
-          unitPrice: parseFloat(item.unitPrice) || 0,
-          total: parseFloat(item.total) || 0
-        }));
+        // Calculate totals
+        const subtotal = updateData.items.reduce((sum: number, item: any) => sum + item.total, 0);
+        const vat = subtotal * 0.16;
+        const finalTotal = subtotal + vat;
+        
+        updateData.totalAmount = subtotal.toString();
+        updateData.vatAmount = vat.toString();
+        updateData.finalTotal = finalTotal.toString();
       }
       
       // Add update timestamp
       updateData.updatedAt = new Date().toISOString();
+      
+      console.log("Updating quote with data:", updateData);
       
       const quote = await storage.updateQuote(id, updateData);
       res.json(quote);
