@@ -120,11 +120,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin product routes
   app.post("/api/admin/products", authenticate, requireAdmin, async (req, res) => {
     try {
-      const productData = insertProductSchema.parse(req.body);
+      console.log("Creating product with data:", req.body);
+      
+      // Transform data to match database schema
+      const transformedData = {
+        ...req.body,
+        price: req.body.price?.toString(), // Convert number to string for decimal
+        specifications: req.body.specifications || {},
+        features: req.body.features || [],
+        applications: req.body.applications || [],
+        images: req.body.images || [],
+      };
+      
+      const productData = insertProductSchema.parse(transformedData);
       const product = await storage.createProduct(productData);
       res.json(product);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid product data" });
+    } catch (error: any) {
+      console.error("Product creation error:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid product data", 
+          details: error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', '),
+          errors: error.errors
+        });
+      }
+      res.status(400).json({ message: "Invalid product data", details: error.message });
     }
   });
 
@@ -366,11 +386,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/admin/blog", authenticate, requireAdmin, async (req: any, res) => {
     try {
-      const postData = { ...insertBlogPostSchema.parse(req.body), author_id: req.user.id };
+      console.log("Creating blog post with data:", req.body);
+      
+      // Transform and validate blog post data
+      const transformedData = {
+        ...req.body,
+        category: req.body.category || "General",
+        tags: req.body.tags || [],
+        authorId: req.user.id,
+        published: req.body.published || false,
+      };
+      
+      const postData = insertBlogPostSchema.parse(transformedData);
       const post = await storage.createBlogPost(postData);
       res.json(post);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid blog post data" });
+    } catch (error: any) {
+      console.error("Blog post creation error:", error);
+      if (error.name === 'ZodError') {
+        return res.status(400).json({ 
+          message: "Invalid blog post data", 
+          details: error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', '),
+          errors: error.errors
+        });
+      }
+      res.status(400).json({ message: "Invalid blog post data", details: error.message });
     }
   });
 

@@ -26,6 +26,8 @@ const productSchema = z.object({
   specifications: z.record(z.any()).optional(),
   features: z.array(z.string()).optional(),
   applications: z.array(z.string()).optional(),
+  inStock: z.boolean().optional(),
+  stockQuantity: z.number().min(0).optional(),
 });
 
 type ProductFormData = z.infer<typeof productSchema>;
@@ -60,6 +62,8 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
       specifications: product?.specifications || {},
       features: product?.features || [],
       applications: product?.applications || [],
+      inStock: product?.inStock !== undefined ? product.inStock : true,
+      stockQuantity: product?.stockQuantity || 0,
     },
   });
 
@@ -222,18 +226,45 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="price">Price (KSh) *</Label>
-            <Input
-              id="price"
-              type="number"
-              step="0.01"
-              placeholder="Enter price"
-              {...register("price", { valueAsNumber: true })}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="price">Price (KSh) *</Label>
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                placeholder="Enter price"
+                {...register("price", { valueAsNumber: true })}
+              />
+              {errors.price && (
+                <p className="text-sm text-red-500">{errors.price.message}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="stockQuantity">Stock Quantity</Label>
+              <Input
+                id="stockQuantity"
+                type="number"
+                placeholder="Enter stock quantity"
+                {...register("stockQuantity", { valueAsNumber: true })}
+              />
+              {errors.stockQuantity && (
+                <p className="text-sm text-red-500">{errors.stockQuantity.message}</p>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              id="inStock"
+              {...register("inStock")}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            {errors.price && (
-              <p className="text-sm text-red-500">{errors.price.message}</p>
-            )}
+            <Label htmlFor="inStock" className="text-sm font-medium">
+              In Stock
+            </Label>
           </div>
 
           <div className="space-y-2">

@@ -30,176 +30,174 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
   };
 
   const handleDownloadPDF = () => {
-    const printContent = document.querySelector('.quote-content')?.innerHTML || '';
-    const originalContent = document.body.innerHTML;
-    
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-          <title>Quote #${quote.id} - DripTech Irrigation</title>
-          <meta charset="utf-8">
-          <style>
-            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-            .company-header { display: flex; align-items: center; margin-bottom: 20px; }
-            .company-logo { width: 48px; height: 48px; background: linear-gradient(to bottom right, #2563eb, #16a34a); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; margin-right: 12px; }
-            .company-info h1 { margin: 0; color: #2563eb; font-size: 24px; }
-            .company-info p { margin: 2px 0; color: #6b7280; font-size: 14px; }
-            .quote-header { text-align: right; margin-bottom: 30px; }
-            .quote-header h2 { font-size: 28px; margin: 0 0 10px 0; }
-            .customer-details { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
-            .section-title { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-            th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
-            th { background-color: #f9fafb; font-weight: 600; }
-            .text-right { text-align: right; }
-            .total-section { margin-left: auto; width: 300px; }
-            .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-            .total-final { font-weight: bold; font-size: 18px; border-top: 2px solid #374151; padding-top: 8px; }
-            .terms { margin-top: 30px; }
-            .terms ul { list-style: none; padding: 0; }
-            .terms li { margin-bottom: 8px; font-size: 14px; }
-            .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
-          </style>
-        </head>
-        <body>
-          <div class="quote-document">
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 40px;">
-              <div>
-                <div class="company-header">
-                  <div class="company-logo">DT</div>
-                  <div class="company-info">
-                    <h1>DripTech</h1>
-                    <p>Irrigation Solutions</p>
-                  </div>
-                </div>
-                <div style="color: #6b7280; font-size: 14px;">
-                  <p>Nairobi Industrial Area, Kenya</p>
-                  <p>Phone: +254 700 123 456</p>
-                  <p>Email: info@driptech.co.ke</p>
-                  <p>Website: www.driptech.co.ke</p>
+    // Generate HTML content for PDF
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Quote #${quote.id} - DripTech Irrigation</title>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+          .company-header { display: flex; align-items: center; margin-bottom: 20px; }
+          .company-logo { width: 48px; height: 48px; background: linear-gradient(to bottom right, #2563eb, #16a34a); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; margin-right: 12px; }
+          .company-info h1 { margin: 0; color: #2563eb; font-size: 24px; }
+          .company-info p { margin: 2px 0; color: #6b7280; font-size: 14px; }
+          .quote-header { text-align: right; margin-bottom: 30px; }
+          .quote-header h2 { font-size: 28px; margin: 0 0 10px 0; }
+          .customer-details { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
+          .section-title { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
+          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+          th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+          th { background-color: #f9fafb; font-weight: 600; }
+          .text-right { text-align: right; }
+          .total-section { margin-left: auto; width: 300px; }
+          .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
+          .total-final { font-weight: bold; font-size: 18px; border-top: 2px solid #374151; padding-top: 8px; }
+          .terms { margin-top: 30px; }
+          .terms ul { list-style: none; padding: 0; }
+          .terms li { margin-bottom: 8px; font-size: 14px; }
+          .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
+        </style>
+      </head>
+      <body>
+        <div class="quote-document">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 40px;">
+            <div>
+              <div class="company-header">
+                <div class="company-logo">DT</div>
+                <div class="company-info">
+                  <h1>DripTech</h1>
+                  <p>Irrigation Solutions</p>
                 </div>
               </div>
-              <div class="quote-header">
-                <h2>QUOTATION</h2>
-                <div style="font-size: 14px;">
-                  <p><strong>Quote #:</strong> ${quote.id}</p>
-                  <p><strong>Date:</strong> ${new Date(quote.createdAt!).toLocaleDateString()}</p>
-                  <p><strong>Valid Until:</strong> ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
-                </div>
+              <div style="color: #6b7280; font-size: 14px;">
+                <p>Nairobi Industrial Area, Kenya</p>
+                <p>Phone: +254 700 123 456</p>
+                <p>Email: info@driptech.co.ke</p>
+                <p>Website: www.driptech.co.ke</p>
               </div>
             </div>
-
-            <hr style="margin: 30px 0;">
-
-            <div class="customer-details">
-              <div>
-                <div class="section-title">Bill To:</div>
-                <div>
-                  <p style="font-weight: 500;">${quote.customerName}</p>
-                  <p>${quote.customerEmail}</p>
-                  <p>${quote.customerPhone}</p>
-                  <p>${quote.location}</p>
-                </div>
+            <div class="quote-header">
+              <h2>QUOTATION</h2>
+              <div style="font-size: 14px;">
+                <p><strong>Quote #:</strong> ${quote.id.slice(0, 8)}</p>
+                <p><strong>Date:</strong> ${new Date(quote.createdAt!).toLocaleDateString()}</p>
+                <p><strong>Valid Until:</strong> ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
               </div>
-              <div>
-                <div class="section-title">Project Details:</div>
-                <div>
-                  <p><strong>Type:</strong> ${quote.projectType}</p>
-                  <p><strong>Area Size:</strong> ${quote.areaSize}</p>
-                  ${quote.cropType ? `<p><strong>Crop Type:</strong> ${quote.cropType}</p>` : ''}
-                  <p><strong>Location:</strong> ${quote.location}</p>
-                </div>
-              </div>
-            </div>
-
-            ${quote.requirements ? `
-              <div style="margin-bottom: 30px;">
-                <div class="section-title">Project Requirements:</div>
-                <div style="background-color: #f9fafb; padding: 16px; border-radius: 8px;">
-                  <p style="font-size: 14px; margin: 0;">${quote.requirements}</p>
-                </div>
-              </div>
-            ` : ''}
-
-            <div style="margin-bottom: 30px;">
-              <div class="section-title">Quote Items:</div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Description</th>
-                    <th class="text-right">Quantity</th>
-                    <th class="text-right">Unit Price</th>
-                    <th class="text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      <div>
-                        <p style="font-weight: 500; margin: 0;">${quote.projectType} Irrigation System</p>
-                        <p style="font-size: 14px; color: #6b7280; margin: 4px 0 0 0;">Complete irrigation system design and installation for ${quote.areaSize}</p>
-                      </div>
-                    </td>
-                    <td class="text-right">1</td>
-                    <td class="text-right">${quote.totalAmount ? `KSh ${parseFloat(quote.totalAmount).toLocaleString()}` : "TBD"}</td>
-                    <td class="text-right">${quote.totalAmount ? `KSh ${parseFloat(quote.totalAmount).toLocaleString()}` : "TBD"}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div style="display: flex; justify-content: end; margin-bottom: 30px;">
-              <div class="total-section">
-                <div class="total-row">
-                  <span>Subtotal:</span>
-                  <span>${quote.totalAmount ? `KSh ${parseFloat(quote.totalAmount).toLocaleString()}` : "TBD"}</span>
-                </div>
-                <div class="total-row">
-                  <span>VAT (16%):</span>
-                  <span>${quote.totalAmount ? `KSh ${(parseFloat(quote.totalAmount) * 0.16).toLocaleString()}` : "TBD"}</span>
-                </div>
-                <hr style="margin: 8px 0;">
-                <div class="total-row total-final">
-                  <span>Total:</span>
-                  <span>${quote.totalAmount ? `KSh ${(parseFloat(quote.totalAmount) * 1.16).toLocaleString()}` : "TBD"}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="terms">
-              <div class="section-title">Terms and Conditions:</div>
-              <ul>
-                <li>• This quotation is valid for 30 days from the date of issue.</li>
-                <li>• Prices are in Kenyan Shillings (KSh) and include delivery within Nairobi.</li>
-                <li>• Installation services include system setup, testing, and basic training.</li>
-                <li>• All products come with manufacturer's warranty as specified.</li>
-                <li>• Payment terms: 50% deposit, 50% on completion.</li>
-                <li>• Project timeline will be confirmed upon order confirmation.</li>
-              </ul>
-            </div>
-
-            <div class="footer">
-              <p>Thank you for considering DripTech for your irrigation needs.</p>
-              <p>For any questions regarding this quotation, please contact us at +254 700 123 456</p>
             </div>
           </div>
 
-          <script>
-            window.onload = function() {
-              window.print();
-              setTimeout(function() {
-                window.close();
-              }, 1000);
-            }
-          </script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-    }
+          <hr style="margin: 30px 0;">
+
+          <div class="customer-details">
+            <div>
+              <div class="section-title">Bill To:</div>
+              <div>
+                <p style="font-weight: 500;">${quote.customerName}</p>
+                <p>${quote.customerEmail}</p>
+                <p>${quote.customerPhone}</p>
+                <p>${quote.location}</p>
+              </div>
+            </div>
+            <div>
+              <div class="section-title">Project Details:</div>
+              <div>
+                <p><strong>Type:</strong> ${quote.projectType}</p>
+                <p><strong>Area Size:</strong> ${quote.areaSize}</p>
+                ${quote.cropType ? `<p><strong>Crop Type:</strong> ${quote.cropType}</p>` : ''}
+                <p><strong>Location:</strong> ${quote.location}</p>
+              </div>
+            </div>
+          </div>
+
+          ${quote.requirements ? `
+            <div style="margin-bottom: 30px;">
+              <div class="section-title">Project Requirements:</div>
+              <div style="background-color: #f9fafb; padding: 16px; border-radius: 8px;">
+                <p style="font-size: 14px; margin: 0;">${quote.requirements}</p>
+              </div>
+            </div>
+          ` : ''}
+
+          <div style="margin-bottom: 30px;">
+            <div class="section-title">Quote Items:</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th class="text-right">Quantity</th>
+                  <th class="text-right">Unit Price</th>
+                  <th class="text-right">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>
+                    <div>
+                      <p style="font-weight: 500; margin: 0;">${quote.projectType} Irrigation System</p>
+                      <p style="font-size: 14px; color: #6b7280; margin: 4px 0 0 0;">Complete irrigation system design and installation for ${quote.areaSize}</p>
+                    </div>
+                  </td>
+                  <td class="text-right">1</td>
+                  <td class="text-right">${quote.totalAmount ? `KSh ${parseFloat(quote.totalAmount).toLocaleString()}` : "TBD"}</td>
+                  <td class="text-right">${quote.totalAmount ? `KSh ${parseFloat(quote.totalAmount).toLocaleString()}` : "TBD"}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="display: flex; justify-content: end; margin-bottom: 30px;">
+            <div class="total-section">
+              <div class="total-row">
+                <span>Subtotal:</span>
+                <span>${quote.totalAmount ? `KSh ${parseFloat(quote.totalAmount).toLocaleString()}` : "TBD"}</span>
+              </div>
+              <div class="total-row">
+                <span>VAT (16%):</span>
+                <span>${quote.totalAmount ? `KSh ${(parseFloat(quote.totalAmount) * 0.16).toLocaleString()}` : "TBD"}</span>
+              </div>
+              <hr style="margin: 8px 0;">
+              <div class="total-row total-final">
+                <span>Total:</span>
+                <span>${quote.totalAmount ? `KSh ${(parseFloat(quote.totalAmount) * 1.16).toLocaleString()}` : "TBD"}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="terms">
+            <div class="section-title">Terms and Conditions:</div>
+            <ul>
+              <li>• This quotation is valid for 30 days from the date of issue.</li>
+              <li>• Prices are in Kenyan Shillings (KSh) and include delivery within Nairobi.</li>
+              <li>• Installation services include system setup, testing, and basic training.</li>
+              <li>• All products come with manufacturer's warranty as specified.</li>
+              <li>• Payment terms: 50% deposit, 50% on completion.</li>
+              <li>• Project timeline will be confirmed upon order confirmation.</li>
+            </ul>
+          </div>
+
+          <div class="footer">
+            <p>Thank you for considering DripTech for your irrigation needs.</p>
+            <p>For any questions regarding this quotation, please contact us at +254 700 123 456</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+
+    // Create a blob with the HTML content
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    
+    // Create a temporary anchor element and trigger download
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `Quote-${quote.id.slice(0, 8)}-DripTech.html`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handlePrint = () => {

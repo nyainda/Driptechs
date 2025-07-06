@@ -20,7 +20,9 @@ const blogSchema = z.object({
   slug: z.string().min(3, "Slug must be at least 3 characters"),
   content: z.string().min(50, "Content must be at least 50 characters"),
   excerpt: z.string().min(20, "Excerpt must be at least 20 characters"),
-  image_url: z.string().optional(),
+  category: z.string().min(1, "Category is required"),
+  tags: z.array(z.string()).optional().default([]),
+  featuredImage: z.string().optional(),
   published: z.boolean().default(false),
 });
 
@@ -35,7 +37,7 @@ interface BlogFormProps {
 export default function BlogForm({ post, onSuccess, onCancel }: BlogFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [imageUrl, setImageUrl] = useState(post?.image_url || "");
+  const [imageUrl, setImageUrl] = useState(post?.featuredImage || "");
 
   const {
     register,
@@ -50,7 +52,9 @@ export default function BlogForm({ post, onSuccess, onCancel }: BlogFormProps) {
       slug: post?.slug || "",
       content: post?.content || "",
       excerpt: post?.excerpt || "",
-      image_url: post?.image_url || "",
+      category: post?.category || "",
+      tags: post?.tags || [],
+      featuredImage: post?.featuredImage || "",
       published: post?.published || false,
     },
   });
@@ -161,6 +165,33 @@ export default function BlogForm({ post, onSuccess, onCancel }: BlogFormProps) {
             )}
           </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="category">Category *</Label>
+              <Input
+                id="category"
+                placeholder="e.g., Technology, Agriculture, Tips"
+                {...register("category")}
+              />
+              {errors.category && (
+                <p className="text-sm text-red-500">{errors.category.message}</p>
+              )}
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="tags">Tags (comma-separated)</Label>
+              <Input
+                id="tags"
+                placeholder="irrigation, drip system, farming"
+                onChange={(e) => {
+                  const tags = e.target.value.split(',').map(tag => tag.trim()).filter(Boolean);
+                  setValue("tags", tags);
+                }}
+                defaultValue={post?.tags?.join(', ') || ''}
+              />
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="excerpt">Excerpt *</Label>
             <Textarea
@@ -203,7 +234,7 @@ export default function BlogForm({ post, onSuccess, onCancel }: BlogFormProps) {
               value={imageUrl}
               onChange={(e) => {
                 setImageUrl(e.target.value);
-                setValue("image_url", e.target.value);
+                setValue("featuredImage", e.target.value);
               }}
             />
           </div>

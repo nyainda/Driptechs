@@ -151,10 +151,15 @@ export const loginSchema = z.object({
 export const insertProductSchema1 = z.object({
   name: z.string().min(1, "Product name is required"),
   category: z.string().min(1, "Category is required"),
-  price: z.number().min(0, "Price must be positive"),
-  description: z.string().optional(),
-  image_url: z.string().optional(),
-  specifications: z.string().optional(),
+  model: z.string().min(1, "Model is required"),
+  price: z.number().min(0.01, "Price must be greater than 0"),
+  description: z.string().min(1, "Description is required"),
+  images: z.array(z.string()).optional().default([]),
+  specifications: z.record(z.any()).optional().default({}),
+  features: z.array(z.string()).optional().default([]),
+  applications: z.array(z.string()).optional().default([]),
+  inStock: z.boolean().optional().default(true),
+  stockQuantity: z.number().min(0).optional().default(0),
 });
 
 export const productSchema = insertProductSchema1.extend({
