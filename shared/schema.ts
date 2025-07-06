@@ -51,7 +51,7 @@ export const quotes = pgTable("quotes", {
   currency: text("currency").notNull().default("KSH"),
   items: jsonb("items").default([]), // Array of quote items
   notes: text("notes"),
-  assignedTo: integer("assigned_to").references(() => users.id),
+  assignedTo: uuid("assigned_to").references(() => users.id),
   sentAt: timestamp("sent_at"),
   deliveryMethod: text("delivery_method").default("email"), // email, whatsapp, sms
   createdAt: timestamp("created_at").defaultNow(),
@@ -72,7 +72,7 @@ export const projects = pgTable("projects", {
   endDate: timestamp("end_date"),
   images: text("images").array().default([]),
   results: jsonb("results"), // Performance metrics, savings, etc.
-  clientId: integer("client_id").references(() => users.id),
+  clientId: uuid("client_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -87,7 +87,7 @@ export const blogPosts = pgTable("blog_posts", {
   tags: text("tags").array().default([]),
   featuredImage: text("featured_image"),
   published: boolean("published").default(false),
-  authorId: integer("author_id").references(() => users.id),
+  authorId: uuid("author_id").references(() => users.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
