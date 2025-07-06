@@ -1,17 +1,107 @@
+
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Download, Printer, Edit, Mail } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Download, Printer, Edit, Mail, Plus, Trash2, Save, X } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import type { Quote } from "@shared/schema";
+
+interface QuoteItem {
+  id?: string;
+  name: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  unitPrice: number;
+  total: number;
+}
 
 interface QuotePDFProps {
   quote: Quote;
 }
 
 export default function QuotePDF({ quote }: QuotePDFProps) {
-  const formatCurrency = (amount: string) => {
-    return `KSh ${parseFloat(amount).toLocaleString()}`;
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedQuote, setEditedQuote] = useState(quote);
+  const [items, setItems] = useState<QuoteItem[]>(
+    quote.items && Array.isArray(quote.items) && quote.items.length > 0 
+      ? quote.items.map((item: any) => ({
+          id: item.id || Math.random().toString(36).substr(2, 9),
+          name: item.name || `${quote.projectType} System`,
+          description: item.description || 'Complete irrigation system design and installation',
+          quantity: item.quantity || 1,
+          unit: item.unit || 'system',
+          unitPrice: parseFloat(item.unitPrice || quote.totalAmount || "0"),
+          total: parseFloat(item.total || quote.totalAmount || "0")
+        }))
+      : [{
+          id: '1',
+          name: `${quote.projectType} Irrigation System`,
+          description: `Complete irrigation system design and installation for ${quote.areaSize}`,
+          quantity: 1,
+          unit: 'system',
+          unitPrice: parseFloat(quote.totalAmount || "0"),
+          total: parseFloat(quote.totalAmount || "0")
+        }]
+  );
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  const updateQuoteMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await apiRequest("PUT", `/api/admin/quotes/${quote.id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
+      toast({
+        title: "Quote Updated",
+        description: "Quote has been updated successfully.",
+      });
+      setIsEditing(false);
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update quote. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const sendQuoteMutation = useMutation({
+    mutationFn: async () => {
+      await apiRequest("POST", `/api/admin/quotes/${quote.id}/send`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
+      toast({
+        title: "Quote Sent",
+        description: "Quote has been successfully sent to the customer.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to send quote. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const formatCurrency = (amount: string | number) => {
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return `KSh ${num.toLocaleString()}`;
   };
 
   const getStatusColor = (status: string) => {
@@ -29,84 +119,158 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
     }
   };
 
+  const addItem = () => {
+    const newItem: QuoteItem = {
+      id: Math.random().toString(36).substr(2, 9),
+      name: '',
+      description: '',
+      quantity: 1,
+      unit: 'pcs',
+      unitPrice: 0,
+      total: 0
+    };
+    setItems([...items, newItem]);
+  };
+
+  const updateItem = (id: string, field: keyof QuoteItem, value: any) => {
+    setItems(items.map(item => {
+      if (item.id === id) {
+        const updatedItem = { ...item, [field]: value };
+        if (field === 'quantity' || field === 'unitPrice') {
+          updatedItem.total = updatedItem.quantity * updatedItem.unitPrice;
+        }
+        return updatedItem;
+      }
+      return item;
+    }));
+  };
+
+  const removeItem = (id: string) => {
+    setItems(items.filter(item => item.id !== id));
+  };
+
+  const calculateSubtotal = () => {
+    return items.reduce((sum, item) => sum + item.total, 0);
+  };
+
+  const calculateVAT = () => {
+    return calculateSubtotal() * 0.16;
+  };
+
+  const calculateTotal = () => {
+    return calculateSubtotal() + calculateVAT();
+  };
+
+  const handleSave = () => {
+    const updatedQuoteData = {
+      ...editedQuote,
+      items: items,
+      totalAmount: calculateSubtotal().toString()
+    };
+    updateQuoteMutation.mutate(updatedQuoteData);
+  };
+
   const handleDownloadPDF = () => {
-    // Generate HTML content for PDF
+    const subtotal = calculateSubtotal();
+    const vat = calculateVAT();
+    const total = calculateTotal();
+
     const htmlContent = `
       <!DOCTYPE html>
       <html>
       <head>
-        <title>Quote #${quote.id} - DripTech Irrigation</title>
+        <title>Quote #${quote.id.slice(0, 8)} - DripTech Irrigation</title>
         <meta charset="utf-8">
         <style>
-          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
-          .company-header { display: flex; align-items: center; margin-bottom: 20px; }
-          .company-logo { width: 48px; height: 48px; background: linear-gradient(to bottom right, #2563eb, #16a34a); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 18px; margin-right: 12px; }
-          .company-info h1 { margin: 0; color: #2563eb; font-size: 24px; }
+          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: white; }
+          .quote-container { max-width: 800px; margin: 0 auto; }
+          .company-header { display: flex; align-items: center; margin-bottom: 30px; }
+          .company-logo { width: 60px; height: 60px; background: linear-gradient(135deg, #2563eb, #16a34a); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 24px; margin-right: 15px; }
+          .company-info h1 { margin: 0; color: #2563eb; font-size: 28px; }
           .company-info p { margin: 2px 0; color: #6b7280; font-size: 14px; }
-          .quote-header { text-align: right; margin-bottom: 30px; }
-          .quote-header h2 { font-size: 28px; margin: 0 0 10px 0; }
-          .customer-details { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
-          .section-title { font-size: 18px; font-weight: 600; margin-bottom: 10px; }
-          table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-          th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
-          th { background-color: #f9fafb; font-weight: 600; }
+          .quote-header { text-align: right; margin-bottom: 40px; }
+          .quote-header h2 { font-size: 32px; margin: 0 0 15px 0; color: #1f2937; }
+          .quote-number { background: #f3f4f6; padding: 10px; border-radius: 8px; display: inline-block; }
+          .customer-section { display: grid; grid-template-columns: 1fr 1fr; gap: 50px; margin-bottom: 40px; }
+          .section-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #1f2937; }
+          .info-grid { display: grid; grid-template-columns: 120px 1fr; gap: 8px; }
+          .info-label { font-weight: 600; color: #374151; }
+          .items-table { width: 100%; border-collapse: collapse; margin: 30px 0; }
+          .items-table th, .items-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+          .items-table th { background-color: #f9fafb; font-weight: 600; color: #374151; }
+          .items-table td { vertical-align: top; }
+          .item-name { font-weight: 600; color: #1f2937; }
+          .item-description { font-size: 12px; color: #6b7280; margin-top: 4px; }
           .text-right { text-align: right; }
-          .total-section { margin-left: auto; width: 300px; }
-          .total-row { display: flex; justify-content: space-between; margin-bottom: 8px; }
-          .total-final { font-weight: bold; font-size: 18px; border-top: 2px solid #374151; padding-top: 8px; }
-          .terms { margin-top: 30px; }
-          .terms ul { list-style: none; padding: 0; }
-          .terms li { margin-bottom: 8px; font-size: 14px; }
-          .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
+          .totals-section { margin-left: auto; width: 350px; margin-top: 30px; }
+          .total-row { display: flex; justify-content: space-between; padding: 8px 0; }
+          .total-final { font-weight: bold; font-size: 18px; border-top: 2px solid #374151; padding-top: 12px; margin-top: 8px; }
+          .terms-section { margin-top: 40px; }
+          .terms-list { list-style: none; padding: 0; }
+          .terms-list li { margin-bottom: 8px; font-size: 14px; color: #374151; }
+          .terms-list li:before { content: "•"; color: #2563eb; font-weight: bold; display: inline-block; width: 1em; }
+          .footer { text-align: center; margin-top: 50px; padding-top: 30px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
+          .highlight-box { background: #eff6ff; border-left: 4px solid #2563eb; padding: 15px; margin: 20px 0; }
+          @media print { 
+            body { margin: 0; padding: 10px; } 
+            .quote-container { max-width: 100%; }
+            .no-print { display: none; }
+          }
         </style>
       </head>
       <body>
-        <div class="quote-document">
-          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 40px;">
+        <div class="quote-container">
+          <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 50px;">
             <div>
               <div class="company-header">
                 <div class="company-logo">DT</div>
                 <div class="company-info">
                   <h1>DripTech</h1>
-                  <p>Irrigation Solutions</p>
+                  <p>Professional Irrigation Solutions</p>
                 </div>
               </div>
-              <div style="color: #6b7280; font-size: 14px;">
-                <p>Nairobi Industrial Area, Kenya</p>
-                <p>Phone: +254 700 123 456</p>
-                <p>Email: info@driptech.co.ke</p>
-                <p>Website: www.driptech.co.ke</p>
+              <div style="color: #6b7280; font-size: 14px; line-height: 1.6;">
+                <p><strong>Address:</strong> Nairobi Industrial Area, Kenya</p>
+                <p><strong>Phone:</strong> +254 700 123 456</p>
+                <p><strong>Email:</strong> info@driptech.co.ke</p>
+                <p><strong>Website:</strong> www.driptech.co.ke</p>
               </div>
             </div>
             <div class="quote-header">
               <h2>QUOTATION</h2>
-              <div style="font-size: 14px;">
-                <p><strong>Quote #:</strong> ${quote.id.slice(0, 8)}</p>
-                <p><strong>Date:</strong> ${new Date(quote.createdAt!).toLocaleDateString()}</p>
-                <p><strong>Valid Until:</strong> ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
+              <div class="quote-number">
+                <div style="font-size: 14px; margin-bottom: 5px;"><strong>Quote #:</strong> ${quote.id.slice(0, 8)}</div>
+                <div style="font-size: 14px; margin-bottom: 5px;"><strong>Date:</strong> ${new Date(quote.createdAt!).toLocaleDateString()}</div>
+                <div style="font-size: 14px;"><strong>Valid Until:</strong> ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</div>
               </div>
             </div>
           </div>
 
-          <hr style="margin: 30px 0;">
+          <hr style="border: none; border-top: 2px solid #e5e7eb; margin: 30px 0;">
 
-          <div class="customer-details">
+          <div class="customer-section">
             <div>
               <div class="section-title">Bill To:</div>
-              <div>
-                <p style="font-weight: 500;">${quote.customerName}</p>
-                <p>${quote.customerEmail}</p>
-                <p>${quote.customerPhone}</p>
-                <p>${quote.location}</p>
+              <div style="background: #f9fafb; padding: 20px; border-radius: 8px;">
+                <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px;">${quote.customerName}</div>
+                <div style="margin-bottom: 5px;">${quote.customerEmail}</div>
+                <div style="margin-bottom: 5px;">${quote.customerPhone}</div>
+                <div>${quote.location}</div>
               </div>
             </div>
             <div>
               <div class="section-title">Project Details:</div>
-              <div>
-                <p><strong>Type:</strong> ${quote.projectType}</p>
-                <p><strong>Area Size:</strong> ${quote.areaSize}</p>
-                ${quote.cropType ? `<p><strong>Crop Type:</strong> ${quote.cropType}</p>` : ''}
-                <p><strong>Location:</strong> ${quote.location}</p>
+              <div class="info-grid">
+                <div class="info-label">Type:</div>
+                <div>${quote.projectType}</div>
+                <div class="info-label">Area Size:</div>
+                <div>${quote.areaSize}</div>
+                ${quote.cropType ? `<div class="info-label">Crop Type:</div><div>${quote.cropType}</div>` : ''}
+                <div class="info-label">Location:</div>
+                <div>${quote.location}</div>
+                <div class="info-label">Water Source:</div>
+                <div>${quote.waterSource || 'N/A'}</div>
+                ${quote.budgetRange ? `<div class="info-label">Budget:</div><div>${quote.budgetRange}</div>` : ''}
               </div>
             </div>
           </div>
@@ -114,90 +278,101 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
           ${quote.requirements ? `
             <div style="margin-bottom: 30px;">
               <div class="section-title">Project Requirements:</div>
-              <div style="background-color: #f9fafb; padding: 16px; border-radius: 8px;">
-                <p style="font-size: 14px; margin: 0;">${quote.requirements}</p>
+              <div class="highlight-box">
+                <p style="margin: 0; font-size: 14px; line-height: 1.6;">${quote.requirements}</p>
               </div>
             </div>
           ` : ''}
 
           <div style="margin-bottom: 30px;">
-            <div class="section-title">Quote Items:</div>
-            <table>
+            <div class="section-title">Materials & Services:</div>
+            <table class="items-table">
               <thead>
                 <tr>
-                  <th>Description</th>
-                  <th class="text-right">Quantity</th>
-                  <th class="text-right">Unit Price</th>
-                  <th class="text-right">Total</th>
+                  <th style="width: 40%;">Description</th>
+                  <th style="width: 10%; text-align: center;">Qty</th>
+                  <th style="width: 10%; text-align: center;">Unit</th>
+                  <th style="width: 20%; text-align: right;">Unit Price</th>
+                  <th style="width: 20%; text-align: right;">Total</th>
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>
-                    <div>
-                      <p style="font-weight: 500; margin: 0;">${quote.projectType} Irrigation System</p>
-                      <p style="font-size: 14px; color: #6b7280; margin: 4px 0 0 0;">Complete irrigation system design and installation for ${quote.areaSize}</p>
-                    </div>
-                  </td>
-                  <td class="text-right">1</td>
-                  <td class="text-right">${quote.totalAmount ? `KSh ${parseFloat(quote.totalAmount).toLocaleString()}` : "TBD"}</td>
-                  <td class="text-right">${quote.totalAmount ? `KSh ${parseFloat(quote.totalAmount).toLocaleString()}` : "TBD"}</td>
-                </tr>
+                ${items.map(item => `
+                  <tr>
+                    <td>
+                      <div class="item-name">${item.name}</div>
+                      <div class="item-description">${item.description}</div>
+                    </td>
+                    <td style="text-align: center;">${item.quantity}</td>
+                    <td style="text-align: center;">${item.unit}</td>
+                    <td style="text-align: right;">${formatCurrency(item.unitPrice)}</td>
+                    <td style="text-align: right;">${formatCurrency(item.total)}</td>
+                  </tr>
+                `).join('')}
               </tbody>
             </table>
           </div>
 
-          <div style="display: flex; justify-content: end; margin-bottom: 30px;">
-            <div class="total-section">
+          <div style="display: flex; justify-content: end;">
+            <div class="totals-section">
               <div class="total-row">
                 <span>Subtotal:</span>
-                <span>${quote.totalAmount ? `KSh ${parseFloat(quote.totalAmount).toLocaleString()}` : "TBD"}</span>
+                <span>${formatCurrency(subtotal)}</span>
               </div>
               <div class="total-row">
                 <span>VAT (16%):</span>
-                <span>${quote.totalAmount ? `KSh ${(parseFloat(quote.totalAmount) * 0.16).toLocaleString()}` : "TBD"}</span>
+                <span>${formatCurrency(vat)}</span>
               </div>
-              <hr style="margin: 8px 0;">
               <div class="total-row total-final">
-                <span>Total:</span>
-                <span>${quote.totalAmount ? `KSh ${(parseFloat(quote.totalAmount) * 1.16).toLocaleString()}` : "TBD"}</span>
+                <span>Total Amount:</span>
+                <span style="color: #2563eb;">${formatCurrency(total)}</span>
               </div>
             </div>
           </div>
 
-          <div class="terms">
+          <div class="terms-section">
             <div class="section-title">Terms and Conditions:</div>
-            <ul>
-              <li>• This quotation is valid for 30 days from the date of issue.</li>
-              <li>• Prices are in Kenyan Shillings (KSh) and include delivery within Nairobi.</li>
-              <li>• Installation services include system setup, testing, and basic training.</li>
-              <li>• All products come with manufacturer's warranty as specified.</li>
-              <li>• Payment terms: 50% deposit, 50% on completion.</li>
-              <li>• Project timeline will be confirmed upon order confirmation.</li>
+            <ul class="terms-list">
+              <li>This quotation is valid for 30 days from the date of issue.</li>
+              <li>Prices are in Kenyan Shillings (KSh) and include delivery within Nairobi metropolitan area.</li>
+              <li>Installation services include complete system setup, testing, commissioning, and user training.</li>
+              <li>All equipment comes with manufacturer's warranty and 12 months service guarantee.</li>
+              <li>Payment terms: 50% deposit upon order confirmation, 50% upon project completion.</li>
+              <li>Project timeline will be confirmed upon order placement and site survey completion.</li>
+              <li>Any additional work outside this scope will be quoted separately.</li>
+              <li>Free maintenance visit included within first 6 months of installation.</li>
             </ul>
           </div>
 
           <div class="footer">
-            <p>Thank you for considering DripTech for your irrigation needs.</p>
+            <div style="margin-bottom: 10px; font-size: 16px; font-weight: 600; color: #2563eb;">
+              Thank you for choosing DripTech for your irrigation needs!
+            </div>
             <p>For any questions regarding this quotation, please contact us at +254 700 123 456</p>
+            <p style="font-size: 12px; margin-top: 15px;">
+              This quotation was generated electronically and is valid without signature.
+            </p>
           </div>
         </div>
       </body>
       </html>
     `;
 
-    // Create a blob with the HTML content
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
     
-    // Create a temporary anchor element and trigger download
     const link = document.createElement('a');
     link.href = url;
-    link.download = `Quote-${quote.id.slice(0, 8)}-DripTech.html`;
+    link.download = `DripTech-Quote-${quote.id.slice(0, 8)}-${quote.customerName.replace(/\s+/g, '-')}.html`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+
+    toast({
+      title: "PDF Downloaded",
+      description: "Quote has been downloaded successfully.",
+    });
   };
 
   const handlePrint = () => {
@@ -205,9 +380,9 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
   };
 
   const handleSendEmail = () => {
-    const subject = `Quote #${quote.id} - DripTech Irrigation Solutions`;
-    const body = `Dear ${quote.customerName},\n\nPlease find attached your irrigation system quote.\n\nBest regards,\nDripTech Team`;
-    window.open(`mailto:${quote.customerEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+    if (window.confirm(`Send updated quote to ${quote.customerEmail}?`)) {
+      sendQuoteMutation.mutate();
+    }
   };
 
   return (
@@ -223,9 +398,49 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
           </span>
         </div>
         <div className="flex gap-2">
+          <Button 
+            variant={isEditing ? "destructive" : "outline"} 
+            size="sm" 
+            onClick={() => {
+              if (isEditing) {
+                setIsEditing(false);
+                setEditedQuote(quote);
+                setItems(quote.items && Array.isArray(quote.items) && quote.items.length > 0 
+                  ? quote.items.map((item: any) => ({
+                      id: item.id || Math.random().toString(36).substr(2, 9),
+                      name: item.name || `${quote.projectType} System`,
+                      description: item.description || 'Complete irrigation system design and installation',
+                      quantity: item.quantity || 1,
+                      unit: item.unit || 'system',
+                      unitPrice: parseFloat(item.unitPrice || quote.totalAmount || "0"),
+                      total: parseFloat(item.total || quote.totalAmount || "0")
+                    }))
+                  : [{
+                      id: '1',
+                      name: `${quote.projectType} Irrigation System`,
+                      description: `Complete irrigation system design and installation for ${quote.areaSize}`,
+                      quantity: 1,
+                      unit: 'system',
+                      unitPrice: parseFloat(quote.totalAmount || "0"),
+                      total: parseFloat(quote.totalAmount || "0")
+                    }]);
+              } else {
+                setIsEditing(true);
+              }
+            }}
+          >
+            {isEditing ? <X className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+            {isEditing ? 'Cancel' : 'Edit'}
+          </Button>
+          {isEditing && (
+            <Button size="sm" onClick={handleSave} className="bg-green-600 hover:bg-green-700">
+              <Save className="h-4 w-4 mr-2" />
+              Save
+            </Button>
+          )}
           <Button variant="outline" size="sm" onClick={handleSendEmail}>
             <Mail className="h-4 w-4 mr-2" />
-            Email
+            Send Email
           </Button>
           <Button variant="outline" size="sm" onClick={handlePrint}>
             <Printer className="h-4 w-4 mr-2" />
@@ -250,7 +465,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
                 </div>
                 <div>
                   <h1 className="text-2xl font-bold text-blue-600">DripTech</h1>
-                  <p className="text-sm text-muted-foreground">Irrigation Solutions</p>
+                  <p className="text-sm text-muted-foreground">Professional Irrigation Solutions</p>
                 </div>
               </div>
               <div className="text-sm space-y-1 text-muted-foreground">
@@ -262,8 +477,8 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
             </div>
             <div className="text-right">
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">QUOTATION</h2>
-              <div className="text-sm space-y-1">
-                <p><strong>Quote #:</strong> {quote.id}</p>
+              <div className="text-sm space-y-1 bg-muted p-3 rounded-lg">
+                <p><strong>Quote #:</strong> {quote.id.slice(0, 8)}</p>
                 <p><strong>Date:</strong> {new Date(quote.createdAt!).toLocaleDateString()}</p>
                 <p><strong>Valid Until:</strong> {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</p>
               </div>
@@ -276,20 +491,64 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div>
               <h3 className="text-lg font-semibold mb-4">Bill To:</h3>
-              <div className="space-y-1">
-                <p className="font-medium">{quote.customerName}</p>
-                <p>{quote.customerEmail}</p>
-                <p>{quote.customerPhone}</p>
-                <p>{quote.location}</p>
+              <div className="bg-muted p-4 rounded-lg space-y-1">
+                {isEditing ? (
+                  <div className="space-y-2">
+                    <Input
+                      value={editedQuote.customerName}
+                      onChange={(e) => setEditedQuote({...editedQuote, customerName: e.target.value})}
+                      className="font-medium"
+                    />
+                    <Input
+                      value={editedQuote.customerEmail}
+                      onChange={(e) => setEditedQuote({...editedQuote, customerEmail: e.target.value})}
+                    />
+                    <Input
+                      value={editedQuote.customerPhone}
+                      onChange={(e) => setEditedQuote({...editedQuote, customerPhone: e.target.value})}
+                    />
+                    <Input
+                      value={editedQuote.location}
+                      onChange={(e) => setEditedQuote({...editedQuote, location: e.target.value})}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    <p className="font-medium">{quote.customerName}</p>
+                    <p>{quote.customerEmail}</p>
+                    <p>{quote.customerPhone}</p>
+                    <p>{quote.location}</p>
+                  </>
+                )}
               </div>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Project Details:</h3>
-              <div className="space-y-1">
-                <p><strong>Type:</strong> {quote.projectType}</p>
-                <p><strong>Area Size:</strong> {quote.areaSize}</p>
-                {quote.cropType && <p><strong>Crop Type:</strong> {quote.cropType}</p>}
-                <p><strong>Location:</strong> {quote.location}</p>
+              <div className="space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-medium">Type:</span>
+                  <span>{quote.projectType}</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-medium">Area Size:</span>
+                  <span>{quote.areaSize}</span>
+                </div>
+                {quote.cropType && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="font-medium">Crop Type:</span>
+                    <span>{quote.cropType}</span>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 gap-2">
+                  <span className="font-medium">Water Source:</span>
+                  <span>{quote.waterSource || 'N/A'}</span>
+                </div>
+                {quote.budgetRange && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <span className="font-medium">Budget Range:</span>
+                    <span>{quote.budgetRange}</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -298,53 +557,118 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
           {quote.requirements && (
             <div className="mb-8">
               <h3 className="text-lg font-semibold mb-4">Project Requirements:</h3>
-              <div className="bg-muted p-4 rounded-lg">
+              <div className="bg-blue-50 dark:bg-blue-950 border-l-4 border-blue-500 p-4 rounded">
                 <p className="text-sm">{quote.requirements}</p>
               </div>
             </div>
           )}
 
-          {/* Quote Items */}
+          {/* Materials & Services */}
           <div className="mb-8">
-            <h3 className="text-lg font-semibold mb-4">Quote Items:</h3>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Materials & Services:</h3>
+              {isEditing && (
+                <Button size="sm" onClick={addItem} variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Item
+                </Button>
+              )}
+            </div>
+            
             <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
+              <table className="w-full border-collapse border border-border">
                 <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4">Description</th>
-                    <th className="text-right py-3 px-4">Quantity</th>
-                    <th className="text-right py-3 px-4">Unit Price</th>
-                    <th className="text-right py-3 px-4">Total</th>
+                  <tr className="bg-muted">
+                    <th className="text-left py-3 px-4 border border-border">Description</th>
+                    <th className="text-center py-3 px-4 border border-border w-20">Qty</th>
+                    <th className="text-center py-3 px-4 border border-border w-20">Unit</th>
+                    <th className="text-right py-3 px-4 border border-border w-32">Unit Price</th>
+                    <th className="text-right py-3 px-4 border border-border w-32">Total</th>
+                    {isEditing && <th className="text-center py-3 px-4 border border-border w-20">Action</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {quote.items && Array.isArray(quote.items) && quote.items.length > 0 ? (
-                    quote.items.map((item: any, index: number) => (
-                      <tr key={index} className="border-b">
-                        <td className="py-3 px-4">
-                          <div>
-                            <p className="font-medium">{item.name || `${quote.projectType} System`}</p>
-                            <p className="text-sm text-muted-foreground">{item.description || 'Complete irrigation system design and installation'}</p>
+                  {items.map((item) => (
+                    <tr key={item.id} className="border-b border-border">
+                      <td className="py-3 px-4 border border-border">
+                        {isEditing ? (
+                          <div className="space-y-2">
+                            <Input
+                              value={item.name}
+                              onChange={(e) => updateItem(item.id!, 'name', e.target.value)}
+                              placeholder="Item name"
+                              className="font-medium"
+                            />
+                            <Textarea
+                              value={item.description}
+                              onChange={(e) => updateItem(item.id!, 'description', e.target.value)}
+                              placeholder="Item description"
+                              className="text-sm"
+                              rows={2}
+                            />
                           </div>
-                        </td>
-                        <td className="text-right py-3 px-4">{item.quantity || 1}</td>
-                        <td className="text-right py-3 px-4">{formatCurrency(item.unitPrice || quote.totalAmount || "0")}</td>
-                        <td className="text-right py-3 px-4">{formatCurrency(item.total || quote.totalAmount || "0")}</td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr className="border-b">
-                      <td className="py-3 px-4">
-                        <div>
-                          <p className="font-medium">{quote.projectType} Irrigation System</p>
-                          <p className="text-sm text-muted-foreground">Complete irrigation system design and installation for {quote.areaSize}</p>
-                        </div>
+                        ) : (
+                          <div>
+                            <p className="font-medium">{item.name}</p>
+                            <p className="text-sm text-muted-foreground">{item.description}</p>
+                          </div>
+                        )}
                       </td>
-                      <td className="text-right py-3 px-4">1</td>
-                      <td className="text-right py-3 px-4">{quote.totalAmount ? formatCurrency(quote.totalAmount) : "TBD"}</td>
-                      <td className="text-right py-3 px-4">{quote.totalAmount ? formatCurrency(quote.totalAmount) : "TBD"}</td>
+                      <td className="text-center py-3 px-4 border border-border">
+                        {isEditing ? (
+                          <Input
+                            type="number"
+                            value={item.quantity}
+                            onChange={(e) => updateItem(item.id!, 'quantity', parseInt(e.target.value) || 0)}
+                            className="text-center"
+                            min="1"
+                          />
+                        ) : (
+                          item.quantity
+                        )}
+                      </td>
+                      <td className="text-center py-3 px-4 border border-border">
+                        {isEditing ? (
+                          <Input
+                            value={item.unit}
+                            onChange={(e) => updateItem(item.id!, 'unit', e.target.value)}
+                            className="text-center"
+                          />
+                        ) : (
+                          item.unit
+                        )}
+                      </td>
+                      <td className="text-right py-3 px-4 border border-border">
+                        {isEditing ? (
+                          <Input
+                            type="number"
+                            value={item.unitPrice}
+                            onChange={(e) => updateItem(item.id!, 'unitPrice', parseFloat(e.target.value) || 0)}
+                            className="text-right"
+                            min="0"
+                            step="0.01"
+                          />
+                        ) : (
+                          formatCurrency(item.unitPrice)
+                        )}
+                      </td>
+                      <td className="text-right py-3 px-4 border border-border font-medium">
+                        {formatCurrency(item.total)}
+                      </td>
+                      {isEditing && (
+                        <td className="text-center py-3 px-4 border border-border">
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => removeItem(item.id!)}
+                            disabled={items.length === 1}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      )}
                     </tr>
-                  )}
+                  ))}
                 </tbody>
               </table>
             </div>
@@ -352,21 +676,19 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
 
           {/* Totals */}
           <div className="flex justify-end mb-8">
-            <div className="w-80">
-              <div className="space-y-2">
-                <div className="flex justify-between">
-                  <span>Subtotal:</span>
-                  <span>{quote.totalAmount ? formatCurrency(quote.totalAmount) : "TBD"}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>VAT (16%):</span>
-                  <span>{quote.totalAmount ? formatCurrency((parseFloat(quote.totalAmount) * 0.16).toString()) : "TBD"}</span>
-                </div>
-                <Separator />
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total:</span>
-                  <span>{quote.totalAmount ? formatCurrency((parseFloat(quote.totalAmount) * 1.16).toString()) : "TBD"}</span>
-                </div>
+            <div className="w-80 space-y-2">
+              <div className="flex justify-between">
+                <span>Subtotal:</span>
+                <span>{formatCurrency(calculateSubtotal())}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>VAT (16%):</span>
+                <span>{formatCurrency(calculateVAT())}</span>
+              </div>
+              <Separator />
+              <div className="flex justify-between text-lg font-bold">
+                <span>Total Amount:</span>
+                <span className="text-blue-600">{formatCurrency(calculateTotal())}</span>
               </div>
             </div>
           </div>
@@ -376,24 +698,27 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
             <h3 className="text-lg font-semibold mb-4">Terms and Conditions:</h3>
             <div className="text-sm space-y-2 text-muted-foreground">
               <p>• This quotation is valid for 30 days from the date of issue.</p>
-              <p>• Prices are in Kenyan Shillings (KSh) and include delivery within Nairobi.</p>
-              <p>• Installation services include system setup, testing, and basic training.</p>
-              <p>• All products come with manufacturer's warranty as specified.</p>
-              <p>• Payment terms: 50% deposit, 50% on completion.</p>
-              <p>• Project timeline will be confirmed upon order confirmation.</p>
+              <p>• Prices are in Kenyan Shillings (KSh) and include delivery within Nairobi metropolitan area.</p>
+              <p>• Installation services include complete system setup, testing, commissioning, and user training.</p>
+              <p>• All equipment comes with manufacturer's warranty and 12 months service guarantee.</p>
+              <p>• Payment terms: 50% deposit upon order confirmation, 50% upon project completion.</p>
+              <p>• Project timeline will be confirmed upon order placement and site survey completion.</p>
+              <p>• Any additional work outside this scope will be quoted separately.</p>
+              <p>• Free maintenance visit included within first 6 months of installation.</p>
             </div>
           </div>
 
           {/* Footer */}
           <Separator className="mb-6" />
           <div className="text-center text-sm text-muted-foreground">
-            <p>Thank you for considering DripTech for your irrigation needs.</p>
+            <p className="font-medium text-blue-600 mb-2">Thank you for choosing DripTech for your irrigation needs!</p>
             <p>For any questions regarding this quotation, please contact us at +254 700 123 456</p>
+            <p className="text-xs mt-3">This quotation was generated electronically and is valid without signature.</p>
           </div>
         </CardContent>
       </Card>
 
-      {/* Additional Notes */}
+      {/* Internal Notes */}
       {quote.notes && (
         <Card className="admin-card">
           <CardHeader>

@@ -288,9 +288,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = req.params.id;
       const updateData = req.body;
+      
+      // Calculate total from items if items are provided
+      if (updateData.items && Array.isArray(updateData.items)) {
+        const subtotal = updateData.items.reduce((sum: number, item: any) => sum + (item.total || 0), 0);
+        updateData.totalAmount = subtotal.toString();
+      }
+      
       const quote = await storage.updateQuote(id, updateData);
       res.json(quote);
     } catch (error) {
+      console.error("Quote update error:", error);
       res.status(400).json({ message: "Failed to update quote" });
     }
   });
@@ -303,9 +311,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Quote not found" });
       }
       
+      // Mark quote as sent and update status
+      await storage.updateQuote(id, { 
+        status: 'sent',
+        sentAt: new Date().toISOString() 
+      });
+      
       await storage.sendQuoteToCustomer(quote);
       res.json({ message: "Quote sent successfully" });
     } catch (error) {
+      console.error("Send quote error:", error);
       res.status(500).json({ message: "Failed to send quote" });
     }
   });
