@@ -117,16 +117,18 @@ Check your email for the detailed quote. Questions? Reply to this message!
 
           <div class="quote-info">
             <h3 style="color: #2563eb; margin-top: 0;">Quote #${quote.id.slice(0, 8)} - Project Details</h3>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-              <div>
-                <strong>Project Type:</strong> ${quote.projectType}<br>
-                <strong>Area Size:</strong> ${quote.areaSize}<br>
-                <strong>Location:</strong> ${quote.location}
-              </div>
-              <div>
-                <strong>Water Source:</strong> ${quote.waterSource || 'N/A'}<br>
-                ${quote.cropType ? `<strong>Crop Type:</strong> ${quote.cropType}<br>` : ''}
-                ${quote.budgetRange ? `<strong>Budget Range:</strong> ${quote.budgetRange}` : ''}
+            <div style="color: #6b7280; font-size: 14px; line-height: 1.6;">
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div>
+                  <strong>Service Type:</strong> ${quote.projectType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}<br>
+                  <strong>Area Size:</strong> ${quote.areaSize}<br>
+                  <strong>Location:</strong> ${quote.location}
+                </div>
+                <div>
+                  <strong>Water Source:</strong> ${quote.waterSource || 'N/A'}<br>
+                  ${quote.cropType ? `<strong>Crop Type:</strong> ${quote.cropType}<br>` : ''}
+                  ${quote.budgetRange ? `<strong>Budget Range:</strong> ${quote.budgetRange}` : ''}
+                </div>
               </div>
             </div>
           </div>

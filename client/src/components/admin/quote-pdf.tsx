@@ -32,23 +32,40 @@ interface QuotePDFProps {
 export default function QuotePDF({ quote }: QuotePDFProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedQuote, setEditedQuote] = useState(quote);
+  const getServiceDescription = (projectType: string) => {
+    const serviceDescriptions = {
+      'system_design': 'Custom irrigation system design and planning',
+      'installation': 'Professional installation and setup',
+      'maintenance': 'Regular maintenance and system optimization',
+      'training': 'User training and system operation guidance',
+      'consulting': 'Expert consultation and advisory services',
+      'support': 'Technical support and troubleshooting',
+      'residential': 'Complete residential irrigation system',
+      'commercial': 'Commercial irrigation system design and installation',
+      'agricultural': 'Agricultural irrigation system for farming',
+      'landscape': 'Landscape irrigation system design',
+      'greenhouse': 'Greenhouse irrigation system setup'
+    };
+    return serviceDescriptions[projectType as keyof typeof serviceDescriptions] || 'Complete irrigation system design and installation';
+  };
+
   const [items, setItems] = useState<QuoteItem[]>(
     quote.items && Array.isArray(quote.items) && quote.items.length > 0 
       ? quote.items.map((item: any) => ({
           id: item.id || Math.random().toString(36).substr(2, 9),
           name: item.name || `${quote.projectType} System`,
-          description: item.description || 'Complete irrigation system design and installation',
+          description: item.description || getServiceDescription(quote.projectType),
           quantity: item.quantity || 1,
-          unit: item.unit || 'system',
+          unit: item.unit || 'service',
           unitPrice: parseFloat(item.unitPrice || quote.totalAmount || "0"),
           total: parseFloat(item.total || quote.totalAmount || "0")
         }))
       : [{
           id: '1',
-          name: `${quote.projectType} Irrigation System`,
-          description: `Complete irrigation system design and installation for ${quote.areaSize}`,
+          name: `${quote.projectType} Service`,
+          description: getServiceDescription(quote.projectType),
           quantity: 1,
-          unit: 'system',
+          unit: 'service',
           unitPrice: parseFloat(quote.totalAmount || "0"),
           total: parseFloat(quote.totalAmount || "0")
         }]

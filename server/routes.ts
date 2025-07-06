@@ -314,7 +314,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Mark quote as sent and update status
       await storage.updateQuote(id, { 
         status: 'sent',
-        sentAt: new Date().toISOString() 
+        sentAt: new Date() 
       });
       
       await storage.sendQuoteToCustomer(quote);

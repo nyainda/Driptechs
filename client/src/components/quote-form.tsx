@@ -114,6 +114,12 @@ export default function QuoteForm({ productId, onSuccess }: QuoteFormProps) {
                   <SelectItem value="landscaping">Landscaping</SelectItem>
                   <SelectItem value="commercial">Commercial</SelectItem>
                   <SelectItem value="residential">Residential</SelectItem>
+                  <SelectItem value="system_design">System Design</SelectItem>
+                  <SelectItem value="installation">Installation</SelectItem>
+                  <SelectItem value="maintenance">Maintenance</SelectItem>
+                  <SelectItem value="training">Training</SelectItem>
+                  <SelectItem value="consulting">Consulting</SelectItem>
+                  <SelectItem value="support">Support</SelectItem>
                 </SelectContent>
               </Select>
               {errors.projectType && (
