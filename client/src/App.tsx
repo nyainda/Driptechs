@@ -16,6 +16,7 @@ import Projects from "@/pages/projects";
 import About from "@/pages/about";
 import Contact from "@/pages/contact";
 import Blog from "@/pages/blog";
+import BlogDetail from "@/pages/blog-detail";
 import Quote from "@/pages/quote";
 import Home from "./pages/home";
 
@@ -40,6 +41,7 @@ function Router() {
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
       <Route path="/blog" component={Blog} />
+      <Route path="/blog/:slug" component={BlogDetail} />
       <Route path="/quote" component={Quote} />
 
       {/* Admin Routes */}

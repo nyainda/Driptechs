@@ -4,9 +4,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import ProductCard from "@/components/product-card";
-import { ArrowRight, Droplets, Leaf, TrendingUp, CheckCircle, Wrench, Award, Phone, Mail } from "lucide-react";
+import { ArrowRight, Droplets, Leaf, TrendingUp, CheckCircle, Wrench, Award, Phone, Mail, Calendar, User, BookOpen } from "lucide-react";
 import { Link } from "wouter";
-import type { Product, Project } from "@shared/schema";
+import type { Product, Project, BlogPost } from "@shared/schema";
 
 export default function Home() {
   const { data: products } = useQuery<Product[]>({
@@ -19,8 +19,14 @@ export default function Home() {
     queryFn: () => fetch("/api/projects").then(res => res.json()),
   });
 
+  const { data: blogPosts } = useQuery<BlogPost[]>({
+    queryKey: ["/api/blog"],
+    queryFn: () => fetch("/api/blog").then(res => res.json()),
+  });
+
   const featuredProducts = products?.slice(0, 3) || [];
   const recentProjects = projects?.slice(0, 3) || [];
+  const latestBlogPosts = blogPosts?.slice(0, 3) || [];
 
   return (
     <div className="flex flex-col">
@@ -211,6 +217,95 @@ export default function Home() {
             <Link href="/projects">
               <Button size="lg" variant="outline" className="px-8 py-3">
                 View All Projects
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Latest Blog Posts */}
+      <section className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Latest Insights & Updates
+            </h2>
+            <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Stay informed with the latest irrigation technology insights, tips, and success stories.
+            </p>
+          </div>
+
+          {latestBlogPosts.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {latestBlogPosts.map((post) => (
+                <Card key={post.id} className="overflow-hidden hover:shadow-xl transition-all duration-300 group">
+                  {post.featuredImage && (
+                    <div className="aspect-video overflow-hidden bg-gray-100 dark:bg-gray-800">
+                      <img
+                        src={post.featuredImage}
+                        alt={post.title}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    </div>
+                  )}
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between mb-3">
+                      <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-sm">
+                        {post.category}
+                      </Badge>
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <Calendar className="h-3 w-3 mr-1" />
+                        {new Date(post.createdAt!).toLocaleDateString()}
+                      </div>
+                    </div>
+                    <CardTitle className="text-lg line-clamp-2 group-hover:text-blue-600 transition-colors">
+                      {post.title}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3 leading-relaxed">
+                      {post.excerpt}
+                    </p>
+                    
+                    {post.tags && post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {post.tags.slice(0, 2).map((tag, index) => (
+                          <Badge key={index} variant="secondary" className="text-xs px-2 py-0.5">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <User className="h-3 w-3 mr-1" />
+                        <span>DripTech Team</span>
+                      </div>
+                      <Link href={`/blog/${post.slug}`}>
+                        <Button variant="ghost" size="sm" className="group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors">
+                          Read More
+                          <ArrowRight className="ml-1 h-3 w-3 transition-transform group-hover:translate-x-1" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground text-lg">No blog posts available yet.</p>
+              <p className="text-sm text-muted-foreground mt-2">Check back soon for irrigation insights and updates!</p>
+            </div>
+          )}
+
+          <div className="text-center">
+            <Link href="/blog">
+              <Button size="lg" variant="outline" className="px-8 py-3 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors">
+                View All Articles
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
