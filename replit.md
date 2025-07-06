@@ -118,6 +118,11 @@ DripTech is a comprehensive irrigation solutions website built with modern web t
 ```
 Changelog:
 - July 05, 2025. Initial setup
+- July 06, 2025. Enhanced admin login with improved error handling
+  - Updated admin credentials to admin@driptech.co.ke / admin123
+  - Improved error messages with specific details for login failures
+  - Fixed product detail page rendering issues
+  - Enhanced PostgreSQL database integration
 ```
 
 ## User Preferences

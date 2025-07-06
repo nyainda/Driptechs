@@ -44,12 +44,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const user = await storage.getUserByEmail(email);
       if (!user) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ 
+          message: "Account not found", 
+          details: "No account exists with this email address. Please check your email or contact support.",
+          field: "email"
+        });
       }
       
       const isValidPassword = await bcrypt.compare(password, user.password);
       if (!isValidPassword) {
-        return res.status(401).json({ message: "Invalid credentials" });
+        return res.status(401).json({ 
+          message: "Incorrect password", 
+          details: "The password you entered is incorrect. Please try again or reset your password.",
+          field: "password"
+        });
       }
       
       const token = jwt.sign(
@@ -63,7 +71,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         user: { id: user.id, email: user.email, name: user.name, role: user.role } 
       });
     } catch (error) {
-      res.status(400).json({ message: "Invalid request data" });
+      console.error("Login error:", error);
+      res.status(400).json({ 
+        message: "Login failed", 
+        details: "Invalid email or password format. Please check your input and try again."
+      });
     }
   });
 

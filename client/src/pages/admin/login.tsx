@@ -52,9 +52,17 @@ export default function AdminLogin() {
       setLocation("/admin/dashboard");
     },
     onError: (error: any) => {
+      let errorMessage = "Invalid credentials. Please try again.";
+      let errorTitle = "Login Failed";
+      
+      if (error.response?.data?.message) {
+        errorTitle = error.response.data.message;
+        errorMessage = error.response.data.details || errorMessage;
+      }
+      
       toast({
-        title: "Login Failed",
-        description: error.message || "Invalid credentials. Please try again.",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive",
       });
     },

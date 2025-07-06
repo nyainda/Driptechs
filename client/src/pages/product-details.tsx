@@ -78,7 +78,7 @@ export default function ProductDetails() {
           <Card className="overflow-hidden">
             <CardContent className="p-0">
               <img
-                src={product.image_url || "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600"}
+                src={(product.images && product.images.length > 0) ? product.images[0] : "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=600"}
                 alt={product.name}
                 className="w-full h-96 object-cover"
               />
@@ -95,7 +95,7 @@ export default function ProductDetails() {
                 {product.name}
               </h1>
               <p className="text-2xl font-semibold text-blue-600 dark:text-blue-400">
-                ${product.price.toFixed(2)}
+                KSh {parseFloat(product.price).toLocaleString()}
               </p>
             </div>
 
@@ -114,9 +114,18 @@ export default function ProductDetails() {
               <div>
                 <h3 className="text-lg font-semibold mb-3">Specifications</h3>
                 <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
-                    {product.specifications}
-                  </p>
+                  <div className="grid grid-cols-2 gap-4">
+                    {Object.entries(product.specifications as Record<string, any>).map(([key, value]) => (
+                      <div key={key} className="flex justify-between">
+                        <span className="font-medium text-gray-700 dark:text-gray-300 capitalize">
+                          {key.replace(/([A-Z])/g, ' $1').trim()}:
+                        </span>
+                        <span className="text-gray-600 dark:text-gray-400">
+                          {String(value)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
