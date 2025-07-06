@@ -291,9 +291,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Calculate total from items if items are provided
       if (updateData.items && Array.isArray(updateData.items)) {
-        const subtotal = updateData.items.reduce((sum: number, item: any) => sum + (item.total || 0), 0);
+        const subtotal = updateData.items.reduce((sum: number, item: any) => sum + (parseFloat(item.total) || 0), 0);
         updateData.totalAmount = subtotal.toString();
+        
+        // Ensure items have proper structure
+        updateData.items = updateData.items.map((item: any) => ({
+          id: item.id || Math.random().toString(36).substr(2, 9),
+          name: item.name || '',
+          description: item.description || '',
+          quantity: parseInt(item.quantity) || 1,
+          unit: item.unit || 'pcs',
+          unitPrice: parseFloat(item.unitPrice) || 0,
+          total: parseFloat(item.total) || 0
+        }));
       }
+      
+      // Add update timestamp
+      updateData.updatedAt = new Date().toISOString();
       
       const quote = await storage.updateQuote(id, updateData);
       res.json(quote);

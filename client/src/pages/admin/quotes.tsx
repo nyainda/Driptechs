@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
+import QuotePDF from "@/components/admin/quote-pdf";
 import type { Quote } from "@shared/schema";
 
 export default function AdminQuotes() {
@@ -198,22 +199,27 @@ export default function AdminQuotes() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center h-16">
-              <Button
-                variant="ghost"
-                onClick={() => setSelectedQuote(null)}
-                className="mr-4"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Quotes
-              </Button>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                Quote #{selectedQuote.id} - {selectedQuote.customerName}
-              </h1>
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  onClick={() => setSelectedQuote(null)}
+                  className="mr-4"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Quotes
+                </Button>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Quote #{selectedQuote.id.slice(0, 8)} - {selectedQuote.customerName}
+                </h1>
+              </div>
+              <Badge className={getStatusColor(selectedQuote.status)}>
+                {selectedQuote.status.replace('_', ' ').toUpperCase()}
+              </Badge>
             </div>
           </div>
         </header>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <QuotePDF quote={selectedQuote} />
         </div>
       </div>
@@ -391,6 +397,16 @@ export default function AdminQuotes() {
                     </div>
 
                     <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedQuote(quote)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        View
+                      </Button>
+                      
                       <Select
                         value={quote.status}
                         onValueChange={(value) => handleStatusChange(quote.id, value)}

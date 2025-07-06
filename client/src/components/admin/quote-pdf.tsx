@@ -49,27 +49,75 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
     return serviceDescriptions[projectType as keyof typeof serviceDescriptions] || 'Complete irrigation system design and installation';
   };
 
-  const [items, setItems] = useState<QuoteItem[]>(
-    quote.items && Array.isArray(quote.items) && quote.items.length > 0 
-      ? quote.items.map((item: any) => ({
-          id: item.id || Math.random().toString(36).substr(2, 9),
-          name: item.name || `${quote.projectType} System`,
-          description: item.description || getServiceDescription(quote.projectType),
-          quantity: item.quantity || 1,
-          unit: item.unit || 'service',
-          unitPrice: parseFloat(item.unitPrice || quote.totalAmount || "0"),
-          total: parseFloat(item.total || quote.totalAmount || "0")
-        }))
-      : [{
-          id: '1',
-          name: `${quote.projectType} Service`,
-          description: getServiceDescription(quote.projectType),
-          quantity: 1,
-          unit: 'service',
-          unitPrice: parseFloat(quote.totalAmount || "0"),
-          total: parseFloat(quote.totalAmount || "0")
-        }]
-  );
+  const [items, setItems] = useState<QuoteItem[]>(() => {
+    if (quote.items && Array.isArray(quote.items) && quote.items.length > 0) {
+      return quote.items.map((item: any) => ({
+        id: item.id || Math.random().toString(36).substr(2, 9),
+        name: item.name || `${quote.projectType} System`,
+        description: item.description || getServiceDescription(quote.projectType),
+        quantity: item.quantity || 1,
+        unit: item.unit || 'service',
+        unitPrice: parseFloat(item.unitPrice || "0"),
+        total: parseFloat(item.total || item.unitPrice || "0")
+      }));
+    }
+    
+    // Default items based on project type
+    const defaultItems = [];
+    const basePrice = parseFloat(quote.totalAmount || "50000");
+    
+    if (quote.projectType === 'system_design') {
+      defaultItems.push({
+        id: '1',
+        name: 'System Design & Engineering',
+        description: 'Complete irrigation system design with technical drawings and specifications',
+        quantity: 1,
+        unit: 'system',
+        unitPrice: basePrice * 0.3,
+        total: basePrice * 0.3
+      });
+      defaultItems.push({
+        id: '2',
+        name: 'Site Survey & Analysis',
+        description: 'Professional site assessment and soil analysis',
+        quantity: 1,
+        unit: 'service',
+        unitPrice: basePrice * 0.2,
+        total: basePrice * 0.2
+      });
+    } else if (quote.projectType === 'installation') {
+      defaultItems.push({
+        id: '1',
+        name: 'Drip Irrigation System',
+        description: `Complete drip irrigation system for ${quote.areaSize} area`,
+        quantity: 1,
+        unit: 'system',
+        unitPrice: basePrice * 0.6,
+        total: basePrice * 0.6
+      });
+      defaultItems.push({
+        id: '2',
+        name: 'Installation & Setup',
+        description: 'Professional installation, testing, and commissioning',
+        quantity: 1,
+        unit: 'service',
+        unitPrice: basePrice * 0.4,
+        total: basePrice * 0.4
+      });
+    } else {
+      defaultItems.push({
+        id: '1',
+        name: `${quote.projectType} Service`,
+        description: getServiceDescription(quote.projectType),
+        quantity: 1,
+        unit: 'service',
+        unitPrice: basePrice,
+        total: basePrice
+      });
+    }
+    
+    return defaultItems;
+  });
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -179,10 +227,12 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
   };
 
   const handleSave = () => {
+    const subtotal = calculateSubtotal();
     const updatedQuoteData = {
       ...editedQuote,
       items: items,
-      totalAmount: calculateSubtotal().toString()
+      totalAmount: subtotal.toString(),
+      updatedAt: new Date().toISOString()
     };
     updateQuoteMutation.mutate(updatedQuoteData);
   };
