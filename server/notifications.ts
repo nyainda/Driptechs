@@ -42,8 +42,8 @@ Check your email for the detailed quote. Questions? Reply to this message!
 
   private static generateQuoteEmail(quote: Quote): string {
     // Calculate totals from items if available
-  const subtotal = quote.items && Array.isArray(quote.items) 
-    ? quote.items.reduce((sum: number, item: any) => sum + (item.total || 0), 0)
+  const subtotal = quote.items && Array.isArray(quote.items) && quote.items.length > 0
+    ? quote.items.reduce((sum: number, item: any) => sum + (parseFloat(item.total) || 0), 0)
     : parseFloat(quote.totalAmount || "0");
   const vat = subtotal * 0.16;
   const total = subtotal + vat;
@@ -75,8 +75,8 @@ Check your email for the detailed quote. Questions? Reply to this message!
           </td>
           <td style="padding: 12px 8px; text-align: center; font-weight: 500;">1</td>
           <td style="padding: 12px 8px; text-align: center; color: #6b7280;">system</td>
-          <td style="padding: 12px 8px; text-align: right; color: #374151;">KSh ${subtotal.toLocaleString()}</td>
-          <td style="padding: 12px 8px; text-align: right; font-weight: bold; color: #1f2937;">KSh ${subtotal.toLocaleString()}</td>
+          <td style="padding: 12px 8px; text-align: right; color: #374151;">KSh ${parseFloat(quote.totalAmount || "0").toLocaleString()}</td>
+          <td style="padding: 12px 8px; text-align: right; font-weight: bold; color: #1f2937;">KSh ${parseFloat(quote.totalAmount || "0").toLocaleString()}</td>
         </tr>
       `;
 

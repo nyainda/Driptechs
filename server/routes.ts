@@ -287,7 +287,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/admin/quotes/:id", authenticate, requireAdmin, async (req, res) => {
     try {
       const id = req.params.id;
-      const updateData = req.body;
+      const updateData = { ...req.body };
+      
+      // Remove timestamp fields that might come from frontend to avoid conflicts
+      delete updateData.createdAt;
+      delete updateData.updatedAt;
       
       // Calculate totals from items if items are provided
       if (updateData.items && Array.isArray(updateData.items)) {
@@ -318,7 +322,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.finalTotal = finalTotal.toString();
       }
       
-      // Add update timestamp
+      // Set proper update timestamp
       updateData.updatedAt = new Date();
       
       console.log("Updating quote with data:", updateData);
