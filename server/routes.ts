@@ -319,7 +319,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Add update timestamp
-      updateData.updatedAt = new Date().toISOString();
+      updateData.updatedAt = new Date();
       
       console.log("Updating quote with data:", updateData);
       
