@@ -2,6 +2,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import type { TeamMember } from "@shared/schema";
 import { 
   Award, 
   Leaf, 
@@ -13,7 +16,8 @@ import {
   CheckCircle,
   ArrowRight,
   Phone,
-  Mail
+  Mail,
+  Linkedin
 } from "lucide-react";
 
 export default function About() {
@@ -261,28 +265,81 @@ export default function About() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {team.map((member, index) => (
-              <Card key={index} className="text-center admin-card">
-                <CardHeader>
-                  <div className="w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <CardTitle className="text-lg">{member.name}</CardTitle>
-                  <p className="text-sm text-blue-600 font-medium">{member.position}</p>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {member.bio}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {teamLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Card key={i} className="text-center admin-card">
+                  <CardHeader>
+                    <div className="w-24 h-24 mx-auto mb-4 bg-gray-200 rounded-full animate-pulse" />
+                    <div className="h-4 bg-gray-200 rounded animate-pulse mb-2" />
+                    <div className="h-3 bg-gray-200 rounded animate-pulse" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="h-3 bg-gray-200 rounded animate-pulse mb-2" />
+                    <div className="h-3 bg-gray-200 rounded animate-pulse" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : team.length === 0 ? (
+            <div className="text-center py-12">
+              <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium mb-2">No team members yet</p>
+              <p className="text-muted-foreground">
+                Team members will appear here once they are added.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {team
+                .filter(member => member.active)
+                .sort((a, b) => (a.order || 0) - (b.order || 0))
+                .map((member, index) => (
+                <Card key={member.id} className="text-center admin-card">
+                  <CardHeader>
+                    <div className="w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full">
+                      <img
+                        src={member.image}
+                        alt={member.name}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=96&background=2563eb&color=fff`;
+                        }}
+                      />
+                    </div>
+                    <CardTitle className="text-lg">{member.name}</CardTitle>
+                    <p className="text-sm text-blue-600 font-medium">{member.position}</p>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {member.bio}
+                    </p>
+                    <div className="flex justify-center space-x-3">
+                      {member.email && (
+                        <a
+                          href={`mailto:${member.email}`}
+                          className="text-blue-600 hover:text-blue-700 transition-colors"
+                        >
+                          <Mail className="h-4 w-4" />
+                        </a>
+                      )}
+                      {member.linkedin && (
+                        <a
+                          href={member.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-700 transition-colors"
+                        >
+                          <Linkedin className="h-4 w-4" />
+                        </a>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Certifications */}

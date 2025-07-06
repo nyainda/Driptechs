@@ -62,6 +62,9 @@ export default function AdminTeam() {
     queryKey: ["/api/admin/team"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/admin/team");
+      if (!response.ok) {
+        throw new Error("Failed to fetch team members");
+      }
       return response.json();
     },
     enabled: !!token,

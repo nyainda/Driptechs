@@ -18,7 +18,8 @@ import {
   AlertCircle,
   LogOut,
   Settings,
-  Plus
+  Plus,
+  Trophy
 } from "lucide-react";
 import { Link } from "wouter";
 import type { Quote, Product, Contact } from "@shared/schema";
@@ -69,12 +70,12 @@ export default function AdminDashboard() {
     const quoteDate = new Date(q.createdAt!);
     return quoteDate.getMonth() === currentMonth && quoteDate.getFullYear() === currentYear;
   }) || [];
-  
+
   const serviceTypes = quotes?.reduce((acc, q) => {
     acc[q.projectType] = (acc[q.projectType] || 0) + 1;
     return acc;
   }, {} as Record<string, number>) || {};
-  
+
   const popularService = Object.entries(serviceTypes)
     .sort(([,a], [,b]) => b - a)[0]?.[0] || 'N/A';
 
@@ -296,7 +297,7 @@ export default function AdminDashboard() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card className="admin-card">
             <CardHeader>
               <CardTitle>Monthly Performance</CardTitle>
@@ -351,6 +352,18 @@ export default function AdminDashboard() {
                   <Button variant="outline" className="w-full justify-start">
                     <Users className="h-4 w-4 mr-2" />
                     Manage Team
+                  </Button>
+                </Link>
+                <Link href="/admin/success-stories">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Trophy className="h-4 w-4 mr-2" />
+                    Success Stories
+                  </Button>
+                </Link>
+                <Link href="/admin/settings">
+                  <Button variant="outline" className="w-full justify-start">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Settings
                   </Button>
                 </Link>
               </div>

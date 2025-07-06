@@ -1,10 +1,11 @@
 import { db } from "./db";
-import { users, products, quotes, projects, blogPosts, contacts, teamMembers } from "@shared/schema";
-import { eq } from "drizzle-orm";
+import { users, products, quotes, projects, blogPosts, contacts, teamMembers, successStories } from "@shared/schema";
+import { eq, asc } from "drizzle-orm";
 import { NotificationService } from "./notifications";
 import type { 
   Product, Quote, Project, BlogPost, Contact, User,
-  InsertProduct, InsertQuote, InsertProject, InsertBlogPost, InsertContact, InsertUser, TeamMember, InsertTeamMember
+  InsertProduct, InsertQuote, InsertProject, InsertBlogPost, InsertContact, InsertUser, TeamMember, InsertTeamMember,
+  SuccessStory, InsertSuccessStory
 } from "@shared/schema";
 
 export class Storage {
@@ -156,7 +157,7 @@ export class Storage {
 
   // Team Members
   async getTeamMembers(): Promise<TeamMember[]> {
-    return await db.select().from(teamMembers);
+    return await db.select().from(teamMembers).orderBy(asc(teamMembers.order), asc(teamMembers.createdAt));
   }
 
   async createTeamMember(data: InsertTeamMember): Promise<TeamMember> {
@@ -174,6 +175,28 @@ export class Storage {
 
   async deleteTeamMember(id: string): Promise<void> {
     await db.delete(teamMembers).where(eq(teamMembers.id, id));
+  }
+
+  // Success Stories
+  async getSuccessStories(): Promise<SuccessStory[]> {
+    return await db.select().from(successStories).orderBy(asc(successStories.completedDate));
+  }
+
+  async createSuccessStory(data: InsertSuccessStory): Promise<SuccessStory> {
+    const [story] = await db.insert(successStories).values(data).returning();
+    return story;
+  }
+
+  async updateSuccessStory(id: string, data: Partial<InsertSuccessStory>): Promise<SuccessStory> {
+    const [story] = await db.update(successStories)
+      .set(data)
+      .where(eq(successStories.id, id))
+      .returning();
+    return story;
+  }
+
+  async deleteSuccessStory(id: string): Promise<void> {
+    await db.delete(successStories).where(eq(successStories.id, id));
   }
 }
 

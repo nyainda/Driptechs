@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { 
   insertProductSchema, insertQuoteSchema, insertProjectSchema, 
   insertBlogPostSchema, insertContactSchema, insertTeamMemberSchema, 
-  loginSchema, insertUserSchema 
+  insertSuccessStorySchema, loginSchema, insertUserSchema 
 } from "@shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -549,6 +549,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Team member deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete team member" });
+    }
+  });
+
+  // Success Stories routes
+  app.get("/api/success-stories", async (req, res) => {
+    try {
+      const stories = await storage.getSuccessStories();
+      // Only return active stories for public view
+      const activeStories = stories.filter(s => s.active);
+      res.json(activeStories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch success stories" });
+    }
+  });
+
+  app.get("/api/admin/success-stories", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const stories = await storage.getSuccessStories();
+      res.json(stories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch success stories" });
+    }
+  });
+
+  app.post("/api/admin/success-stories", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const storyData = insertSuccessStorySchema.parse(req.body);
+      const story = await storage.createSuccessStory(storyData);
+      res.json(story);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid success story data" });
+    }
+  });
+
+  app.put("/api/admin/success-stories/:id", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const updateData = req.body;
+      const story = await storage.updateSuccessStory(id, updateData);
+      res.json(story);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to update success story" });
+    }
+  });
+
+  app.delete("/api/admin/success-stories/:id", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const id = req.params.id;
+      await storage.deleteSuccessStory(id);
+      res.json({ message: "Success story deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete success story" });
     }
   });
 

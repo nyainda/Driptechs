@@ -118,6 +118,24 @@ export const teamMembers = pgTable("team_members", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+export const successStories = pgTable("success_stories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  client: text("client").notNull(),
+  description: text("description").notNull(),
+  projectType: text("project_type").notNull(),
+  location: text("location").notNull(),
+  areaSize: text("area_size").notNull(),
+  waterSavings: text("water_savings"),
+  yieldIncrease: text("yield_increase"),
+  image: text("image").notNull(),
+  completedDate: text("completed_date").notNull(),
+  featured: boolean("featured").default(false),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schema validation
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
@@ -157,6 +175,12 @@ export const insertContactSchema = createInsertSchema(contacts).omit({
 });
 
 export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSuccessStorySchema = createInsertSchema(successStories).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
@@ -203,4 +227,6 @@ export type Contact = typeof contacts.$inferSelect;
 export type InsertContact = z.infer<typeof insertContactSchema>;
 export type TeamMember = typeof teamMembers.$inferSelect;
 export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
+export type SuccessStory = typeof successStories.$inferSelect;
+export type InsertSuccessStory = z.infer<typeof insertSuccessStorySchema>;
 export type LoginData = z.infer<typeof loginSchema>;

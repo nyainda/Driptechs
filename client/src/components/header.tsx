@@ -2,8 +2,16 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/theme-provider";
-import { Droplets, Sun, Moon, Menu, X, Phone, Mail } from "lucide-react";
+import { Droplets, Sun, Moon, Menu, X, Phone, Mail, Settings } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   const { theme, toggleTheme } = useTheme();
@@ -55,6 +63,39 @@ export default function Header() {
                 {item.label}
               </Link>
             ))}
+             <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost">Products</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56">
+                    <DropdownMenuLabel>Categories</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/products?category=drip" className="flex items-center">
+                        <Droplets className="mr-2 h-4 w-4" />
+                        Drip Irrigation
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/products?category=sprinkler" className="flex items-center">
+                        <Droplets className="mr-2 h-4 w-4" />
+                        Sprinkler Systems
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/products?category=fertigation" className="flex items-center">
+                        <Droplets className="mr-2 h-4 w-4" />
+                        Fertigation Systems
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/products?category=accessories" className="flex items-center">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Accessories
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
           </nav>
 
           {/* Contact Info & Actions */}
