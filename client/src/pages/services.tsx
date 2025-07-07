@@ -12,7 +12,8 @@ import {
   CheckCircle,
   ArrowRight,
   Phone,
-  Mail
+  Mail,
+  MessageCircle // Added for WhatsApp
 } from "lucide-react";
 
 export default function Services() {
@@ -73,7 +74,7 @@ export default function Services() {
         "Emergency repairs",
         "Performance optimization",
         "Parts replacement",
-        "System upgrades"
+        "System-updates"
       ],
       process: [
         "Maintenance scheduling",
@@ -228,7 +229,7 @@ export default function Services() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Basic Package */}
-            <Card className="relative admin-card">
+            <Card className="admin-card">
               <CardHeader className="text-center">
                 <Badge className="mx-auto mb-4">Basic</Badge>
                 <CardTitle className="text-2xl">Essential Services</CardTitle>
@@ -370,7 +371,7 @@ export default function Services() {
 
         {/* Call to Action */}
         <div className="text-center">
-          <Card className="max-w-2xl mx-auto quote-form">
+          <Card className="max-w-3xl mx-auto quote-form">
             <CardContent className="p-8 text-white">
               <h3 className="text-2xl font-bold mb-4">
                 Ready to Get Started?
@@ -391,14 +392,29 @@ export default function Services() {
                   </Button>
                 </Link>
               </div>
-              <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center text-sm">
-                <div className="flex items-center justify-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  <span>+254 700 123 456</span>
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 justify-items-center text-sm">
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">+254 111 409 454</span>
                 </div>
-                <div className="flex items-center justify-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  <span>info@driptech.co.ke</span>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">+254 114 575 401</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">driptechs.info@gmail.com</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4 flex-shrink-0" />
+                  <a 
+                    href="https://wa.me/254111409454" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="truncate hover:text-blue-300 transition-colors"
+                  >
+                    Chat on WhatsApp
+                  </a>
                 </div>
               </div>
             </CardContent>

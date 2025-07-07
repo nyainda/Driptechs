@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,6 +31,8 @@ interface QuotePDFProps {
 export default function QuotePDF({ quote }: QuotePDFProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedQuote, setEditedQuote] = useState(quote);
+  const [isUpdating, setIsUpdating] = useState(false);
+  
   const getServiceDescription = (projectType: string) => {
     const serviceDescriptions = {
       'system_design': 'Custom irrigation system design and planning',
@@ -44,7 +45,8 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
       'commercial': 'Commercial irrigation system design and installation',
       'agricultural': 'Agricultural irrigation system for farming',
       'landscape': 'Landscape irrigation system design',
-      'greenhouse': 'Greenhouse irrigation system setup'
+      'greenhouse': 'Greenhouse irrigation system setup',
+      'orchard': 'Orchard irrigation system design and installation'
     };
     return serviceDescriptions[projectType as keyof typeof serviceDescriptions] || 'Complete irrigation system design and installation';
   };
@@ -132,6 +134,34 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
         unitPrice: basePrice,
         total: basePrice
       });
+    } else if (quote.projectType === 'orchard') {
+      defaultItems.push({
+        id: '1',
+        name: 'Orchard Irrigation System',
+        description: 'Complete drip irrigation system for orchard/fruit trees',
+        quantity: 1,
+        unit: 'system',
+        unitPrice: basePrice * 0.6,
+        total: basePrice * 0.6
+      });
+      defaultItems.push({
+        id: '2',
+        name: 'Installation & Setup',
+        description: 'Professional installation and system commissioning',
+        quantity: 1,
+        unit: 'service',
+        unitPrice: basePrice * 0.25,
+        total: basePrice * 0.25
+      });
+      defaultItems.push({
+        id: '3',
+        name: 'Training & Support',
+        description: 'User training and 6-month support package',
+        quantity: 1,
+        unit: 'service',
+        unitPrice: basePrice * 0.15,
+        total: basePrice * 0.15
+      });
     } else {
       defaultItems.push({
         id: '1',
@@ -152,21 +182,42 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
 
   const updateQuoteMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest("PUT", `/api/admin/quotes/${quote.id}`, data);
-      return response.json();
+      console.log('Sending update request with data:', data);
+      setIsUpdating(true);
+      
+      try {
+        const response = await apiRequest("PUT", `/api/admin/quotes/${quote.id}`, data);
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          console.error('Update failed with response:', errorData);
+          throw new Error(`Update failed: ${response.status} ${response.statusText} - ${errorData}`);
+        }
+        
+        return response.json();
+      } catch (error) {
+        console.error('Update request failed:', error);
+        throw error;
+      } finally {
+        setIsUpdating(false);
+      }
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('Update successful:', data);
       queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
       toast({
         title: "Quote Updated",
         description: "Quote has been updated successfully.",
       });
       setIsEditing(false);
+      // Update the local state with the returned data
+      setEditedQuote(data);
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Update mutation error:', error);
       toast({
         title: "Error",
-        description: "Failed to update quote. Please try again.",
+        description: `Failed to update quote: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     },
@@ -174,7 +225,12 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
 
   const sendQuoteMutation = useMutation({
     mutationFn: async () => {
-      await apiRequest("POST", `/api/admin/quotes/${quote.id}/send`);
+      const response = await apiRequest("POST", `/api/admin/quotes/${quote.id}/send`);
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Send failed: ${response.status} ${response.statusText} - ${errorData}`);
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
@@ -183,10 +239,11 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
         description: "Quote has been successfully sent to the customer.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error('Send quote error:', error);
       toast({
         title: "Error",
-        description: "Failed to send quote. Please try again.",
+        description: `Failed to send quote: ${error.message || 'Unknown error'}`,
         variant: "destructive",
       });
     },
@@ -207,6 +264,8 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
         return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
       case "cancelled":
         return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
+      case "sent":
+        return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
     }
@@ -274,14 +333,28 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
     const vat = calculateVAT();
     const total = calculateTotal();
     
+    // Prepare the update data - only include fields that should be updated
     const updatedQuoteData = {
-      ...editedQuote,
-      items: items,
+      customerName: editedQuote.customerName,
+      customerEmail: editedQuote.customerEmail,
+      customerPhone: editedQuote.customerPhone,
+      location: editedQuote.location,
+      items: items.map(item => ({
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        quantity: item.quantity,
+        unit: item.unit,
+        unitPrice: item.unitPrice,
+        total: item.total
+      })),
       totalAmount: subtotal.toString(),
       vatAmount: vat.toString(),
       finalTotal: total.toString(),
-      updatedAt: new Date().toISOString()
+      // Don't include createdAt, updatedAt will be set by backend
     };
+    
+    console.log('Preparing to update quote with data:', updatedQuoteData);
     updateQuoteMutation.mutate(updatedQuoteData);
   };
 

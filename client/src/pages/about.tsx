@@ -17,7 +17,8 @@ import {
   ArrowRight,
   Phone,
   Mail,
-  Linkedin
+  Linkedin,
+  MessageCircle
 } from "lucide-react";
 
 export default function About() {
@@ -149,16 +150,16 @@ export default function About() {
               </h2>
               <div className="space-y-4 text-muted-foreground">
                 <p>
-                  Founded in 2009, DripTech began as a small irrigation consultancy with a 
+                  Founded in 2024, DripTech began as a forward-thinking irrigation consultancy with a 
                   vision to transform Kenyan agriculture through smart water management. 
                   Our founders, experienced agricultural engineers, recognized the critical 
                   need for efficient irrigation solutions in Kenya's diverse farming landscape.
                 </p>
                 <p>
-                  Over the past 15 years, we have grown from a team of 3 to over 50 dedicated 
-                  professionals, completing more than 500 projects across Kenya. Our success 
-                  is built on a foundation of technical expertise, innovative solutions, and 
-                  unwavering commitment to our clients' success.
+                  Since our inception, we have quickly grown from a small team to a dedicated 
+                  group of professionals, delivering innovative irrigation solutions across Kenya. 
+                  Our success is built on a foundation of technical expertise, innovative solutions, 
+                  and unwavering commitment to our clients' success.
                 </p>
                 <p>
                   Today, DripTech stands as Kenya's premier irrigation solutions provider, 
@@ -175,46 +176,12 @@ export default function About() {
                       <Award className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-xl font-bold">2009</h3>
+                      <h3 className="text-xl font-bold">2024</h3>
                       <p className="text-muted-foreground">Company Founded</p>
                     </div>
                   </div>
                   <p className="text-sm text-muted-foreground">
                     Started with a vision to revolutionize irrigation in Kenya
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="admin-card">
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
-                      <Users className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold">2015</h3>
-                      <p className="text-muted-foreground">Major Expansion</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Expanded operations to serve commercial agriculture sector
-                  </p>
-                </CardContent>
-              </Card>
-
-              <Card className="admin-card">
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-4 mb-4">
-                    <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center">
-                      <Globe className="h-6 w-6 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-bold">2024</h3>
-                      <p className="text-muted-foreground">Market Leader</p>
-                    </div>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Recognized as Kenya's leading irrigation technology company
                   </p>
                 </CardContent>
               </Card>
@@ -374,7 +341,7 @@ export default function About() {
 
         {/* Call to Action */}
         <div className="text-center">
-          <Card className="max-w-2xl mx-auto quote-form">
+          <Card className="max-w-3xl mx-auto quote-form">
             <CardContent className="p-8 text-white">
               <h3 className="text-2xl font-bold mb-4">
                 Ready to Partner with Us?
@@ -395,14 +362,29 @@ export default function About() {
                   </Button>
                 </Link>
               </div>
-              <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center text-sm">
-                <div className="flex items-center justify-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  <span>+254 700 123 456</span>
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 justify-items-center text-sm">
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">+254 111 409 454</span>
                 </div>
-                <div className="flex items-center justify-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  <span>info@driptech.co.ke</span>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">+254 114 575 401</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 flex-shrink-0" />
+                  <span className="truncate">driptechs.info@gmail.com</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MessageCircle className="h-4 w-4 flex-shrink-0" />
+                  <a 
+                    href="https://wa.me/254111409454" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="truncate hover:text-blue-300 transition-colors"
+                  >
+                    Chat on WhatsApp
+                  </a>
                 </div>
               </div>
             </CardContent>

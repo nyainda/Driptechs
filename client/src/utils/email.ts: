@@ -1,0 +1,256 @@
+
+import nodemailer from 'nodemailer';
+import { Quote } from '@shared/schema';
+
+// Email configuration
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'driptechs.info@gmail.com',
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
+
+// Email template generator (same as provided)
+const generateQuoteEmailHTML = (quote: Quote, items: any[], subtotal: number, vat: number, total: number) => {
+  const formatCurrency = (amount: number) => `KSh ${amount.toLocaleString()}`;
+  
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Your DripTech Irrigation Quote</title>
+      <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #2563eb, #16a34a); color: white; padding: 30px; text-align: center; border-radius: 10px; margin-bottom: 30px; }
+        .header h1 { margin: 0; font-size: 32px; }
+        .header p { margin: 10px 0 0 0; font-size: 16px; opacity: 0.9; }
+        .quote-info { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; }
+        .quote-info h2 { color: #2563eb; margin-top: 0; }
+        .customer-section { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px; }
+        .section-title { font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #1f2937; }
+        .info-grid { display: grid; grid-template-columns: 120px 1fr; gap: 8px; }
+        .info-label { font-weight: 600; color: #374151; }
+        .items-table { width: 100%; border-collapse: collapse; margin: 30px 0; }
+        .items-table th, .items-table td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; }
+        .items-table th { background-color: #f9fafb; font-weight: 600; color: #374151; }
+        .item-name { font-weight: 600; color: #1f2937; }
+        .item-description { font-size: 14px; color: #6b7280; margin-top: 4px; }
+        .text-right { text-align: right; }
+        .totals-section { margin-left: auto; width: 300px; margin-top: 30px; }
+        .total-row { display: flex; justify-content: space-between; padding: 8px 0; }
+        .total-final { font-weight: bold; font-size: 18px; border-top: 2px solid #374151; padding-top: 12px; margin-top: 8px; }
+        .cta-section { background: #eff6ff; border: 1px solid #dbeafe; padding: 25px; border-radius: 8px; margin: 30px 0; text-align: center; }
+        .cta-button { display: inline-block; background: #2563eb; color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; margin: 10px; }
+        .cta-button:hover { background: #1d4ed8; }
+        .contact-info { background: #f9fafb; padding: 20px; border-radius: 8px; margin-top: 30px; }
+        .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .contact-item { text-align: center; }
+        .contact-item h4 { margin: 0 0 8px 0; color: #2563eb; }
+        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 14px; }
+        @media (max-width: 600px) {
+          .customer-section { grid-template-columns: 1fr; }
+          .contact-grid { grid-template-columns: 1fr; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="header">
+        <h1>🌱 DripTech Irrigation</h1>
+        <p>Your Professional Irrigation Quote is Ready!</p>
+      </div>
+
+      <div style="margin-bottom: 30px;">
+        <h2>Dear ${quote.customerName},</h2>
+        <p>Thank you for your interest in our irrigation solutions. We're excited to present you with a customized quote for your <strong>${quote.projectType}</strong> project.</p>
+      </div>
+
+      <div class="quote-info">
+        <h2>Quote Summary</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+          <div>
+            <strong>Quote #:</strong> ${quote.id.slice(0, 8)}<br>
+            <strong>Date:</strong> ${new Date(quote.createdAt!).toLocaleDateString()}<br>
+            <strong>Valid Until:</strong> ${new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}
+          </div>
+          <div>
+            <strong>Project Type:</strong> ${quote.projectType}<br>
+            <strong>Area Size:</strong> ${quote.areaSize}<br>
+            <strong>Location:</strong> ${quote.location}
+          </div>
+        </div>
+      </div>
+
+      ${quote.requirements ? `
+        <div style="margin-bottom: 30px;">
+          <h3>Your Requirements:</h3>
+          <div style="background: #eff6ff; border-left: 4px solid #2563eb; padding: 15px; margin: 10px 0;">
+            <p style="margin: 0;">${quote.requirements}</p>
+          </div>
+        </div>
+      ` : ''}
+
+      <div style="margin-bottom: 30px;">
+        <h3>Materials & Services Included:</h3>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th style="text-align: center;">Qty</th>
+              <th style="text-align: center;">Unit</th>
+              <th style="text-align: right;">Unit Price</th>
+              <th style="text-align: right;">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${items.map(item => `
+              <tr>
+                <td>
+                  <div class="item-name">${item.name}</div>
+                  <div class="item-description">${item.description}</div>
+                </td>
+                <td style="text-align: center;">${item.quantity}</td>
+                <td style="text-align: center;">${item.unit}</td>
+                <td style="text-align: right;">${formatCurrency(item.unitPrice)}</td>
+                <td style="text-align: right;">${formatCurrency(item.total)}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; justify-content: end;">
+        <div class="totals-section">
+          <div class="total-row">
+            <span>Subtotal:</span>
+            <span>${formatCurrency(subtotal)}</span>
+          </div>
+          <div class="total-row">
+            <span>VAT (16%):</span>
+            <span>${formatCurrency(vat)}</span>
+          </div>
+          <div class="total-row total-final">
+            <span>Total Amount:</span>
+            <span style="color: #2563eb;">${formatCurrency(total)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-section">
+        <h3 style="margin-top: 0; color: #2563eb;">Ready to Transform Your Irrigation?</h3>
+        <p>Our team is ready to bring your irrigation project to life with professional installation and ongoing support.</p>
+        <a href="tel:+254111409454" class="cta-button">📞 Call Us Now</a>
+        <a href="mailto:driptechs.info@gmail.com" class="cta-button">📧 Reply to Quote</a>
+      </div>
+
+      <div style="margin: 30px 0;">
+        <h3>What's Included:</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 8px 0;">✅ Complete system design and installation</li>
+          <li style="margin: 8px 0;">✅ Professional testing and commissioning</li>
+          <li style="margin: 8px 0;">✅ User training and operation guidance</li>
+          <li style="margin: 8px 0;">✅ 12-month service guarantee</li>
+          <li style="margin: 8px 0;">✅ Free maintenance visit within 6 months</li>
+          <li style="margin: 8px 0;">✅ Manufacturer's warranty on all equipment</li>
+        </ul>
+      </div>
+
+      <div style="margin: 30px 0;">
+        <h3>Next Steps:</h3>
+        <ol style="line-height: 1.8;">
+          <li><strong>Review the quote</strong> and let us know if you have any questions</li>
+          <li><strong>Schedule a site visit</strong> for final measurements and planning</li>
+          <li><strong>Confirm your order</strong> with a 50% deposit</li>
+          <li><strong>Installation begins</strong> within 7-14 days after confirmation</li>
+          <li><strong>Enjoy your new irrigation system!</strong></li>
+        </ol>
+      </div>
+
+      <div class="contact-info">
+        <h3 style="text-align: center; margin-top: 0;">Contact Our Team</h3>
+        <div class="contact-grid">
+          <div class="contact-item">
+            <h4>📞 Primary Contact</h4>
+            <p>+254 111 409 454</p>
+          </div>
+          <div class="contact-item">
+            <h4>📱 Secondary Contact</h4>
+            <p>+254 114 575 401</p>
+          </div>
+          <div class="contact-item">
+            <h4>📧 Email</h4>
+            <p>driptechs.info@gmail.com</p>
+          </div>
+          <div class="contact-item">
+            <h4>📍 Location</h4>
+            <p>Nairobi Industrial Area, Kenya</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="background: #f0f9ff; border: 1px solid #0284c7; padding: 20px; border-radius: 8px; margin: 30px 0;">
+        <h4 style="color: #0284c7; margin-top: 0;">💡 Why Choose DripTech?</h4>
+        <ul style="margin: 0; padding-left: 20px;">
+          <li>Over 5 years of irrigation expertise in Kenya</li>
+          <li>Customized solutions for every project size</li>
+          <li>Professional installation and ongoing support</li>
+          <li>Water-efficient systems that save you money</li>
+          <li>Local team with deep understanding of Kenyan agriculture</li>
+        </ul>
+      </div>
+
+      <div class="footer">
+        <p><strong>This quote is valid for 30 days from the date of issue.</strong></p>
+        <p>Thank you for considering DripTech for your irrigation needs. We look forward to working with you!</p>
+        <p style="font-size: 12px; margin-top: 20px;">
+          This email was sent from DripTech Irrigation Systems. If you have any questions, please don't hesitate to contact us.
+        </p>
+      </div>
+    </body>
+    </html>
+  `;
+};
+
+// Placeholder for PDF generation
+const generateQuotePDF = (quote: Quote, items: any[], subtotal: number, vat: number, total: number) => {
+  // Implement PDF generation logic here (e.g., using pdfkit or a similar library)
+  // For now, return a dummy Buffer
+  return Buffer.from('PDF placeholder');
+};
+
+export const sendQuoteEmail = async (quote: Quote) => {
+  try {
+    // Calculate totals
+    const items = quote.items || [];
+    const subtotal = items.reduce((sum: number, item: any) => sum + (item.total || 0), 0);
+    const vat = subtotal * 0.16;
+    const total = subtotal + vat;
+
+    // Email options
+    const mailOptions = {
+      from: {
+        name: 'DripTech Irrigation',
+        address: 'driptechs.info@gmail.com',
+      },
+      to: quote.customerEmail,
+      subject: `Your DripTech Irrigation Quote #${quote.id.slice(0, 8)} - ${quote.projectType}`,
+      html: generateQuoteEmailHTML(quote, items, subtotal, vat, total),
+      attachments: [
+        {
+          filename: `DripTech-Quote-${quote.id.slice(0, 8)}.pdf`,
+          content: generateQuotePDF(quote, items, subtotal, vat, total),
+          contentType: 'application/pdf',
+        },
+      ],
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+    return { success: true, sentTo: quote.customerEmail };
+  } catch (error) {
+    console.error('Email sending error:', error);
+    throw new Error('Failed to send email');
+  }
+};

@@ -8,7 +8,7 @@ import {
 } from "@shared/schema";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-
+import { sql } from 'drizzle-orm';
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Authentication middleware
@@ -37,6 +37,29 @@ const requireAdmin = (req: any, res: any, next: any) => {
 };
 
 export async function registerRoutes(app: Express): Promise<Server> {
+
+
+  // Health check endpoint to keep database alive
+app.get("/api/health", async (req, res) => {
+  try {
+    // Simple query to keep database connection alive
+    await storage.getUsers?.(); // Or use another lightweight query like getProducts()
+    res.json({ 
+      status: 'ok', 
+      database: 'connected',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime()
+    });
+  } catch (error) {
+    console.error('Health check failed:', error);
+    res.status(500).json({ 
+      status: 'error', 
+      database: 'disconnected',
+      message: 'Database connection failed',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
   
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
@@ -221,7 +244,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         updateData.password = await bcrypt.hash(updateData.password, 10);
       }
       
-      const user = await storage.updateUser(id, updateData);
+      const user = await storage.updateUser(id.toString(), updateData);
       
       // Remove password from response
       const { password, ...safeUser } = user;
@@ -233,10 +256,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete("/api/admin/users/:id", authenticate, requireAdmin, async (req: any, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       
       // Prevent deleting own account
-      if (id === req.user.id) {
+      if (id === req.user.id.toString()) {
         return res.status(400).json({ message: "Cannot delete your own account" });
       }
       
@@ -275,7 +298,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get("/api/admin/quotes/:id", authenticate, requireAdmin, async (req, res) => {
     try {
-      const quote = await storage.getQuote(parseInt(req.params.id));
+      const quote = await storage.getQuote(req.params.id);
       if (!quote) {
         return res.status(404).json({ message: "Quote not found" });
       }

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -9,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { getAuthToken, getUser } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
@@ -27,18 +26,35 @@ import {
   Mail,
   Linkedin
 } from "lucide-react";
-import { Link } from "wouter";
-import type { TeamMember } from "@shared/schema";
 
+// Define TeamMember type to match backend schema
+export type TeamMember = {
+  id: string;
+  name: string;
+  position: string;
+  bio: string;
+  image: string;
+  email: string | null;
+  linkedin: string | null;
+  order: number;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// Zod schema aligned with backend pgTable schema
 const teamMemberSchema = z.object({
   name: z.string().min(1, "Name is required"),
   position: z.string().min(1, "Position is required"),
   bio: z.string().min(1, "Bio is required"),
-  image: z.string().url("Must be a valid URL"),
-  email: z.string().email().optional().or(z.literal("")),
-  linkedin: z.string().optional(),
-  order: z.number().min(0).optional(),
-  active: z.boolean().optional(),
+  image: z.string().min(1, "Image URL is required"),
+  email: z.string().email("Invalid email").optional(),
+  linkedin: z.string().optional().refine(
+    (val) => !val || /^https:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9\-_]+\/?$/.test(val),
+    { message: "Invalid LinkedIn URL. Must be like https://www.linkedin.com/in/username" }
+  ),
+  order: z.number().int().min(0).default(0),
+  active: z.boolean().default(true),
 });
 
 export default function AdminTeam() {
@@ -58,7 +74,7 @@ export default function AdminTeam() {
     return null;
   }
 
-  const { data: teamMembers, isLoading } = useQuery<TeamMember[]>({
+  const { data: teamMembers = [], isLoading } = useQuery<TeamMember[]>({
     queryKey: ["/api/admin/team"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/admin/team");
@@ -70,15 +86,15 @@ export default function AdminTeam() {
     enabled: !!token,
   });
 
-  const form = useForm({
+  const form = useForm<z.infer<typeof teamMemberSchema>>({
     resolver: zodResolver(teamMemberSchema),
     defaultValues: {
       name: "",
       position: "",
       bio: "",
       image: "",
-      email: "",
-      linkedin: "",
+      email: undefined,
+      linkedin: undefined,
       order: 0,
       active: true,
     },
@@ -87,13 +103,13 @@ export default function AdminTeam() {
   useEffect(() => {
     if (editingMember) {
       form.reset({
-        name: editingMember.name,
-        position: editingMember.position,
-        bio: editingMember.bio,
-        image: editingMember.image,
-        email: editingMember.email || "",
-        linkedin: editingMember.linkedin || "",
-        order: editingMember.order || 0,
+        name: editingMember.name || "",
+        position: editingMember.position || "",
+        bio: editingMember.bio || "",
+        image: editingMember.image || "",
+        email: editingMember.email || undefined,
+        linkedin: editingMember.linkedin || undefined,
+        order: editingMember.order ?? 0,
         active: editingMember.active ?? true,
       });
     } else {
@@ -102,8 +118,8 @@ export default function AdminTeam() {
         position: "",
         bio: "",
         image: "",
-        email: "",
-        linkedin: "",
+        email: undefined,
+        linkedin: undefined,
         order: 0,
         active: true,
       });
@@ -111,8 +127,13 @@ export default function AdminTeam() {
   }, [editingMember, form]);
 
   const createMutation = useMutation({
-    mutationFn: async (data: any) => {
+    mutationFn: async (data: z.infer<typeof teamMemberSchema>) => {
+      console.log("Submitting data:", data); // Debug log
       const response = await apiRequest("POST", "/api/admin/team", data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create team member");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -126,18 +147,23 @@ export default function AdminTeam() {
         description: "Team member has been successfully added.",
       });
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to create team member. Please try again.",
+        description: error.message || "Failed to create team member. Please try again.",
         variant: "destructive",
       });
     },
   });
 
   const updateMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: any }) => {
+    mutationFn: async ({ id, data }: { id: string; data: z.infer<typeof teamMemberSchema> }) => {
+      console.log("Updating data:", data); // Debug log
       const response = await apiRequest("PUT", `/api/admin/team/${id}`, data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update team member");
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -151,10 +177,10 @@ export default function AdminTeam() {
         description: "Team member has been successfully updated.",
       });
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to update team member. Please try again.",
+        description: error.message || "Failed to update team member. Please try again.",
         variant: "destructive",
       });
     },
@@ -162,7 +188,11 @@ export default function AdminTeam() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await apiRequest("DELETE", `/api/admin/team/${id}`);
+      const response = await apiRequest("DELETE", `/api/admin/team/${id}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to delete team member");
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/team"] });
@@ -172,19 +202,19 @@ export default function AdminTeam() {
         description: "Team member has been successfully removed.",
       });
     },
-    onError: () => {
+    onError: (error) => {
       toast({
         title: "Error",
-        description: "Failed to delete team member. Please try again.",
+        description: error.message || "Failed to delete team member. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  const filteredMembers = teamMembers?.filter((member) =>
+  const filteredMembers = teamMembers.filter((member) =>
     member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     member.position.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  );
 
   const handleEdit = (member: TeamMember) => {
     setEditingMember(member);
@@ -197,11 +227,16 @@ export default function AdminTeam() {
     }
   };
 
-  const onSubmit = (data: any) => {
+  const onSubmit = (data: z.infer<typeof teamMemberSchema>) => {
     const cleanData = {
-      ...data,
-      email: data.email || null,
-      linkedin: data.linkedin || null,
+      name: data.name,
+      position: data.position,
+      bio: data.bio,
+      image: data.image,
+      email: data.email || undefined,
+      linkedin: data.linkedin || undefined,
+      order: data.order ?? 0,
+      active: data.active ?? true,
     };
 
     if (editingMember) {
@@ -251,7 +286,7 @@ export default function AdminTeam() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Total Members</p>
-                  <p className="text-3xl font-bold">{teamMembers?.length || 0}</p>
+                  <p className="text-3xl font-bold">{teamMembers.length}</p>
                 </div>
                 <Users className="h-8 w-8 text-blue-600" />
               </div>
@@ -263,7 +298,7 @@ export default function AdminTeam() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Active Members</p>
                   <p className="text-3xl font-bold">
-                    {teamMembers?.filter(m => m.active).length || 0}
+                    {teamMembers.filter(m => m.active).length}
                   </p>
                 </div>
                 <Badge className="bg-green-100 text-green-800">Active</Badge>
@@ -276,7 +311,7 @@ export default function AdminTeam() {
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Departments</p>
                   <p className="text-3xl font-bold">
-                    {new Set(teamMembers?.map(m => m.position.split(' ').pop())).size || 0}
+                    {new Set(teamMembers.map(m => m.position.split(' ').pop())).size}
                   </p>
                 </div>
                 <Users className="h-8 w-8 text-purple-600" />
@@ -323,7 +358,7 @@ export default function AdminTeam() {
               <div className="text-center py-12">
                 <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">
-                  {teamMembers?.length === 0 ? "No team members added yet." : "No members found matching your search."}
+                  {teamMembers.length === 0 ? "No team members added yet." : "No members found matching your search."}
                 </p>
                 <Button
                   onClick={() => {
@@ -346,8 +381,7 @@ export default function AdminTeam() {
                         alt={member.name}
                         className="h-16 w-16 object-cover rounded-full"
                         onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=64&background=2563eb&color=fff`;
+                          (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&size=64&background=2563eb&color=fff`;
                         }}
                       />
                       <div className="flex-1">
@@ -376,7 +410,7 @@ export default function AdminTeam() {
                             </div>
                           )}
                           <span className="text-xs text-muted-foreground">
-                            Order: {member.order || 0}
+                            Order: {member.order}
                           </span>
                         </div>
                       </div>
@@ -407,7 +441,13 @@ export default function AdminTeam() {
       </div>
 
       {/* Form Dialog */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
+      <Dialog open={showForm} onOpenChange={(open) => {
+        setShowForm(open);
+        if (!open) {
+          setEditingMember(null);
+          form.reset();
+        }
+      }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
@@ -423,7 +463,7 @@ export default function AdminTeam() {
                   {...form.register("name")}
                   placeholder="Full name"
                 />
-                {form.formState.errors.name && (
+                {form.formState.errors.name?.message && (
                   <p className="text-sm text-red-600">{form.formState.errors.name.message}</p>
                 )}
               </div>
@@ -434,7 +474,7 @@ export default function AdminTeam() {
                   {...form.register("position")}
                   placeholder="Job title"
                 />
-                {form.formState.errors.position && (
+                {form.formState.errors.position?.message && (
                   <p className="text-sm text-red-600">{form.formState.errors.position.message}</p>
                 )}
               </div>
@@ -448,7 +488,7 @@ export default function AdminTeam() {
                 placeholder="Brief description of background and expertise"
                 rows={3}
               />
-              {form.formState.errors.bio && (
+              {form.formState.errors.bio?.message && (
                 <p className="text-sm text-red-600">{form.formState.errors.bio.message}</p>
               )}
             </div>
@@ -460,7 +500,7 @@ export default function AdminTeam() {
                 {...form.register("image")}
                 placeholder="https://example.com/image.jpg"
               />
-              {form.formState.errors.image && (
+              {form.formState.errors.image?.message && (
                 <p className="text-sm text-red-600">{form.formState.errors.image.message}</p>
               )}
             </div>
@@ -474,7 +514,7 @@ export default function AdminTeam() {
                   {...form.register("email")}
                   placeholder="email@company.com"
                 />
-                {form.formState.errors.email && (
+                {form.formState.errors.email?.message && (
                   <p className="text-sm text-red-600">{form.formState.errors.email.message}</p>
                 )}
               </div>
@@ -483,8 +523,11 @@ export default function AdminTeam() {
                 <Input
                   id="linkedin"
                   {...form.register("linkedin")}
-                  placeholder="https://linkedin.com/in/profile"
+                  placeholder="https://www.linkedin.com/in/username"
                 />
+                {form.formState.errors.linkedin?.message && (
+                  <p className="text-sm text-red-600">{form.formState.errors.linkedin.message}</p>
+                )}
               </div>
             </div>
 
@@ -497,11 +540,15 @@ export default function AdminTeam() {
                   {...form.register("order", { valueAsNumber: true })}
                   placeholder="0"
                 />
+                {form.formState.errors.order?.message && (
+                  <p className="text-sm text-red-600">{form.formState.errors.order.message}</p>
+                )}
               </div>
               <div className="flex items-center space-x-2">
                 <Switch
                   id="active"
                   {...form.register("active")}
+                  defaultChecked={true}
                 />
                 <Label htmlFor="active">Active</Label>
               </div>

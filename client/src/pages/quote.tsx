@@ -108,18 +108,13 @@ export default function Quote() {
   return (
     <div className="min-h-screen bg-background py-20">
       <div className="container mx-auto px-4">
-        {/* Header */}
         <div className="text-center mb-16">
-          <h1 className="text-4xl font-bold mb-4 heading-primary">
-            Get Your Custom Quote
-          </h1>
+          <h1 className="text-4xl font-bold mb-4 heading-primary">Get Your Custom Quote</h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Professional irrigation system design and pricing tailored to your specific needs. 
-            Get started with our free consultation and detailed quote.
+            Professional irrigation system design and pricing tailored to your specific needs. Get started with our free consultation and detailed quote.
           </p>
         </div>
 
-        {/* Benefits Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           {benefits.map((benefit, index) => (
             <Card key={index} className="text-center admin-card">
@@ -134,7 +129,6 @@ export default function Quote() {
           ))}
         </div>
 
-        {/* Main Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="form">Quote Request</TabsTrigger>
@@ -145,25 +139,19 @@ export default function Quote() {
           <TabsContent value="form" className="space-y-8">
             <QuoteForm 
               productId={productId || undefined}
-              onSuccess={() => {
-                // Could redirect to a success page or show additional options
-              }}
+              onSuccess={() => {}}
             />
           </TabsContent>
 
           <TabsContent value="packages" className="space-y-8">
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold mb-4">Choose Your Package</h2>
-              <p className="text-muted-foreground">
-                Select the service package that best fits your needs and budget
-              </p>
+              <p className="text-muted-foreground">Select the service package that best fits your needs and budget</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {packages.map((pkg, index) => (
-                <Card key={index} className={`relative admin-card ${
-                  pkg.badge ? 'border-blue-600' : ''
-                }`}>
+                <Card key={index} className={`relative admin-card ${pkg.badge ? 'border-blue-600' : ''}`}>
                   {pkg.badge && (
                     <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                       <Badge className="bg-blue-600 text-white">{pkg.badge}</Badge>
@@ -183,16 +171,7 @@ export default function Quote() {
                         </li>
                       ))}
                     </ul>
-                    <Button 
-                      className={`w-full ${pkg.badge ? 'btn-primary' : ''}`}
-                      variant={pkg.badge ? 'default' : 'outline'}
-                      onClick={() => {
-                        setActiveTab("form");
-                        // Could pre-fill form with package selection
-                      }}
-                    >
-                      Get Quote
-                    </Button>
+                    <Button className={`w-full ${pkg.badge ? 'btn-primary' : ''}`} variant={pkg.badge ? 'default' : 'outline'} onClick={() => setActiveTab("form")}>Get Quote</Button>
                   </CardContent>
                 </Card>
               ))}
@@ -203,37 +182,22 @@ export default function Quote() {
             <Card className="max-w-2xl mx-auto admin-card">
               <CardHeader>
                 <CardTitle className="text-2xl text-center">Quick Cost Calculator</CardTitle>
-                <p className="text-center text-muted-foreground">
-                  Get an instant estimate for your irrigation project
-                </p>
+                <p className="text-center text-muted-foreground">Get an instant estimate for your irrigation project</p>
               </CardHeader>
               <CardContent className="text-center py-16">
                 <Calculator className="h-16 w-16 text-muted-foreground mx-auto mb-6" />
                 <h3 className="text-xl font-semibold mb-4">Calculator Coming Soon</h3>
-                <p className="text-muted-foreground mb-6">
-                  Our interactive cost calculator is under development. For now, 
-                  please use our quote form for accurate pricing.
-                </p>
-                <Button 
-                  onClick={() => setActiveTab("form")}
-                  className="btn-primary"
-                >
-                  Request Detailed Quote
-                </Button>
+                <p className="text-muted-foreground mb-6">Our interactive cost calculator is under development. For now, please use our quote form for accurate pricing.</p>
+                <Button onClick={() => setActiveTab("form")} className="btn-primary">Request Detailed Quote</Button>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
 
-        {/* FAQ Section */}
         <section className="mt-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4 heading-secondary">
-              Frequently Asked Questions
-            </h2>
-            <p className="text-muted-foreground">
-              Common questions about our quoting process and services
-            </p>
+            <h2 className="text-3xl font-bold mb-4 heading-secondary">Frequently Asked Questions</h2>
+            <p className="text-muted-foreground">Common questions about our quoting process and services</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
@@ -250,43 +214,34 @@ export default function Quote() {
           </div>
         </section>
 
-        {/* Contact Section */}
         <section className="mt-16">
           <Card className="max-w-2xl mx-auto quote-form">
             <CardContent className="p-8 text-white text-center">
-              <h3 className="text-2xl font-bold mb-4">
-                Need Help with Your Quote?
-              </h3>
-              <p className="mb-6">
-                Our irrigation experts are here to help you choose the right solution
-              </p>
+              <h3 className="text-2xl font-bold mb-4">Need Help with Your Quote?</h3>
+              <p className="mb-6">Our irrigation experts are here to help you choose the right solution</p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button 
-                  size="lg" 
-                  className="bg-green-600 hover:bg-green-700"
-                  onClick={() => window.open('tel:+254700123456')}
-                >
-                  <Phone className="mr-2 h-5 w-5" />
-                  Call Now
+                <Button size="lg" className="bg-green-600 hover:bg-green-700" onClick={() => window.open('tel:+254111409454')}>
+                  <Phone className="mr-2 h-5 w-5" /> Call Now
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="text-white border-white hover:bg-white hover:text-blue-600"
-                  onClick={() => window.open('mailto:info@driptech.co.ke')}
-                >
-                  <Mail className="mr-2 h-5 w-5" />
-                  Email Us
+                <Button size="lg" variant="outline" className="text-white border-white hover:bg-white hover:text-blue-600" onClick={() => window.open('mailto:driptechs.info@gmail.com')}>
+                  <Mail className="mr-2 h-5 w-5" /> Email Us
                 </Button>
               </div>
               <div className="mt-6 flex flex-col sm:flex-row gap-4 justify-center text-sm">
                 <div className="flex items-center justify-center gap-2">
                   <Phone className="h-4 w-4" />
-                  <span>+254 700 123 456</span>
+                  <span>+254 111 409 454</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  <span>+254 114 575 401</span>
                 </div>
                 <div className="flex items-center justify-center gap-2">
                   <Mail className="h-4 w-4" />
-                  <span>info@driptech.co.ke</span>
+                  <span>driptechs.info@gmail.com</span>
+                </div>
+                <div className="flex items-center justify-center gap-2">
+                  💬 <a href="https://wa.me/254111409454" target="_blank" rel="noopener noreferrer" className="underline">Chat on WhatsApp</a>
                 </div>
               </div>
             </CardContent>

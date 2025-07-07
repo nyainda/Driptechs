@@ -14,23 +14,19 @@ import { insertProductSchema } from "@shared/schema";
 import type { Product } from "@shared/schema";
 import { z } from "zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Save, Upload, Image as ImageIcon } from "lucide-react";
+import { Save, Upload, Image as ImageIcon, Plus, X } from "lucide-react";
 
-const productSchema = z.object({
-  name: z.string().min(2, "Product name must be at least 2 characters"),
-  category: z.string().min(1, "Category is required"),
-  model: z.string().min(1, "Model is required"),
+// Use the shared schema but extend it for form validation
+const productFormSchema = insertProductSchema.extend({
   price: z.number().min(0, "Price must be positive"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
   images: z.array(z.string()).optional(),
-  specifications: z.record(z.any()).optional(),
+  image_url: z.string().optional(), // Keep this for form input
   features: z.array(z.string()).optional(),
   applications: z.array(z.string()).optional(),
-  inStock: z.boolean().optional(),
-  stockQuantity: z.number().min(0).optional(),
+  specifications: z.union([z.string(), z.object({}).passthrough()]).optional(),
 });
 
-type ProductFormData = z.infer<typeof productSchema>;
+type ProductFormData = z.infer<typeof productFormSchema>;
 
 interface ProductFormProps {
   product?: Product | null;
@@ -41,8 +37,19 @@ interface ProductFormProps {
 export default function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [imageUrl, setImageUrl] = useState((product?.images && product.images.length > 0) ? product.images[0] : "");
+  const [imageUrl, setImageUrl] = useState(product?.images?.[0] || "");
   const [dragActive, setDragActive] = useState(false);
+  const [features, setFeatures] = useState<string[]>(
+    product?.features || [""]
+  );
+  const [applications, setApplications] = useState<string[]>(
+    product?.applications || [""]
+  );
+  const [specifications, setSpecifications] = useState<Array<{key: string, value: string}>>(
+    product?.specifications && typeof product.specifications === 'object' && !Array.isArray(product.specifications)
+      ? Object.entries(product.specifications).map(([key, value]) => ({ key, value: String(value) }))
+      : [{ key: "", value: "" }]
+  );
 
   const {
     register,
@@ -51,27 +58,46 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     setValue,
     watch,
   } = useForm<ProductFormData>({
-    resolver: zodResolver(productSchema),
+    resolver: zodResolver(productFormSchema),
     defaultValues: {
       name: product?.name || "",
       category: product?.category || "",
       model: product?.model || "",
       price: product ? parseFloat(product.price) : 0,
       description: product?.description || "",
-      images: product?.images || [],
+      image_url: product?.images?.[0] || "",
       specifications: product?.specifications || {},
-      features: product?.features || [],
-      applications: product?.applications || [],
-      inStock: product?.inStock !== undefined ? product.inStock : true,
-      stockQuantity: product?.stockQuantity || 0,
+      inStock: product?.inStock ?? true,
+      features: product?.features || [""],
+      applications: product?.applications || [""],
     },
   });
 
   const watchedCategory = watch("category");
+  const watchedInStock = watch("inStock");
 
   const createProductMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      const response = await apiRequest("POST", "/api/admin/products", data);
+      // Transform the data to match your API expectations
+      const transformedData = {
+        name: data.name,
+        category: data.category,
+        model: data.model,
+        price: data.price.toString(), // Convert to string if needed
+        description: data.description,
+        specifications: specifications.reduce((acc, spec) => {
+          if (spec.key.trim() && spec.value.trim()) {
+            acc[spec.key.trim()] = spec.value.trim();
+          }
+          return acc;
+        }, {} as Record<string, string>),
+        images: data.image_url ? [data.image_url] : [], // Convert to array
+        inStock: data.inStock,
+        features: features.filter(feature => feature.trim() !== ""), // Filter out empty features
+        applications: applications.filter(app => app.trim() !== ""), // Filter out empty applications
+      };
+      
+      const response = await apiRequest("POST", "/api/admin/products", transformedData);
       return response.json();
     },
     onSuccess: () => {
@@ -82,7 +108,8 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
       });
       onSuccess();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Create product error:", error);
       toast({
         title: "Error",
         description: "Failed to create product. Please try again.",
@@ -93,7 +120,26 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
 
   const updateProductMutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      const response = await apiRequest("PUT", `/api/admin/products/${product!.id}`, data);
+      // Transform the data to match your API expectations
+      const transformedData = {
+        name: data.name,
+        category: data.category,
+        model: data.model,
+        price: data.price.toString(), // Convert to string if needed
+        description: data.description,
+        specifications: specifications.reduce((acc, spec) => {
+          if (spec.key.trim() && spec.value.trim()) {
+            acc[spec.key.trim()] = spec.value.trim();
+          }
+          return acc;
+        }, {} as Record<string, string>),
+        images: data.image_url ? [data.image_url] : [], // Convert to array
+        inStock: data.inStock,
+        features: features.filter(feature => feature.trim() !== ""), // Filter out empty features
+        applications: applications.filter(app => app.trim() !== ""), // Filter out empty applications
+      };
+      
+      const response = await apiRequest("PUT", `/api/admin/products/${product!.id}`, transformedData);
       return response.json();
     },
     onSuccess: () => {
@@ -104,7 +150,8 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
       });
       onSuccess();
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Update product error:", error);
       toast({
         title: "Error",
         description: "Failed to update product. Please try again.",
@@ -114,19 +161,10 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
   });
 
   const onSubmit = (data: ProductFormData) => {
-    // Transform specifications from string to object if needed
-    const transformedData = {
-      ...data,
-      specifications: data.specifications || {},
-      images: data.images || [],
-      features: data.features || [],
-      applications: data.applications || [],
-    };
-    
     if (product) {
-      updateProductMutation.mutate(transformedData);
+      updateProductMutation.mutate(data);
     } else {
-      createProductMutation.mutate(transformedData);
+      createProductMutation.mutate(data);
     }
   };
 
@@ -152,7 +190,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         // For demo purposes, we'll use a placeholder
         const demoUrl = `https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&h=300&fit=crop`;
         setImageUrl(demoUrl);
-        setValue("images", [demoUrl]);
+        setValue("image_url", demoUrl);
         toast({
           title: "Image Added",
           description: "Demo image has been set. In production, this would upload your file.",
@@ -161,15 +199,61 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
     }
   };
 
+  // Features Management
+  const addFeature = () => {
+    setFeatures([...features, ""]);
+  };
+
+  const removeFeature = (index: number) => {
+    const newFeatures = features.filter((_, i) => i !== index);
+    setFeatures(newFeatures);
+  };
+
+  const updateFeature = (index: number, value: string) => {
+    const newFeatures = [...features];
+    newFeatures[index] = value;
+    setFeatures(newFeatures);
+  };
+
+  // Applications Management
+  const addApplication = () => {
+    setApplications([...applications, ""]);
+  };
+
+  const removeApplication = (index: number) => {
+    const newApplications = applications.filter((_, i) => i !== index);
+    setApplications(newApplications);
+  };
+
+  // Specifications Management
+  const addSpecification = () => {
+    setSpecifications([...specifications, { key: "", value: "" }]);
+  };
+
+  const removeSpecification = (index: number) => {
+    const newSpecs = specifications.filter((_, i) => i !== index);
+    setSpecifications(newSpecs);
+  };
+
+  const updateSpecification = (index: number, field: 'key' | 'value', value: string) => {
+    const newSpecs = [...specifications];
+    newSpecs[index][field] = value;
+    setSpecifications(newSpecs);
+  };
+
   const categories = [
-    { value: "drip_irrigation", label: "Drip Irrigation" },
-    { value: "sprinkler", label: "Sprinkler Systems" },
-    { value: "filtration", label: "Water Treatment" },
-    { value: "control", label: "Automation" },
-    { value: "fertigation", label: "Fertigation" },
-    { value: "accessories", label: "Accessories" },
+    { value: "Drip Irrigation", label: "Drip Irrigation" },
+    { value: "Sprinkler Systems", label: "Sprinkler Systems" },
+    { value: "Water Treatment", label: "Water Treatment" },
+    { value: "Automation", label: "Automation" },
+    { value: "Accessories", label: "Accessories" },
   ];
 
+  function updateApplication(index: number, value: string): void {
+    const newApplications = [...applications];
+    newApplications[index] = value;
+    setApplications(newApplications);
+  }
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Basic Information */}
@@ -202,7 +286,9 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 <p className="text-sm text-red-500">{errors.model.message}</p>
               )}
             </div>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="category">Category *</Label>
               <Select 
@@ -224,9 +310,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 <p className="text-sm text-red-500">{errors.category.message}</p>
               )}
             </div>
-          </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="price">Price (KSh) *</Label>
               <Input
@@ -240,31 +324,6 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
                 <p className="text-sm text-red-500">{errors.price.message}</p>
               )}
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="stockQuantity">Stock Quantity</Label>
-              <Input
-                id="stockQuantity"
-                type="number"
-                placeholder="Enter stock quantity"
-                {...register("stockQuantity", { valueAsNumber: true })}
-              />
-              {errors.stockQuantity && (
-                <p className="text-sm text-red-500">{errors.stockQuantity.message}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-2">
-            <input
-              type="checkbox"
-              id="inStock"
-              {...register("inStock")}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <Label htmlFor="inStock" className="text-sm font-medium">
-              In Stock
-            </Label>
           </div>
 
           <div className="space-y-2">
@@ -279,6 +338,108 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
               <p className="text-sm text-red-500">{errors.description.message}</p>
             )}
           </div>
+
+          {/* Stock Status */}
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="inStock"
+              checked={watchedInStock ?? false}
+              onCheckedChange={(checked) => setValue("inStock", checked)}
+            />
+            <Label htmlFor="inStock" className="text-sm font-medium">
+              In Stock
+            </Label>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Features */}
+      <Card className="admin-card">
+        <CardHeader>
+          <CardTitle>Features</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            {features.map((feature, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  placeholder={`Feature ${index + 1}`}
+                  value={feature}
+                  onChange={(e) => updateFeature(index, e.target.value)}
+                  className="flex-1"
+                />
+                {features.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeFeature(index)}
+                    className="px-2"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addFeature}
+              className="mt-2"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Feature
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Add key features and benefits that make this product stand out.
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Applications */}
+      <Card className="admin-card">
+        <CardHeader>
+          <CardTitle>Applications</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-3">
+            {applications.map((application, index) => (
+              <div key={index} className="flex gap-2">
+                <Input
+                  placeholder={`Application ${index + 1}`}
+                  value={application}
+                  onChange={(e) => updateApplication(index, e.target.value)}
+                  className="flex-1"
+                />
+                {applications.length > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeApplication(index)}
+                    className="px-2"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addApplication}
+              className="mt-2"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Application
+            </Button>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Specify the use cases and applications where this product is most effective.
+          </p>
         </CardContent>
       </Card>
 
@@ -296,7 +457,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
               value={imageUrl}
               onChange={(e) => {
                 setImageUrl(e.target.value);
-                setValue("images", e.target.value ? [e.target.value] : []);
+                setValue("image_url", e.target.value);
               }}
             />
           </div>
@@ -347,22 +508,76 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
           <CardTitle>Technical Specifications</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="specifications">Specifications (JSON format)</Label>
-            <Textarea
-              id="specifications"
-              rows={4}
-              placeholder='Enter technical specifications as JSON (e.g., {"flowRate": "2-4 L/h", "pressure": "0.5-4 bar"})'
-              defaultValue={product?.specifications ? JSON.stringify(product.specifications, null, 2) : '{}'}
-              onChange={(e) => {
-                try {
-                  const parsed = JSON.parse(e.target.value);
-                  setValue("specifications", parsed);
-                } catch {
-                  // Invalid JSON, keep the string value
-                }
-              }}
-            />
+          <div className="space-y-4">
+            {specifications.map((spec, index) => (
+              <div key={index} className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                <div className="flex justify-between items-start mb-3">
+                  <h4 className="font-medium text-sm">Specification {index + 1}</h4>
+                  {specifications.length > 1 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeSpecification(index)}
+                      className="text-red-500 hover:text-red-700 h-6 w-6 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-1 block">
+                      What are you specifying? (e.g., Flow Rate, Material, Size)
+                    </Label>
+                    <Input
+                      placeholder="e.g., Flow Rate"
+                      value={spec.key}
+                      onChange={(e) => updateSpecification(index, 'key', e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label className="text-xs text-muted-foreground mb-1 block">
+                      What is the value? (e.g., 2-4 L/h, Plastic, 16mm)
+                    </Label>
+                    <Input
+                      placeholder="e.g., 2-4 L/h"
+                      value={spec.value}
+                      onChange={(e) => updateSpecification(index, 'value', e.target.value)}
+                      className="text-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={addSpecification}
+              className="w-full mt-3"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Another Specification
+            </Button>
+          </div>
+          
+          <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg">
+            <p className="text-sm text-blue-700 dark:text-blue-300 font-medium mb-2">
+              💡 Examples for Irrigation Products:
+            </p>
+            <div className="text-xs text-blue-600 dark:text-blue-400 space-y-1">
+              <div><strong>Flow Rate:</strong> 2-4 L/h</div>
+              <div><strong>Pressure Range:</strong> 0.5-4 bar</div>
+              <div><strong>Material:</strong> UV-resistant plastic</div>
+              <div><strong>Connection Size:</strong> 16mm</div>
+              <div><strong>Operating Temperature:</strong> 5-40°C</div>
+              <div><strong>Coverage Area:</strong> 1-2 square meters</div>
+            </div>
           </div>
         </CardContent>
       </Card>
