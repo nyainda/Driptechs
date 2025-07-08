@@ -657,6 +657,63 @@ app.get("/api/health", async (req, res) => {
     }
   });
 
+  // Gamification & Achievement Routes
+  app.get("/api/admin/achievements", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const achievements = await storage.getAchievements();
+      res.json(achievements);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+
+  app.get("/api/admin/gamification-overview", authenticate, requireAdmin, async (req, res) => {
+    try {
+      // Get current user's gamification data
+      const userId = req.user.id;
+      const [achievements, userAchievements, stats] = await Promise.all([
+        storage.getAchievements(),
+        storage.getUserAchievements(userId),
+        storage.getGamificationStats(userId)
+      ]);
+
+      // Check for new achievements
+      const newAchievements = await storage.checkAndUnlockMilestones(userId);
+      
+      // Get updated stats if new achievements were unlocked
+      const finalStats = newAchievements.length > 0 
+        ? await storage.getGamificationStats(userId) 
+        : stats;
+
+      res.json({
+        totalAchievements: achievements.length,
+        unlockedAchievements: userAchievements.length,
+        gamificationStats: finalStats,
+        newlyUnlocked: newAchievements,
+        achievementsByCategory: achievements.reduce((acc, achievement) => {
+          if (!acc[achievement.category]) acc[achievement.category] = [];
+          acc[achievement.category].push({
+            ...achievement,
+            unlocked: userAchievements.some(ua => ua.achievementId === achievement.id)
+          });
+          return acc;
+        }, {} as Record<string, any[]>)
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch gamification overview" });
+    }
+  });
+
+  // Initialize default achievements on first run
+  (async () => {
+    try {
+      await storage.initializeDefaultAchievements();
+      console.log("✅ Default achievements initialized");
+    } catch (error) {
+      console.error("❌ Failed to initialize achievements:", error);
+    }
+  })();
+
   const httpServer = createServer(app);
   return httpServer;
 }

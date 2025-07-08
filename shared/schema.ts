@@ -160,6 +160,42 @@ export const websiteAnalytics = pgTable("website_analytics", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Achievement badges system
+export const achievements = pgTable("achievements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(),
+  category: text("category").notNull(), // visitors, quotes, revenue, content, engagement
+  milestone: integer("milestone").notNull(),
+  color: text("color").notNull().default("blue"),
+  rarity: text("rarity").notNull().default("common"), // common, rare, epic, legendary
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const userAchievements = pgTable("user_achievements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull(),
+  achievementId: uuid("achievement_id").notNull(),
+  unlockedAt: timestamp("unlocked_at").defaultNow(),
+  progress: integer("progress").default(0),
+  completed: boolean("completed").default(false),
+});
+
+// Gamification stats
+export const gamificationStats = pgTable("gamification_stats", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").notNull().unique(),
+  totalPoints: integer("total_points").default(0),
+  level: integer("level").default(1),
+  experiencePoints: integer("experience_points").default(0),
+  achievementCount: integer("achievement_count").default(0),
+  streak: integer("streak").default(0), // consecutive days of activity
+  lastActivity: timestamp("last_activity").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schema validation
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
@@ -221,6 +257,22 @@ export const insertWebsiteAnalyticsSchema = createInsertSchema(websiteAnalytics)
   updatedAt: true,
 });
 
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  unlockedAt: true,
+});
+
+export const insertGamificationStatsSchema = createInsertSchema(gamificationStats).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -268,4 +320,10 @@ export type PageView = typeof pageViews.$inferSelect;
 export type InsertPageView = z.infer<typeof insertPageViewSchema>;
 export type WebsiteAnalytics = typeof websiteAnalytics.$inferSelect;
 export type InsertWebsiteAnalytics = z.infer<typeof insertWebsiteAnalyticsSchema>;
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+export type GamificationStats = typeof gamificationStats.$inferSelect;
+export type InsertGamificationStats = z.infer<typeof insertGamificationStatsSchema>;
 export type LoginData = z.infer<typeof loginSchema>;

@@ -38,6 +38,7 @@ import type { Quote, Product, Contact } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { getAuthToken, getUser, clearAuth } from "@/lib/auth";
 import QuickSuccessStory from "@/components/admin/quick-success-story";
+import GamificationDashboard from "@/components/admin/gamification-dashboard";
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
@@ -684,6 +685,11 @@ export default function AdminDashboard() {
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Gamification Dashboard */}
+        <div className="mt-8">
+          <GamificationDashboard />
         </div>
       </div>
     </div>

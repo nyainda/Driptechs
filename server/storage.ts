@@ -1,11 +1,12 @@
 import { db } from "./db";
-import { users, products, quotes, projects, blogPosts, contacts, teamMembers, successStories, pageViews, websiteAnalytics } from "@shared/schema";
+import { users, products, quotes, projects, blogPosts, contacts, teamMembers, successStories, pageViews, websiteAnalytics, achievements, userAchievements, gamificationStats } from "@shared/schema";
 import { eq, asc, sql } from "drizzle-orm";
 import { NotificationService } from "./notifications";
 import type { 
   Product, Quote, Project, BlogPost, Contact, User,
   InsertProduct, InsertQuote, InsertProject, InsertBlogPost, InsertContact, InsertUser, TeamMember, InsertTeamMember,
-  SuccessStory, InsertSuccessStory, PageView, InsertPageView, WebsiteAnalytics, InsertWebsiteAnalytics
+  SuccessStory, InsertSuccessStory, PageView, InsertPageView, WebsiteAnalytics, InsertWebsiteAnalytics,
+  Achievement, InsertAchievement, UserAchievement, InsertUserAchievement, GamificationStats, InsertGamificationStats
 } from "@shared/schema";
 
 export class Storage {
@@ -313,6 +314,154 @@ export class Storage {
       return todayVisitors - yesterdayVisitors;
     } catch {
       return 0;
+    }
+  }
+
+  // Gamification & Achievement System
+  async getAchievements(): Promise<Achievement[]> {
+    return await db.select().from(achievements).orderBy(asc(achievements.category), asc(achievements.milestone));
+  }
+
+  async createAchievement(data: InsertAchievement): Promise<Achievement> {
+    const [achievement] = await db.insert(achievements).values(data).returning();
+    return achievement;
+  }
+
+  async getUserAchievements(userId: string): Promise<UserAchievement[]> {
+    return await db.select().from(userAchievements).where(eq(userAchievements.userId, userId));
+  }
+
+  async unlockAchievement(userId: string, achievementId: string): Promise<UserAchievement> {
+    const [userAchievement] = await db.insert(userAchievements).values({
+      userId,
+      achievementId,
+      completed: true,
+      progress: 100
+    }).returning();
+    
+    // Update gamification stats
+    await this.updateGamificationStats(userId);
+    
+    return userAchievement;
+  }
+
+  async getGamificationStats(userId: string): Promise<GamificationStats | null> {
+    const [stats] = await db.select().from(gamificationStats).where(eq(gamificationStats.userId, userId));
+    return stats || null;
+  }
+
+  async updateGamificationStats(userId: string): Promise<GamificationStats> {
+    const achievementCount = await db.select({ count: sql<number>`count(*)` })
+      .from(userAchievements)
+      .where(eq(userAchievements.userId, userId));
+    
+    const count = achievementCount[0]?.count || 0;
+    const points = count * 10; // 10 points per achievement
+    const level = Math.floor(points / 100) + 1; // Level up every 100 points
+    
+    const existing = await this.getGamificationStats(userId);
+    
+    if (existing) {
+      const [updated] = await db.update(gamificationStats)
+        .set({
+          totalPoints: points,
+          level,
+          achievementCount: count,
+          lastActivity: new Date(),
+          updatedAt: new Date()
+        })
+        .where(eq(gamificationStats.userId, userId))
+        .returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(gamificationStats).values({
+        userId,
+        totalPoints: points,
+        level,
+        achievementCount: count,
+        lastActivity: new Date()
+      }).returning();
+      return created;
+    }
+  }
+
+  async checkAndUnlockMilestones(userId: string): Promise<Achievement[]> {
+    const unlockedAchievements: Achievement[] = [];
+    
+    // Check various milestones
+    const analytics = await this.getAnalytics();
+    const allAchievements = await this.getAchievements();
+    const userAchievements = await this.getUserAchievements(userId);
+    const unlockedIds = userAchievements.map(ua => ua.achievementId);
+    
+    for (const achievement of allAchievements) {
+      if (unlockedIds.includes(achievement.id)) continue; // Already unlocked
+      
+      let shouldUnlock = false;
+      
+      switch (achievement.category) {
+        case 'visitors':
+          shouldUnlock = analytics.todayUniqueVisitors >= achievement.milestone;
+          break;
+        case 'quotes':
+          shouldUnlock = analytics.totalQuotes >= achievement.milestone;
+          break;
+        case 'revenue':
+          shouldUnlock = analytics.totalRevenue >= achievement.milestone;
+          break;
+        case 'content':
+          const blogCount = await db.select({ count: sql<number>`count(*)` })
+            .from(blogPosts);
+          shouldUnlock = (blogCount[0]?.count || 0) >= achievement.milestone;
+          break;
+        case 'engagement':
+          const pageViewCount = await db.select({ count: sql<number>`count(*)` })
+            .from(pageViews);
+          shouldUnlock = (pageViewCount[0]?.count || 0) >= achievement.milestone;
+          break;
+      }
+      
+      if (shouldUnlock) {
+        await this.unlockAchievement(userId, achievement.id);
+        unlockedAchievements.push(achievement);
+      }
+    }
+    
+    return unlockedAchievements;
+  }
+
+  async initializeDefaultAchievements(): Promise<void> {
+    const existingAchievements = await this.getAchievements();
+    if (existingAchievements.length > 0) return; // Already initialized
+    
+    const defaultAchievements: InsertAchievement[] = [
+      // Visitor milestones
+      { name: "First Visitor", description: "Welcome your first visitor to the website", icon: "👋", category: "visitors", milestone: 1, color: "green", rarity: "common" },
+      { name: "Growing Audience", description: "Reach 10 unique visitors in a day", icon: "👥", category: "visitors", milestone: 10, color: "blue", rarity: "common" },
+      { name: "Popular Site", description: "Reach 50 unique visitors in a day", icon: "🌟", category: "visitors", milestone: 50, color: "purple", rarity: "rare" },
+      { name: "Traffic Magnet", description: "Reach 100 unique visitors in a day", icon: "🚀", category: "visitors", milestone: 100, color: "orange", rarity: "epic" },
+      { name: "Viral Success", description: "Reach 500 unique visitors in a day", icon: "💥", category: "visitors", milestone: 500, color: "red", rarity: "legendary" },
+      
+      // Quote milestones
+      { name: "First Quote", description: "Receive your first quote request", icon: "📝", category: "quotes", milestone: 1, color: "green", rarity: "common" },
+      { name: "Quote Collector", description: "Receive 5 quote requests", icon: "📋", category: "quotes", milestone: 5, color: "blue", rarity: "common" },
+      { name: "Business Builder", description: "Receive 25 quote requests", icon: "🏢", category: "quotes", milestone: 25, color: "purple", rarity: "rare" },
+      { name: "Quote Master", description: "Receive 100 quote requests", icon: "💼", category: "quotes", milestone: 100, color: "orange", rarity: "epic" },
+      
+      // Content milestones
+      { name: "Content Creator", description: "Publish your first blog post", icon: "✍️", category: "content", milestone: 1, color: "green", rarity: "common" },
+      { name: "Prolific Writer", description: "Publish 10 blog posts", icon: "📚", category: "content", milestone: 10, color: "blue", rarity: "common" },
+      { name: "Content Authority", description: "Publish 25 blog posts", icon: "📖", category: "content", milestone: 25, color: "purple", rarity: "rare" },
+      
+      // Engagement milestones
+      { name: "Engagement Starter", description: "Reach 100 total page views", icon: "👀", category: "engagement", milestone: 100, color: "green", rarity: "common" },
+      { name: "Highly Engaged", description: "Reach 1,000 total page views", icon: "📈", category: "engagement", milestone: 1000, color: "blue", rarity: "common" },
+      { name: "Engagement Expert", description: "Reach 5,000 total page views", icon: "🎯", category: "engagement", milestone: 5000, color: "purple", rarity: "rare" },
+      { name: "Engagement Legend", description: "Reach 25,000 total page views", icon: "🏆", category: "engagement", milestone: 25000, color: "orange", rarity: "epic" },
+    ];
+    
+    for (const achievement of defaultAchievements) {
+      await this.createAchievement(achievement);
     }
   }
 }
