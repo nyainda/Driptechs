@@ -1,3 +1,4 @@
+
 #!/usr/bin/env node
 
 // Build script for Vercel deployment
@@ -12,15 +13,25 @@ async function buildForVercel() {
     // Build frontend with Vite
     console.log('📦 Building frontend...');
     await build({
+      root: './client',
       build: {
-        outDir: 'dist/public',
-        emptyOutDir: true
+        outDir: '../dist/public',
+        emptyOutDir: true,
+        rollupOptions: {
+          input: './client/index.html'
+        }
       }
     });
     
+    // Ensure the API directory structure exists
+    const apiDir = path.join(process.cwd(), 'api');
+    if (!fs.existsSync(apiDir)) {
+      fs.mkdirSync(apiDir, { recursive: true });
+    }
+    
     console.log('✅ Build completed successfully!');
     console.log('📁 Frontend built to: dist/public');
-    console.log('📁 Backend will be handled by Vercel directly from server/index.ts');
+    console.log('📁 Backend entry point: server/index.ts');
     
   } catch (error) {
     console.error('❌ Build failed:', error);
