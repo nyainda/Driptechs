@@ -33,7 +33,17 @@ async function buildForVercel() {
       target: 'node18',
       format: 'cjs',
       outfile: 'dist/index.js',
-      external: ['better-sqlite3', 'pg-native'],
+      external: [
+        'better-sqlite3', 
+        'pg-native',
+        'pg',
+        'bcrypt',
+        'jsonwebtoken',
+        '@sendgrid/mail'
+      ],
+      define: {
+        'process.env.NODE_ENV': '"production"'
+      },
       banner: {
         js: '// Compiled by esbuild for Vercel deployment'
       }
@@ -45,10 +55,34 @@ async function buildForVercel() {
       fs.mkdirSync(apiDir, { recursive: true });
     }
     
+    // Copy package.json dependencies info for Vercel
+    const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
+    const serverlessPackage = {
+      name: packageJson.name,
+      version: packageJson.version,
+      type: "commonjs",
+      dependencies: {
+        express: packageJson.dependencies.express,
+        bcrypt: packageJson.dependencies.bcrypt,
+        jsonwebtoken: packageJson.dependencies.jsonwebtoken,
+        '@sendgrid/mail': packageJson.dependencies['@sendgrid/mail'],
+        drizzle: packageJson.dependencies.drizzle,
+        'drizzle-orm': packageJson.dependencies['drizzle-orm'],
+        postgres: packageJson.dependencies.postgres,
+        zod: packageJson.dependencies.zod
+      }
+    };
+    
+    fs.writeFileSync(
+      path.join(apiDir, 'package.json'),
+      JSON.stringify(serverlessPackage, null, 2)
+    );
+    
     console.log('✅ Build completed successfully!');
     console.log('📁 Frontend built to: dist/public');
     console.log('📁 Backend built to: dist/index.js');
     console.log('📁 API entry point: api/index.js');
+    console.log('📁 API package.json created');
     
   } catch (error) {
     console.error('❌ Build failed:', error);
