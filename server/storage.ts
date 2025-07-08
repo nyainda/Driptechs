@@ -302,7 +302,7 @@ export class Storage {
       const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
       const todayVisitors = await this.getTodayUniqueVisitors();
-      
+
       const yesterdayStart = new Date(yesterday + 'T00:00:00Z');
       const yesterdayEnd = new Date(yesterday + 'T23:59:59Z');
 
@@ -310,7 +310,7 @@ export class Storage {
         .where(sql`${pageViews.timestamp} >= ${yesterdayStart} AND ${pageViews.timestamp} <= ${yesterdayEnd}`);
 
       const yesterdayVisitors = new Set(yesterdayViews.map(v => v.ipAddress)).size;
-      
+
       return todayVisitors - yesterdayVisitors;
     } catch {
       return 0;
@@ -338,10 +338,10 @@ export class Storage {
       completed: true,
       progress: 100
     }).returning();
-    
+
     // Update gamification stats
     await this.updateGamificationStats(userId);
-    
+
     return userAchievement;
   }
 
@@ -354,13 +354,13 @@ export class Storage {
     const achievementCount = await db.select({ count: sql<number>`count(*)` })
       .from(userAchievements)
       .where(eq(userAchievements.userId, userId));
-    
+
     const count = achievementCount[0]?.count || 0;
     const points = count * 10; // 10 points per achievement
     const level = Math.floor(points / 100) + 1; // Level up every 100 points
-    
+
     const existing = await this.getGamificationStats(userId);
-    
+
     if (existing) {
       const [updated] = await db.update(gamificationStats)
         .set({
@@ -387,18 +387,18 @@ export class Storage {
 
   async checkAndUnlockMilestones(userId: string): Promise<Achievement[]> {
     const unlockedAchievements: Achievement[] = [];
-    
+
     // Check various milestones
     const analytics = await this.getAnalytics();
     const allAchievements = await this.getAchievements();
     const userAchievements = await this.getUserAchievements(userId);
     const unlockedIds = userAchievements.map(ua => ua.achievementId);
-    
+
     for (const achievement of allAchievements) {
       if (unlockedIds.includes(achievement.id)) continue; // Already unlocked
-      
+
       let shouldUnlock = false;
-      
+
       switch (achievement.category) {
         case 'visitors':
           shouldUnlock = analytics.todayUniqueVisitors >= achievement.milestone;
@@ -420,20 +420,46 @@ export class Storage {
           shouldUnlock = (pageViewCount[0]?.count || 0) >= achievement.milestone;
           break;
       }
-      
+
       if (shouldUnlock) {
         await this.unlockAchievement(userId, achievement.id);
         unlockedAchievements.push(achievement);
       }
     }
-    
+
     return unlockedAchievements;
   }
 
-  async initializeDefaultAchievements(): Promise<void> {
-    const existingAchievements = await this.getAchievements();
-    if (existingAchievements.length > 0) return; // Already initialized
-    
+  async initializeAdminUser() {
+    try {
+      const adminUser = await this.getUserByEmail("admin@driptech.co.ke");
+      if (!adminUser) {
+        const bcrypt = require('bcrypt');
+        const hashedPassword = await bcrypt.hash("admin123", 10);
+
+        await this.db.insert(users).values({
+          id: Math.random().toString(36).substr(2, 9),
+          name: "Admin User",
+          email: "admin@driptech.co.ke",
+          password: hashedPassword,
+          role: "super_admin",
+          createdAt: new Date(),
+          updatedAt: new Date()
+        });
+        console.log("✅ Admin user created");
+      }
+    } catch (error) {
+      console.error("❌ Failed to initialize admin user:", error);
+    }
+  }
+
+  async initializeDefaultAchievements() {
+    try {
+      const existingAchievements = await this.getAchievements();
+      if (existingAchievements.length > 0) {
+        return; // Already initialized
+      }
+
     const defaultAchievements: InsertAchievement[] = [
       // Visitor milestones
       { name: "First Visitor", description: "Welcome your first visitor to the website", icon: "👋", category: "visitors", milestone: 1, color: "green", rarity: "common" },
@@ -441,25 +467,25 @@ export class Storage {
       { name: "Popular Site", description: "Reach 50 unique visitors in a day", icon: "🌟", category: "visitors", milestone: 50, color: "purple", rarity: "rare" },
       { name: "Traffic Magnet", description: "Reach 100 unique visitors in a day", icon: "🚀", category: "visitors", milestone: 100, color: "orange", rarity: "epic" },
       { name: "Viral Success", description: "Reach 500 unique visitors in a day", icon: "💥", category: "visitors", milestone: 500, color: "red", rarity: "legendary" },
-      
+
       // Quote milestones
       { name: "First Quote", description: "Receive your first quote request", icon: "📝", category: "quotes", milestone: 1, color: "green", rarity: "common" },
       { name: "Quote Collector", description: "Receive 5 quote requests", icon: "📋", category: "quotes", milestone: 5, color: "blue", rarity: "common" },
       { name: "Business Builder", description: "Receive 25 quote requests", icon: "🏢", category: "quotes", milestone: 25, color: "purple", rarity: "rare" },
       { name: "Quote Master", description: "Receive 100 quote requests", icon: "💼", category: "quotes", milestone: 100, color: "orange", rarity: "epic" },
-      
+
       // Content milestones
       { name: "Content Creator", description: "Publish your first blog post", icon: "✍️", category: "content", milestone: 1, color: "green", rarity: "common" },
       { name: "Prolific Writer", description: "Publish 10 blog posts", icon: "📚", category: "content", milestone: 10, color: "blue", rarity: "common" },
       { name: "Content Authority", description: "Publish 25 blog posts", icon: "📖", category: "content", milestone: 25, color: "purple", rarity: "rare" },
-      
+
       // Engagement milestones
       { name: "Engagement Starter", description: "Reach 100 total page views", icon: "👀", category: "engagement", milestone: 100, color: "green", rarity: "common" },
       { name: "Highly Engaged", description: "Reach 1,000 total page views", icon: "📈", category: "engagement", milestone: 1000, color: "blue", rarity: "common" },
       { name: "Engagement Expert", description: "Reach 5,000 total page views", icon: "🎯", category: "engagement", milestone: 5000, color: "purple", rarity: "rare" },
       { name: "Engagement Legend", description: "Reach 25,000 total page views", icon: "🏆", category: "engagement", milestone: 25000, color: "orange", rarity: "epic" },
     ];
-    
+
     for (const achievement of defaultAchievements) {
       await this.createAchievement(achievement);
     }

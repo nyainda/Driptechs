@@ -1,179 +1,242 @@
-import { useState } from "react";
-import { Link, useLocation } from "wouter";
+
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "@/components/theme-provider";
-import { Droplets, Sun, Moon, Menu, X, Phone, Mail, MessageCircle } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu, X, Droplets, Phone, Mail, MapPin, ChevronDown } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
+const navigation = [
+  { name: "Home", href: "/" },
+  { 
+    name: "Products", 
+    href: "/products",
+    submenu: [
+      { name: "Drip Irrigation", href: "/products?category=drip-irrigation" },
+      { name: "Sprinkler Systems", href: "/products?category=sprinkler" },
+      { name: "Pumps & Motors", href: "/products?category=pumps" },
+      { name: "Controllers", href: "/products?category=controllers" },
+    ]
+  },
+  { name: "Services", href: "/services" },
+  { name: "Projects", href: "/projects" },
+  { name: "Blog", href: "/blog" },
+  { name: "About", href: "/about" },
+  { name: "Contact", href: "/contact" },
+];
 
 export default function Header() {
-  const { theme, toggleTheme } = useTheme();
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  const navItems = [
-    { href: "/", label: "Home" },
-    { href: "/products", label: "Products" },
-    { href: "/services", label: "Services" },
-    { href: "/projects", label: "Projects" },
-    { href: "/blog", label: "Blog" },
-    { href: "/about", label: "About" },
-    { href: "/contact", label: "Contact" },
-  ];
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-  const isActive = (href: string) => {
-    if (href === "/") return location === "/";
-    return location.startsWith(href);
-  };
+  const closeSheet = () => setIsOpen(false);
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 sm:px-6">
-        <div className="flex h-16 sm:h-20 items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 sm:space-x-3">
-            <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-blue-700">
-              <Droplets className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
+    <>
+      {/* Top Bar */}
+      <div className="bg-blue-600 text-white py-2 hidden md:block">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-between items-center text-sm">
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-2">
+                <Phone className="h-4 w-4" />
+                <span>+254 123 456 789</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <Mail className="h-4 w-4" />
+                <span>info@driptech.co.ke</span>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-blue-600">DripTech</h1>
-              <p className="text-xs text-muted-foreground">Irrigation Solutions</p>
+            <div className="flex items-center space-x-2">
+              <MapPin className="h-4 w-4" />
+              <span>Nairobi, Kenya</span>
             </div>
-          </Link>
+          </div>
+        </div>
+      </div>
 
-          {/* Desktop Navigation and Contact Info */}
-          <div className="flex items-center space-x-4 sm:space-x-6 lg:space-x-8">
-            <nav className="hidden md:flex items-center space-x-4 lg:space-x-6">
-              {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`text-xs sm:text-sm font-medium transition-colors hover:text-blue-600 ${
-                    isActive(item.href)
-                      ? "text-blue-600"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {item.label}
-                </Link>
+      {/* Main Navigation */}
+      <header className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled 
+          ? "bg-white/95 backdrop-blur-md shadow-lg border-b" 
+          : "bg-white border-b"
+      }`}>
+        <div className="container mx-auto px-4">
+          <div className="flex h-16 items-center justify-between">
+            {/* Logo */}
+            <Link href="/" className="flex items-center space-x-3 group">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-green-600 transition-transform group-hover:scale-105">
+                <Droplets className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-blue-600">DripTech</h1>
+                <p className="text-xs text-muted-foreground hidden sm:block">Smart Irrigation Solutions</p>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <nav className="hidden lg:flex items-center space-x-1">
+              {navigation.map((item) => (
+                item.submenu ? (
+                  <DropdownMenu key={item.name}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        className={`h-10 px-3 text-sm font-medium transition-colors hover:bg-blue-50 hover:text-blue-600 ${
+                          location.startsWith(item.href) 
+                            ? "bg-blue-50 text-blue-600" 
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {item.name}
+                        <ChevronDown className="ml-1 h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-56">
+                      {item.submenu.map((subItem) => (
+                        <DropdownMenuItem key={subItem.name} asChild>
+                          <Link 
+                            href={subItem.href}
+                            className="flex w-full items-center px-3 py-2 text-sm hover:bg-blue-50 hover:text-blue-600 cursor-pointer"
+                          >
+                            {subItem.name}
+                          </Link>
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <Link key={item.name} href={item.href}>
+                    <Button
+                      variant="ghost"
+                      className={`h-10 px-3 text-sm font-medium transition-colors hover:bg-blue-50 hover:text-blue-600 ${
+                        location === item.href 
+                          ? "bg-blue-50 text-blue-600" 
+                          : "text-gray-700"
+                      }`}
+                    >
+                      {item.name}
+                    </Button>
+                  </Link>
+                )
               ))}
             </nav>
 
-            {/* Contact Info - Phone, Email, and WhatsApp on Desktop */}
-            <div className="hidden md:grid grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-4 items-center text-xs sm:text-sm text-muted-foreground mr-2 lg:mr-4">
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 text-green-600 flex-shrink-0" />
-                <span className="truncate">+254 111 409 454</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                <span className="truncate">driptechs.info@gmail.com</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MessageCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                <a 
-                  href="https://wa.me/254111409454" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="truncate hover:text-blue-600 transition-colors"
-                >
-                  WhatsApp
-                </a>
-              </div>
+            {/* CTA Buttons */}
+            <div className="hidden lg:flex items-center space-x-3">
+              <Link href="/quote">
+                <Button size="sm" className="bg-green-600 hover:bg-green-700">
+                  Get Quote
+                </Button>
+              </Link>
+              <Link href="/admin/login">
+                <Button variant="outline" size="sm">
+                  Admin
+                </Button>
+              </Link>
             </div>
-          </div>
 
-          {/* Actions */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            {/* Theme Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              className="h-8 w-8 sm:h-9 sm:w-9"
-            >
-              {theme === "light" ? (
-                <Moon className="h-4 w-4" />
-              ) : (
-                <Sun className="h-4 w-4" />
-              )}
-            </Button>
-
-            {/* Get Quote Button */}
-            <Link href="/quote">
-              <Button className="hidden md:inline-flex bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm px-3 sm:px-4">
-                Get Quote
-              </Button>
-            </Link>
-
-            {/* Mobile Menu */}
+            {/* Mobile menu button */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
+              <SheetTrigger asChild className="lg:hidden">
+                <Button variant="ghost" size="sm">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[280px] sm:w-[360px]">
-                <SheetHeader>
-                  <SheetTitle className="flex items-center space-x-2">
-                    <Droplets className="h-5 w-5 text-blue-600" />
-                    <span>DripTech</span>
-                  </SheetTitle>
-                </SheetHeader>
-                <nav className="mt-6 space-y-4">
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className={`block text-sm font-medium transition-colors hover:text-blue-600 ${
-                        isActive(item.href)
-                          ? "text-blue-600"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {item.label}
-                    </Link>
-                  ))}
-                  <div className="pt-4 border-t">
-                    <Link href="/quote" onClick={() => setIsOpen(false)}>
-                      <Button className="w-full bg-blue-600 hover:bg-blue-700 text-sm">
-                        Get Quote
-                      </Button>
-                    </Link>
-                  </div>
-                  <div className="pt-4 space-y-4 text-sm text-muted-foreground">
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <span className="truncate">+254 111 409 454</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <span className="truncate">+254 114 575 401</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-blue-600 flex-shrink-0" />
-                        <span className="truncate">driptechs.info@gmail.com</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MessageCircle className="h-4 w-4 text-green-600 flex-shrink-0" />
-                        <a 
-                          href="https://wa.me/254111409454" 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="truncate hover:text-blue-600 transition-colors"
-                        >
-                          WhatsApp
-                        </a>
-                      </div>
+              <SheetContent side="right" className="w-80">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center space-x-3">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-green-600">
+                      <Droplets className="h-4 w-4 text-white" />
                     </div>
+                    <span className="text-lg font-bold text-blue-600">DripTech</span>
                   </div>
+                  <Button variant="ghost" size="sm" onClick={closeSheet}>
+                    <X className="h-5 w-5" />
+                  </Button>
+                </div>
+
+                <nav className="space-y-2">
+                  {navigation.map((item) => (
+                    <div key={item.name}>
+                      <Link href={item.href} onClick={closeSheet}>
+                        <Button
+                          variant="ghost"
+                          className={`w-full justify-start h-10 px-3 ${
+                            location === item.href 
+                              ? "bg-blue-50 text-blue-600" 
+                              : "text-gray-700"
+                          }`}
+                        >
+                          {item.name}
+                        </Button>
+                      </Link>
+                      {item.submenu && (
+                        <div className="ml-4 mt-1 space-y-1">
+                          {item.submenu.map((subItem) => (
+                            <Link key={subItem.name} href={subItem.href} onClick={closeSheet}>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="w-full justify-start text-gray-600 hover:text-blue-600"
+                              >
+                                {subItem.name}
+                              </Button>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </nav>
+
+                <div className="mt-6 space-y-3">
+                  <Link href="/quote" onClick={closeSheet}>
+                    <Button className="w-full bg-green-600 hover:bg-green-700">
+                      Get Quote
+                    </Button>
+                  </Link>
+                  <Link href="/admin/login" onClick={closeSheet}>
+                    <Button variant="outline" className="w-full">
+                      Admin Login
+                    </Button>
+                  </Link>
+                </div>
+
+                {/* Contact Info in Mobile */}
+                <div className="mt-6 pt-6 border-t space-y-3 text-sm text-gray-600">
+                  <div className="flex items-center space-x-2">
+                    <Phone className="h-4 w-4" />
+                    <span>+254 123 456 789</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Mail className="h-4 w-4" />
+                    <span>info@driptech.co.ke</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <MapPin className="h-4 w-4" />
+                    <span>Nairobi, Kenya</span>
+                  </div>
+                </div>
               </SheetContent>
             </Sheet>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

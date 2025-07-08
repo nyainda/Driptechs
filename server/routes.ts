@@ -704,13 +704,14 @@ app.get("/api/health", async (req, res) => {
     }
   });
 
-  // Initialize default achievements on first run
+  // Initialize default achievements and admin user on first run
   (async () => {
     try {
+      await storage.initializeAdminUser();
       await storage.initializeDefaultAchievements();
       console.log("✅ Default achievements initialized");
     } catch (error) {
-      console.error("❌ Failed to initialize achievements:", error);
+      console.error("❌ Failed to initialize:", error);
     }
   })();
 
