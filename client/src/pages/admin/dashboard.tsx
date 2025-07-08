@@ -37,6 +37,7 @@ import { Link } from "wouter";
 import type { Quote, Product, Contact } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { getAuthToken, getUser, clearAuth } from "@/lib/auth";
+import QuickSuccessStory from "@/components/admin/quick-success-story";
 
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
@@ -561,6 +562,44 @@ export default function AdminDashboard() {
                   ))}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Quick Create Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-950 hover:shadow-2xl transition-all duration-300">
+            <CardHeader className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-t-lg">
+              <CardTitle className="flex items-center">
+                <Plus className="mr-2 h-5 w-5" />
+                Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <QuickSuccessStory />
+            </CardContent>
+          </Card>
+          
+          <Card className="border-0 shadow-xl bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900 dark:to-blue-950 hover:shadow-2xl transition-all duration-300">
+            <CardHeader className="bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-t-lg">
+              <CardTitle className="flex items-center">
+                <FileText className="mr-2 h-5 w-5" />
+                Content Creation
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-3">
+              <Link href="/admin/blog">
+                <Button className="w-full bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Create New Blog Post
+                </Button>
+              </Link>
+              <Link href="/admin/products">
+                <Button variant="outline" className="w-full">
+                  <Package className="mr-2 h-4 w-4" />
+                  Add New Product
+                </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

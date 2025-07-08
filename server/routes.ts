@@ -637,6 +637,26 @@ app.get("/api/health", async (req, res) => {
     }
   });
 
+  // Page view tracking for analytics
+  app.post("/api/track/pageview", async (req, res) => {
+    try {
+      const { page, sessionId } = req.body;
+      const userAgent = req.headers['user-agent'] || '';
+      const ipAddress = req.ip || req.connection.remoteAddress || '';
+
+      await storage.trackPageView({
+        page,
+        userAgent,
+        ipAddress: ipAddress.replace(/^::ffff:/, ''), // Clean IPv4-mapped IPv6
+        sessionId
+      });
+
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ success: false });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

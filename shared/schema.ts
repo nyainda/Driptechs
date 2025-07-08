@@ -136,6 +136,30 @@ export const successStories = pgTable("success_stories", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Website analytics tracking
+export const pageViews = pgTable("page_views", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  page: text("page").notNull(),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  timestamp: timestamp("timestamp").defaultNow(),
+  sessionId: text("session_id"),
+});
+
+export const websiteAnalytics = pgTable("website_analytics", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  date: text("date").notNull().unique(), // YYYY-MM-DD format
+  totalVisitors: integer("total_visitors").default(0),
+  uniqueVisitors: integer("unique_visitors").default(0),
+  pageViews: integer("page_views").default(0),
+  bounceRate: decimal("bounce_rate", { precision: 5, scale: 2 }).default("0"),
+  avgSessionDuration: integer("avg_session_duration").default(0), // in seconds
+  topPages: jsonb("top_pages").default([]),
+  trafficSources: jsonb("traffic_sources").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Schema validation
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
@@ -186,6 +210,17 @@ export const insertSuccessStorySchema = createInsertSchema(successStories).omit(
   updatedAt: true,
 });
 
+export const insertPageViewSchema = createInsertSchema(pageViews).omit({
+  id: true,
+  timestamp: true,
+});
+
+export const insertWebsiteAnalyticsSchema = createInsertSchema(websiteAnalytics).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
@@ -229,4 +264,8 @@ export type TeamMember = typeof teamMembers.$inferSelect;
 export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
 export type SuccessStory = typeof successStories.$inferSelect;
 export type InsertSuccessStory = z.infer<typeof insertSuccessStorySchema>;
+export type PageView = typeof pageViews.$inferSelect;
+export type InsertPageView = z.infer<typeof insertPageViewSchema>;
+export type WebsiteAnalytics = typeof websiteAnalytics.$inferSelect;
+export type InsertWebsiteAnalytics = z.infer<typeof insertWebsiteAnalyticsSchema>;
 export type LoginData = z.infer<typeof loginSchema>;

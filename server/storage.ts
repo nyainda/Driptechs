@@ -1,11 +1,11 @@
 import { db } from "./db";
-import { users, products, quotes, projects, blogPosts, contacts, teamMembers, successStories } from "@shared/schema";
-import { eq, asc } from "drizzle-orm";
+import { users, products, quotes, projects, blogPosts, contacts, teamMembers, successStories, pageViews, websiteAnalytics } from "@shared/schema";
+import { eq, asc, sql } from "drizzle-orm";
 import { NotificationService } from "./notifications";
 import type { 
   Product, Quote, Project, BlogPost, Contact, User,
   InsertProduct, InsertQuote, InsertProject, InsertBlogPost, InsertContact, InsertUser, TeamMember, InsertTeamMember,
-  SuccessStory, InsertSuccessStory
+  SuccessStory, InsertSuccessStory, PageView, InsertPageView, WebsiteAnalytics, InsertWebsiteAnalytics
 } from "@shared/schema";
 
 export class Storage {
@@ -249,11 +249,11 @@ export class Storage {
         totalQuotes: quotes.length,
         totalRevenue: currentRevenue,
         activeProjects,
-        websiteVisitors: Math.floor(Math.random() * 1000) + 500, // Mock data
+        websiteVisitors: await this.getTodayUniqueVisitors(),
         quoteGrowth: parseFloat(quoteGrowth),
         revenueGrowth: parseFloat(revenueGrowth),
         projectGrowth: Math.floor(Math.random() * 50) - 20, // Mock data
-        visitorGrowth: Math.floor(Math.random() * 100) + 50, // Mock data
+        visitorGrowth: await this.getVisitorGrowth(),
         monthlyQuotes: currentMonthQuotes.length,
         totalContacts: contacts.length,
         totalStories: stories.length,
@@ -271,6 +271,48 @@ export class Storage {
         projectGrowth: 19,
         visitorGrowth: 201
       };
+    }
+  }
+
+  // Analytics tracking methods
+  async trackPageView(pageViewData: InsertPageView): Promise<PageView> {
+    const [pageView] = await db.insert(pageViews).values(pageViewData).returning();
+    return pageView;
+  }
+
+  async getTodayUniqueVisitors(): Promise<number> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const startOfDay = new Date(today + 'T00:00:00Z');
+      const endOfDay = new Date(today + 'T23:59:59Z');
+
+      const todayViews = await db.select().from(pageViews)
+        .where(sql`${pageViews.timestamp} >= ${startOfDay} AND ${pageViews.timestamp} <= ${endOfDay}`);
+
+      return new Set(todayViews.map(v => v.ipAddress)).size;
+    } catch {
+      return 0;
+    }
+  }
+
+  async getVisitorGrowth(): Promise<number> {
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+      const todayVisitors = await this.getTodayUniqueVisitors();
+      
+      const yesterdayStart = new Date(yesterday + 'T00:00:00Z');
+      const yesterdayEnd = new Date(yesterday + 'T23:59:59Z');
+
+      const yesterdayViews = await db.select().from(pageViews)
+        .where(sql`${pageViews.timestamp} >= ${yesterdayStart} AND ${pageViews.timestamp} <= ${yesterdayEnd}`);
+
+      const yesterdayVisitors = new Set(yesterdayViews.map(v => v.ipAddress)).size;
+      
+      return todayVisitors - yesterdayVisitors;
+    } catch {
+      return 0;
     }
   }
 }

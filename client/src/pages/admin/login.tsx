@@ -24,6 +24,7 @@ export default function AdminLogin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
 
   const {
     register,
