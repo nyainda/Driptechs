@@ -143,11 +143,6 @@ export default function Header() {
                   Get Quote
                 </Button>
               </Link>
-              <Link href="/admin">
-                <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 hover:bg-blue-50">
-                  Admin Portal
-                </Button>
-              </Link>
             </div>
 
             {/* Mobile menu button */}
@@ -208,11 +203,6 @@ export default function Header() {
                   <Link href="/quote" onClick={closeSheet}>
                     <Button className="w-full bg-green-600 hover:bg-green-700">
                       Get Quote
-                    </Button>
-                  </Link>
-                  <Link href="/admin/login" onClick={closeSheet}>
-                    <Button variant="outline" className="w-full">
-                      Admin Login
                     </Button>
                   </Link>
                 </div>
