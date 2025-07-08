@@ -16,17 +16,3 @@ if (!process.env.DATABASE_URL) {
 
 export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 export const db = drizzle({ client: pool, schema });
-
-export const successStories = pgTable("success_stories", {
-  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  client: text("client").notNull(),
-  projectType: text("project_type").notNull(),
-  challenge: text("challenge").notNull(),
-  solution: text("solution").notNull(),
-  results: text("results").notNull(),
-  completedAt: timestamp("completed_at").notNull(),
-  imageUrl: text("image_url"),
-  active: boolean("active").default(true),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
