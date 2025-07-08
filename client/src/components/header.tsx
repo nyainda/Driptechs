@@ -143,9 +143,9 @@ export default function Header() {
                   Get Quote
                 </Button>
               </Link>
-              <Link href="/admin/login">
-                <Button variant="outline" size="sm">
-                  Admin
+              <Link href="/admin">
+                <Button variant="outline" size="sm" className="text-blue-600 border-blue-600 hover:bg-blue-50">
+                  Admin Portal
                 </Button>
               </Link>
             </div>

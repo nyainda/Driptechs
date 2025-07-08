@@ -1,7 +1,7 @@
 // client/src/api.ts
 const API_BASE_URL = import.meta.env.PROD 
-  ? '' // When deployed on Vercel, API calls will be relative
-  : 'http://localhost:5000'; // Your local server
+  ? '' // When deployed, API calls will be relative to the deployed domain
+  : 'http://localhost:5000'; // Your local development server
 
 // Simple API call function
 export const callAPI = async (endpoint: string, options: RequestInit = {}) => {

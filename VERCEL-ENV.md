@@ -10,6 +10,23 @@ Set these in your Vercel dashboard under Settings > Environment Variables:
 DATABASE_URL=postgresql://username:password@hostname:port/database_name
 ```
 
+**Important**: For production deployment, you MUST set up a proper database:
+
+**Option 1 - Vercel Postgres (Recommended)**:
+1. Go to your Vercel dashboard → Storage tab
+2. Create a new Postgres database
+3. Copy the connection string and set as DATABASE_URL
+
+**Option 2 - Neon Database**:
+1. Go to https://neon.tech and create a free account
+2. Create a new database
+3. Copy the connection string and set as DATABASE_URL
+
+**Option 3 - Supabase**:
+1. Go to https://supabase.com and create a project
+2. Go to Settings → Database
+3. Copy the connection string and set as DATABASE_URL
+
 ### JWT Authentication
 ```
 JWT_SECRET=your-super-secret-jwt-key-here-make-it-long-and-random

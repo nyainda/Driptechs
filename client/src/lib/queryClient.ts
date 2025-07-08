@@ -24,13 +24,20 @@ export async function apiRequest(method: string, url: string, data?: any) {
     config.body = JSON.stringify(data);
   }
 
-  const response = await fetch(url, config);
+  try {
+    const response = await fetch(url, config);
 
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    return response;
+  } catch (error) {
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      throw new Error('Connection Error: Unable to connect to the server. Please check your internet connection.');
+    }
+    throw error;
   }
-
-  return response;
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
@@ -40,7 +47,7 @@ export const getQueryFn: <T>(options: {
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     const token = getAuthToken();
-    
+
     const res = await fetch(queryKey[0] as string, {
       credentials: "include",
       headers: {
