@@ -489,6 +489,9 @@ export class Storage {
     for (const achievement of defaultAchievements) {
       await this.createAchievement(achievement);
     }
+    } catch (error) {
+      console.error("❌ Failed to initialize default achievements:", error);
+    }
   }
 }
 
