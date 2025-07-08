@@ -8,6 +8,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Request logging middleware
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -38,60 +39,106 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
+// Database initialization status
+let isInitialized = false;
+let initError: Error | null = null;
+
+// Initialize database
+const initializeApp = async () => {
+  try {
+    const isConnected = await checkDatabaseConnection();
+    if (!isConnected) {
+      throw new Error('Database connection failed. Please check your DATABASE_URL.');
+    }
+
+    const dbConfig = getDatabaseConfig();
+    console.log(`🗄️  Database provider: ${dbConfig.provider}`);
+
+    await initializeDatabase();
+    isInitialized = true;
+    console.log('✅ Database initialized successfully');
+  } catch (error) {
+    initError = error as Error;
+    console.error('❌ Database initialization failed:', error);
+    
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
+  }
+};
+
+// Middleware to check initialization status
+app.use('/api', (req, res, next) => {
+  if (!isInitialized && initError) {
+    return res.status(500).json({ 
+      error: 'Database initialization failed',
+      message: initError.message 
+    });
+  }
+  
+  if (!isInitialized) {
+    return res.status(503).json({ 
+      error: 'Service temporarily unavailable',
+      message: 'Database is still initializing...' 
+    });
+  }
+  
+  next();
+});
+
+// Health check route (bypasses initialization check)
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: isInitialized ? 'ok' : initError ? 'error' : 'initializing',
+    timestamp: new Date().toISOString(),
+    env: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Main application setup
+const setupApp = async () => {
+  // Initialize database first
+  await initializeApp();
+  
+  // Register routes
   const server = await registerRoutes(app);
 
+  // Error handler
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
     res.status(status).json({ message });
-    throw err;
+    
+    // Only throw in development
+    if (process.env.NODE_ENV !== 'production') {
+      throw err;
+    }
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+  // Setup static serving
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
-})();
-
-// Initialize database on startup
-const initializeApp = async () => {
-  try {
-    // Check database connection
-    const isConnected = await checkDatabaseConnection();
-    if (!isConnected) {
-      console.error('❌ Database connection failed. Please check your DATABASE_URL.');
-      process.exit(1);
-    }
-
-    // Log database provider
-    const dbConfig = getDatabaseConfig();
-    console.log(`🗄️  Database provider: ${dbConfig.provider}`);
-
-    // Initialize database and demo data
-    await initializeDatabase();
-  } catch (error) {
-    console.error('❌ App initialization failed:', error);
-    process.exit(1);
+  // Start server only in development
+  if (process.env.NODE_ENV !== 'production') {
+    const port = 5000;
+    server.listen({
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    }, () => {
+      log(`serving on port ${port}`);
+    });
   }
+
+  return app;
 };
 
-initializeApp();
-module.exports = app;
+// Initialize app (don't await in module scope for Vercel)
+setupApp().catch(console.error);
+
+export default app;

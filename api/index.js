@@ -1,30 +1,34 @@
 // Vercel serverless function entry point
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-// Get __dirname equivalent in ES modules
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Import the compiled server - try different approaches for compatibility
 let app;
+
 try {
-  // Try to import the compiled server
+  // Import the esbuild-compiled server from dist/index.js
   const serverModule = await import('../dist/index.js');
   app = serverModule.default || serverModule;
+  console.log('Successfully loaded server from dist/index.js');
 } catch (error) {
-  console.error('Failed to import compiled server:', error);
+  console.error('Failed to import server:', error);
   
-  // Fallback: try to run the TypeScript directly (not recommended for production)
-  try {
-    // Note: tsx might not work in ES modules, consider using ts-node/esm
-    const serverModule = await import('../server/index.ts');
-    app = serverModule.default || serverModule;
-  } catch (tsError) {
-    console.error('Failed to import TypeScript server:', tsError);
-    throw new Error('Could not load server application');
-  }
+  // Create a simple fallback handler
+  app = (req, res) => {
+    // Handle CORS
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    
+    if (req.method === 'OPTIONS') {
+      res.status(200).end();
+      return;
+    }
+    
+    res.status(500).json({ 
+      error: 'Server application failed to load',
+      message: error.message || 'Please check build configuration',
+      timestamp: new Date().toISOString(),
+      method: req.method,
+      path: req.url
+    });
+  };
 }
 
-// Export as default for Vercel
 export default app;
