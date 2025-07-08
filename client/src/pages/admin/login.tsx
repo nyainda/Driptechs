@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { setAuthToken, setUser } from "@/lib/auth";
 import { Droplets, Lock, Mail, Eye, EyeOff } from "lucide-react";
-
+import { callAPI } from '@/api';
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
