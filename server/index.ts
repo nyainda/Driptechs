@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { initializeDatabase } from './init-db';
+import { checkDatabaseConnection, getDatabaseConfig } from './db';
 
 const app = express();
 app.use(express.json());
@@ -68,4 +70,28 @@ app.use((req, res, next) => {
     log(`serving on port ${port}`);
   });
 })();
+
+// Initialize database on startup
+const initializeApp = async () => {
+  try {
+    // Check database connection
+    const isConnected = await checkDatabaseConnection();
+    if (!isConnected) {
+      console.error('❌ Database connection failed. Please check your DATABASE_URL.');
+      process.exit(1);
+    }
+
+    // Log database provider
+    const dbConfig = getDatabaseConfig();
+    console.log(`🗄️  Database provider: ${dbConfig.provider}`);
+
+    // Initialize database and demo data
+    await initializeDatabase();
+  } catch (error) {
+    console.error('❌ App initialization failed:', error);
+    process.exit(1);
+  }
+};
+
+initializeApp();
 module.exports = app;

@@ -10,6 +10,17 @@ import type {
 } from "@shared/schema";
 
 export class Storage {
+  // Flag to track if we're in demo mode (when no real data exists)
+  private async isDemoMode(): Promise<boolean> {
+    try {
+      const userCount = await db.select().from(users).limit(2);
+      // Demo mode if only admin user exists
+      return userCount.length <= 1;
+    } catch {
+      return true;
+    }
+  }
+
   // User management
   async getUsers(): Promise<User[]> {
     return await db.select().from(users);

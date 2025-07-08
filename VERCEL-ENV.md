@@ -1,4 +1,3 @@
-
 # Vercel Environment Variables Setup
 
 ## Required Environment Variables
@@ -75,3 +74,21 @@ Use services like:
 ## Testing Environment Variables
 
 After setting them up, redeploy your application. Check the deployment logs to ensure no environment variable errors.
+
+## Environment Variables for Vercel Deployment
+
+To deploy DripTech to Vercel successfully, you need to set up these environment variables:
+
+### Required Environment Variables
+
+1. **DATABASE_URL** (Required)
+   ```
+   DATABASE_URL=postgresql://username:password@host:port/database?sslmode=require
+   ```
+   - **Recommended Providers:**
+     - **Neon** (Free tier available): `postgresql://username:password@ep-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require`
+     - **Supabase**: `postgresql://postgres.xxx:password@aws-0-us-east-1.pooler.supabase.com:6543/postgres`
+     - **Railway**: `postgresql://postgres:password@viaduct.proxy.rlwy.net:port/railway`
+     - **Render**: `postgresql://user:pass@host:port/db`
+   - Must be a PostgreSQL connection string
+   - SSL mode is usually required for production databases
