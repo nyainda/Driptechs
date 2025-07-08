@@ -1,20 +1,24 @@
-
 // Vercel serverless function entry point
-const path = require('path');
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Import the compiled server - try different approaches for compatibility
 let app;
 try {
   // Try to import the compiled server
-  const serverModule = require('../dist/index.js');
+  const serverModule = await import('../dist/index.js');
   app = serverModule.default || serverModule;
 } catch (error) {
   console.error('Failed to import compiled server:', error);
   
   // Fallback: try to run the TypeScript directly (not recommended for production)
   try {
-    require('tsx/cjs');
-    const serverModule = require('../server/index.ts');
+    // Note: tsx might not work in ES modules, consider using ts-node/esm
+    const serverModule = await import('../server/index.ts');
     app = serverModule.default || serverModule;
   } catch (tsError) {
     console.error('Failed to import TypeScript server:', tsError);
@@ -22,8 +26,5 @@ try {
   }
 }
 
-// Ensure we export a function for Vercel
-module.exports = app;
-
-// Also export as default for compatibility
-module.exports.default = app;
+// Export as default for Vercel
+export default app;
