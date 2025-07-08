@@ -38,8 +38,13 @@ const successStorySchema = z.object({
   areaSize: z.string().min(1, "Area size is required"),
   waterSavings: z.string().optional(),
   yieldIncrease: z.string().optional(),
-  image: z.string().url("Must be a valid image URL"),
-  completedDate: z.string().min(1, "Completion date is required"),
+  image: z.string().min(1, "Image URL is required"),
+  completedDate: z.string().min(1, "Completion date is required").refine((date) => {
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(23, 59, 59, 999);
+    return selectedDate <= today;
+  }, "Completion date cannot be in the future"),
   featured: z.boolean().optional(),
   active: z.boolean().optional(),
 });

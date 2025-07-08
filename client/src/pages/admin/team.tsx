@@ -48,7 +48,7 @@ const teamMemberSchema = z.object({
   position: z.string().min(1, "Position is required"),
   bio: z.string().min(1, "Bio is required"),
   image: z.string().min(1, "Image URL is required"),
-  email: z.string().email("Invalid email").optional(),
+  email: z.string().email("Invalid email").optional().or(z.literal("")),
   linkedin: z.string().optional().refine(
     (val) => !val || /^https:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9\-_]+\/?$/.test(val),
     { message: "Invalid LinkedIn URL. Must be like https://www.linkedin.com/in/username" }

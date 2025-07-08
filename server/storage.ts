@@ -93,7 +93,11 @@ export class Storage {
   }
 
   async sendQuoteToCustomer(quote: Quote): Promise<void> {
-    await NotificationService.sendQuoteEmail(quote);
+    const { sendQuoteEmail } = await import("./email");
+    const success = await sendQuoteEmail(quote);
+    if (!success) {
+      throw new Error("Failed to send quote email");
+    }
   }
 
   async updateQuote(id: string, updateData: Partial<InsertQuote>): Promise<Quote> {
