@@ -3,6 +3,7 @@
 
 // Build script for Vercel deployment
 import { build } from 'vite';
+import { build as esbuild } from 'esbuild';
 import fs from 'fs';
 import path from 'path';
 
@@ -23,6 +24,21 @@ async function buildForVercel() {
       }
     });
     
+    // Build backend with esbuild for Node.js
+    console.log('🔧 Building backend...');
+    await esbuild({
+      entryPoints: ['server/index.ts'],
+      bundle: true,
+      platform: 'node',
+      target: 'node18',
+      format: 'cjs',
+      outfile: 'dist/index.js',
+      external: ['better-sqlite3', 'pg-native'],
+      banner: {
+        js: '// Compiled by esbuild for Vercel deployment'
+      }
+    });
+    
     // Ensure the API directory structure exists
     const apiDir = path.join(process.cwd(), 'api');
     if (!fs.existsSync(apiDir)) {
@@ -31,7 +47,8 @@ async function buildForVercel() {
     
     console.log('✅ Build completed successfully!');
     console.log('📁 Frontend built to: dist/public');
-    console.log('📁 Backend entry point: server/index.ts');
+    console.log('📁 Backend built to: dist/index.js');
+    console.log('📁 API entry point: api/index.js');
     
   } catch (error) {
     console.error('❌ Build failed:', error);
