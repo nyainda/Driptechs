@@ -1,18 +1,12 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
-    {
-      "src": "api/index.ts",
-      "use": "@vercel/node"
+  "buildCommand": "cd client && npm install && npm run build",
+  "outputDirectory": "client/dist",
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 30
     }
-  ],
+  },
   "routes": [
     {
       "src": "/api/(.*)",
@@ -20,12 +14,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/client/dist/$1"
+      "dest": "/$1"
     }
-  ],
-  "functions": {
-    "api/index.ts": {
-      "maxDuration": 30
-    }
-  }
+  ]
 }
