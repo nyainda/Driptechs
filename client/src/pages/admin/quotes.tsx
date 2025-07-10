@@ -220,7 +220,14 @@ export default function AdminQuotes() {
           </div>
         </header>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <QuotePDF quote={selectedQuote} />
+          <Dialog open={!!selectedQuote} onOpenChange={() => setSelectedQuote(null)}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Quote #{selectedQuote?.id.slice(0, 8)} - {selectedQuote?.customerName}</DialogTitle>
+            </DialogHeader>
+            {selectedQuote && <QuotePDF quote={selectedQuote} />}
+          </DialogContent>
+        </Dialog>
         </div>
       </div>
     );
@@ -406,7 +413,7 @@ export default function AdminQuotes() {
                         <Eye className="h-4 w-4 mr-1" />
                         View
                       </Button>
-                      
+
                       <Select
                         value={quote.status}
                         onValueChange={(value) => handleStatusChange(quote.id, value)}

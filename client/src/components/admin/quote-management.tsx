@@ -291,7 +291,10 @@ export default function QuoteManagement() {
 
   const { data: quotes, isLoading } = useQuery<Quote[]>({
     queryKey: ["/api/admin/quotes"],
-    queryFn: () => fetch("/api/admin/quotes").then(res => res.json()),
+    queryFn: async () => {
+      const response = await apiRequest("GET", "/api/admin/quotes");
+      return response.json();
+    },
   });
 
   const deleteMutation = useMutation({
@@ -313,17 +316,14 @@ export default function QuoteManagement() {
 
   const generateInvoice = async (quote: Quote) => {
     try {
-      const response = await fetch(`/api/admin/quotes/${quote.id}/invoice`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await apiRequest("POST", `/api/admin/quotes/${quote.id}/invoice`);
       
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = `invoice-${quote.id}.pdf`;
+        a.download = `invoice-${quote.id}.html`;
         a.click();
         window.URL.revokeObjectURL(url);
         toast({ title: "Success", description: "Invoice generated successfully" });

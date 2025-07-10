@@ -25,7 +25,7 @@ function generateInvoiceHTML(quote: any): string {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>Invoice - ${quote.id}</title>
       <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #333; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #333; line-height: 1.6; }
         .invoice-header { display: flex; justify-content: space-between; margin-bottom: 40px; }
         .company-info { flex: 1; }
         .invoice-info { flex: 1; text-align: right; }
@@ -43,7 +43,11 @@ function generateInvoiceHTML(quote: any): string {
         .total-line { margin-bottom: 8px; }
         .total-amount { font-size: 20px; font-weight: bold; color: #16a34a; }
         .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
-        @media print { body { padding: 0; } }
+        .print-btn { background: #16a34a; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 20px 0; }
+        @media print { 
+          body { padding: 0; } 
+          .print-btn { display: none; }
+        }
       </style>
     </head>
     <body>
@@ -112,17 +116,33 @@ function generateInvoiceHTML(quote: any): string {
             <tr>
               <th>Description</th>
               <th>Quantity</th>
-              <th>Unit Price</th>
-              <th>Total</th>
+              <th>Unit</th>
+              <th>Unit Price (KES)</th>
+              <th>Total (KES)</th>
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <td>${quote.projectType} - ${quote.location}</td>
-              <td>1</td>
-              <td>KES ${quote.totalAmount?.toLocaleString() || 0}</td>
-              <td>KES ${quote.totalAmount?.toLocaleString() || 0}</td>
-            </tr>
+            ${quote.items && quote.items.length > 0 ? 
+              quote.items.map((item: any) => `
+                <tr>
+                  <td>
+                    <strong>${item.name}</strong><br>
+                    <small>${item.description}</small>
+                  </td>
+                  <td>${item.quantity}</td>
+                  <td>${item.unit}</td>
+                  <td>${item.unitPrice?.toLocaleString() || 0}</td>
+                  <td>${item.total?.toLocaleString() || 0}</td>
+                </tr>
+              `).join('') :
+              `<tr>
+                <td>${quote.projectType} - ${quote.location}</td>
+                <td>1</td>
+                <td>service</td>
+                <td>${quote.totalAmount?.toLocaleString() || 0}</td>
+                <td>${quote.totalAmount?.toLocaleString() || 0}</td>
+              </tr>`
+            }
           </tbody>
         </table>
       </div>
@@ -150,6 +170,15 @@ function generateInvoiceHTML(quote: any): string {
         <p>Thank you for choosing DripTech Irrigation Solutions!</p>
         <p>For any inquiries, please contact us at info@driptech.co.ke</p>
       </div>
+      
+      <button class="print-btn" onclick="window.print()">Print Invoice</button>
+      
+      <script>
+        // Auto-focus for accessibility
+        document.addEventListener('DOMContentLoaded', function() {
+          document.querySelector('.print-btn').focus();
+        });
+      </script>
     </body>
     </html>
   `;
@@ -548,12 +577,13 @@ app.get("/api/health", async (req, res) => {
       // Generate invoice HTML
       const invoiceHTML = generateInvoiceHTML(quote);
       
-      // For now, we'll return the HTML as a downloadable file
-      // In a production environment, you'd use a PDF generation library
-      res.setHeader('Content-Type', 'text/html');
-      res.setHeader('Content-Disposition', `attachment; filename="invoice-${quote.id}.html"`);
+      // Set proper headers for HTML download
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      res.setHeader('Content-Disposition', `attachment; filename="invoice-${quote.id.slice(-8)}.html"`);
+      res.setHeader('Cache-Control', 'no-cache');
       res.send(invoiceHTML);
     } catch (error) {
+      console.error("Invoice generation error:", error);
       res.status(500).json({ message: "Failed to generate invoice" });
     }
   });
