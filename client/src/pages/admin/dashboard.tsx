@@ -275,10 +275,10 @@ export default function AdminDashboard() {
               Add Product
             </Button>
           </Link>
-          <Link href="/admin/quotes">
+          <Link href="/admin/quote-management">
             <Button className="w-full h-16 bg-gradient-to-r from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 hover:from-slate-200 hover:to-slate-300 dark:hover:from-slate-700 dark:hover:to-slate-800 text-slate-800 dark:text-slate-200 border-0 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
               <FileText className="mr-2 h-5 w-5" />
-              View Quotes
+              Quote Management
             </Button>
           </Link>
           <Link href="/admin/users">

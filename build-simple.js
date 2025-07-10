@@ -1,7 +1,7 @@
 #!/usr/bin/env node
+
+// Simple build script that works with ES modules
 const { execSync } = require('child_process');
-const fs = require('fs');
-const path = require('path');
 
 console.log('🏗️  Simple build for Vercel deployment...');
 

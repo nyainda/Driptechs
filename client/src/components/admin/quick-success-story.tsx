@@ -15,11 +15,12 @@ import { Trophy, Plus, X } from "lucide-react";
 
 const quickSuccessStorySchema = z.object({
   title: z.string().min(1, "Title is required"),
-  client: z.string().min(1, "Client name is required"),
-  projectType: z.string().min(1, "Project type is required"),
+  clientName: z.string().min(1, "Client name is required"),
+  category: z.string().min(1, "Category is required"),
   location: z.string().min(1, "Location is required"),
   areaSize: z.string().min(1, "Area size is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
+  photoUrl: z.string().url("Please enter a valid URL").optional().or(z.literal("")),
   featured: z.boolean().default(false),
   completedDate: z.string().min(1, "Completion date is required"),
   waterSavings: z.string().optional(),
@@ -50,6 +51,8 @@ export default function QuickSuccessStory({ onSuccess, onCancel }: QuickSuccessS
     defaultValues: {
       featured: false,
       completedDate: new Date().toISOString().split('T')[0],
+      category: "Agriculture",
+      photoUrl: "",
     },
   });
 
@@ -57,12 +60,11 @@ export default function QuickSuccessStory({ onSuccess, onCancel }: QuickSuccessS
     mutationFn: async (data: QuickSuccessStoryData) => {
       const storyData = {
         ...data,
-        image: "/api/placeholder/400/300", // Default placeholder image
+        image: data.photoUrl || "/api/placeholder/400/300", // Use photo URL or default placeholder
         active: true
       };
       
-      const response = await apiRequest("POST", "/api/admin/success-stories", storyData);
-      return response.json();
+      return await apiRequest("POST", "/api/admin/success-stories", storyData);
     },
     onSuccess: () => {
       toast({
@@ -115,6 +117,7 @@ export default function QuickSuccessStory({ onSuccess, onCancel }: QuickSuccessS
               onCancel?.();
             }}
             className="text-white hover:bg-white/20"
+            aria-label="Close form"
           >
             <X className="h-4 w-4" />
           </Button>
@@ -136,26 +139,26 @@ export default function QuickSuccessStory({ onSuccess, onCancel }: QuickSuccessS
             </div>
 
             <div>
-              <Label htmlFor="client">Client Name</Label>
+              <Label htmlFor="clientName">Client Name</Label>
               <Input
-                id="client"
-                {...register("client")}
+                id="clientName"
+                {...register("clientName")}
                 placeholder="Green Valley Farms"
               />
-              {errors.client && (
-                <p className="text-sm text-red-500">{errors.client.message}</p>
+              {errors.clientName && (
+                <p className="text-sm text-red-500">{errors.clientName.message}</p>
               )}
             </div>
 
             <div>
-              <Label htmlFor="projectType">Project Type</Label>
+              <Label htmlFor="category">Category</Label>
               <Input
-                id="projectType"
-                {...register("projectType")}
-                placeholder="Drip Irrigation System"
+                id="category"
+                {...register("category")}
+                placeholder="Agriculture"
               />
-              {errors.projectType && (
-                <p className="text-sm text-red-500">{errors.projectType.message}</p>
+              {errors.category && (
+                <p className="text-sm text-red-500">{errors.category.message}</p>
               )}
             </div>
 
@@ -212,6 +215,21 @@ export default function QuickSuccessStory({ onSuccess, onCancel }: QuickSuccessS
                 placeholder="25%"
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="photoUrl">Photo URL</Label>
+            <Input
+              id="photoUrl"
+              {...register("photoUrl")}
+              placeholder="https://example.com/photo.jpg"
+            />
+            {errors.photoUrl && (
+              <p className="text-sm text-red-500">{errors.photoUrl.message}</p>
+            )}
+            <p className="text-sm text-gray-500 mt-1">
+              Enter a direct URL to the photo. You can use services like Unsplash, Pixabay, or upload to your own server.
+            </p>
           </div>
 
           <div>

@@ -26,6 +26,7 @@ import AdminDashboard from "@/pages/admin/dashboard";
 import AdminProducts from "@/pages/admin/products";
 import AdminBlog from "@/pages/admin/blog";
 import AdminQuotes from "@/pages/admin/quotes";
+import AdminQuoteManagement from "@/pages/admin/quote-management";
 import AdminUsers from "@/pages/admin/users";
 import AdminSettings from "@/pages/admin/settings";
 import AdminSuccessStories from "@/pages/admin/success-stories";
@@ -54,6 +55,7 @@ function Router() {
       <Route path="/admin/products" component={AdminProducts} />
       <Route path="/admin/blog" component={AdminBlog} />
       <Route path="/admin/quotes" component={AdminQuotes} />
+      <Route path="/admin/quote-management" component={AdminQuoteManagement} />
       <Route path="/admin/users" component={AdminUsers} />
       <Route path="/admin/settings" component={AdminSettings} />
       <Route path="/admin/success-stories" component={AdminSuccessStories} />
