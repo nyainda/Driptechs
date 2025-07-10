@@ -173,7 +173,7 @@ export class Storage {
 
   // Team Members
   async getTeamMembers(): Promise<TeamMember[]> {
-    return await db.select().from(teamMembers).orderBy(asc(teamMembers.order), asc(teamMembers.createdAt));
+    return await db.select().from(teamMembers).orderBy(asc(teamMembers.createdAt));
   }
 
   async createTeamMember(data: InsertTeamMember): Promise<TeamMember> {
@@ -195,7 +195,7 @@ export class Storage {
 
   // Success Stories
   async getSuccessStories(): Promise<SuccessStory[]> {
-    return await db.select().from(successStories).orderBy(asc(successStories.completedDate));
+    return await db.select().from(successStories).orderBy(asc(successStories.createdAt));
   }
 
   async createSuccessStory(data: InsertSuccessStory): Promise<SuccessStory> {
@@ -299,7 +299,7 @@ export class Storage {
       const endOfDay = new Date(today + 'T23:59:59Z');
 
       const todayViews = await db.select().from(pageViews)
-        .where(sql`${pageViews.timestamp} >= ${startOfDay} AND ${pageViews.timestamp} <= ${endOfDay}`);
+        .where(sql`${pageViews.createdAt} >= ${startOfDay} AND ${pageViews.createdAt} <= ${endOfDay}`);
 
       return new Set(todayViews.map(v => v.ipAddress)).size;
     } catch {
@@ -318,7 +318,7 @@ export class Storage {
       const yesterdayEnd = new Date(yesterday + 'T23:59:59Z');
 
       const yesterdayViews = await db.select().from(pageViews)
-        .where(sql`${pageViews.timestamp} >= ${yesterdayStart} AND ${pageViews.timestamp} <= ${yesterdayEnd}`);
+        .where(sql`${pageViews.createdAt} >= ${yesterdayStart} AND ${pageViews.createdAt} <= ${yesterdayEnd}`);
 
       const yesterdayVisitors = new Set(yesterdayViews.map(v => v.ipAddress)).size;
 

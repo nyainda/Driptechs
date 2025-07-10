@@ -85,8 +85,8 @@ export default function Home() {
   const displayProducts = products?.slice(0, 6) || [];
   const recentProjects = projects?.slice(0, 3) || [];
   const latestBlogPosts = blogPosts?.slice(0, 3) || [];
-  const displayTeamMembers = teamMembers?.slice(0, 3) || [];
-  const displaySuccessStories = successStories?.slice(0, 3) || [];
+  const displayTeamMembers = (teamMembers && Array.isArray(teamMembers)) ? teamMembers.slice(0, 3) : [];
+  const displaySuccessStories = (successStories && Array.isArray(successStories)) ? successStories.slice(0, 3) : [];
 
   return (
     <div className="flex flex-col">

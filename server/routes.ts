@@ -728,6 +728,7 @@ app.get("/api/health", async (req, res) => {
       const teamMembers = await storage.getTeamMembers();
       res.json(teamMembers);
     } catch (error) {
+      console.error("Team members error:", error);
       res.status(500).json({ message: "Failed to fetch team members" });
     }
   });
@@ -780,6 +781,7 @@ app.get("/api/health", async (req, res) => {
       const activeStories = stories.filter(s => s.active);
       res.json(activeStories);
     } catch (error) {
+      console.error("Success stories error:", error);
       res.status(500).json({ message: "Failed to fetch success stories" });
     }
   });
@@ -849,6 +851,7 @@ app.get("/api/health", async (req, res) => {
 
       res.json({ success: true });
     } catch (error) {
+      console.error("Page view tracking error:", error);
       res.status(500).json({ success: false });
     }
   });
