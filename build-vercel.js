@@ -1,5 +1,5 @@
 
-#!/usr/bin/env node
+
 
 // Build script for Vercel deployment
 import { build } from 'vite';
@@ -14,14 +14,8 @@ async function buildForVercel() {
     // Build frontend with Vite
     console.log('📦 Building frontend...');
     await build({
-      root: './client',
-      build: {
-        outDir: '../dist/public',
-        emptyOutDir: true,
-        rollupOptions: {
-          input: './client/index.html'
-        }
-      }
+      configFile: path.resolve(process.cwd(), 'vite.config.ts'),
+      mode: 'production'
     });
     
     // Build backend with esbuild for Node.js
@@ -39,14 +33,21 @@ async function buildForVercel() {
         'pg',
         'bcrypt',
         'jsonwebtoken',
-        '@sendgrid/mail'
+        '@sendgrid/mail',
+        '@neondatabase/serverless',
+        'drizzle-orm',
+        'postgres',
+        'zod',
+        'nanoid',
+        'uuid'
       ],
       define: {
         'process.env.NODE_ENV': '"production"'
       },
       banner: {
         js: '// Compiled by esbuild for Vercel deployment'
-      }
+      },
+      minify: true
     });
     
     // Ensure the API directory structure exists
