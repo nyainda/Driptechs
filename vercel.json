@@ -1,8 +1,8 @@
 
 {
   "version": 2,
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/public",
+  "buildCommand": "cd client && npm install && npx vite build",
+  "outputDirectory": "client/dist",
   "functions": {
     "api/index.js": {
       "runtime": "@vercel/node@3.0.0",

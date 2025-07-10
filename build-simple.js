@@ -4,15 +4,31 @@
 // Simple build script that works with ES modules
 const { execSync } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 
 console.log('🏗️  Simple build for Vercel deployment...');
 
 try {
-  // Set working directory to client for Vite build
+  // Ensure client directory exists
   const clientDir = path.join(process.cwd(), 'client');
-  
+  if (!fs.existsSync(clientDir)) {
+    console.error('❌ Client directory not found');
+    process.exit(1);
+  }
+
+  // Clean any existing dist directory
+  const distDir = path.join(process.cwd(), 'dist');
+  if (fs.existsSync(distDir)) {
+    fs.rmSync(distDir, { recursive: true, force: true });
+  }
+
   // Build frontend with vite from client directory
   console.log('📦 Building frontend...');
+  execSync('npm install', { 
+    stdio: 'inherit',
+    cwd: clientDir 
+  });
+  
   execSync('npx vite build', { 
     stdio: 'inherit',
     cwd: clientDir 
