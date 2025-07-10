@@ -20,17 +20,17 @@ NODE_ENV=production
 ### Step 2: Deploy to Vercel
 1. Connect your GitHub repository to Vercel
 2. Vercel will automatically detect the configuration from `vercel.json`
-3. The build process will:
-   - Install dependencies in the client directory
-   - Build the React frontend to `client/dist`
-   - Deploy the API as serverless functions
-   - Configure routing for both frontend and API
+3. The deployment includes:
+   - Static homepage (`index.html`) with API connectivity test
+   - Serverless API functions from `api/` directory
+   - Automatic routing between frontend and API
 
 ### Important Notes for Vercel
-- The `vercel.json` configuration uses `@vercel/static-build` for the frontend
-- The client build output goes to `client/dist` (not `../dist/public`)
-- API functions are deployed from the `api/` directory
+- Simplified configuration using static HTML and serverless API
+- Root `index.html` provides a professional landing page
+- All API endpoints work at `/api/*` routes
 - Environment variables must be set in Vercel dashboard
+- The homepage includes API health check to verify connectivity
 
 ### Step 3: Database Setup
 After deployment, your database will be automatically initialized with:

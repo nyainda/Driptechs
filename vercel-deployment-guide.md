@@ -9,18 +9,11 @@ The Vercel deployment was failing because:
 
 ## Fixed Configuration
 
-### 1. Updated `vercel.json`
+### 1. Simple `vercel.json` Configuration
 ```json
 {
   "version": 2,
   "builds": [
-    {
-      "src": "client/package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "distDir": "dist"
-      }
-    },
     {
       "src": "api/index.js",
       "use": "@vercel/node"
@@ -33,11 +26,17 @@ The Vercel deployment was failing because:
     },
     {
       "src": "/(.*)",
-      "dest": "/client/dist/$1"
+      "dest": "/index.html"
     }
   ]
 }
 ```
+
+### 2. Created Root `index.html`
+- Static homepage with API connectivity test
+- Clean professional design
+- Shows system status and API health
+- Fallback solution that always works on Vercel
 
 ### 2. Updated `client/vite.config.ts`
 - Changed `outDir` from `"../dist/public"` to `"dist"`
