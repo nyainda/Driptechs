@@ -257,8 +257,9 @@ export default function Home() {
               Real results from farmers who transformed their operations with our irrigation solutions.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {(successStories || []).slice(0, 3).map((story) => (
+          {successStories && successStories.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {successStories.slice(0, 3).map((story) => (
                 <Card key={story.id} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
                   <div className="aspect-video overflow-hidden">
                     <img
@@ -303,8 +304,9 @@ export default function Home() {
               Dedicated professionals committed to bringing you the best irrigation solutions.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-            {(teamMembers || []).slice(0, 3).map((member) => (
+          {teamMembers && teamMembers.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {teamMembers.slice(0, 3).map((member) => (
                 <Card key={member.id} className="text-center group hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full">
