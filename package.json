@@ -5,9 +5,9 @@
   "license": "MIT",
   "scripts": {
     "dev": "NODE_ENV=development tsx -r dotenv/config server/index.ts",
-    "build": "vite build client",
-    "build:simple": "vite build client",
-    "build:client": "vite build client",
+    "build": "node build-simple.js",
+    "build:simple": "node build-simple.js",
+    "build:client": "cd client && npx vite build",
     "build:server": "tsc -p server",
     "start": "NODE_ENV=production node dist/server/index.js",
     "db:generate": "drizzle-kit generate",
