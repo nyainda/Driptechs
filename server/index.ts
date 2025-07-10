@@ -138,6 +138,11 @@ const setupApp = async () => {
   return app;
 };
 
+// Export function to create app for Vercel
+export const createServer = async () => {
+  return await setupApp();
+};
+
 // Initialize app (don't await in module scope for Vercel)
 setupApp().catch(console.error);
 
