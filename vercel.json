@@ -4,7 +4,7 @@
   "outputDirectory": "dist/public",
   "functions": {
     "api/index.js": {
-      "runtime": "nodejs18.x",
+      "runtime": "@vercel/node@3.0.0",
       "maxDuration": 30
     }
   },
@@ -20,10 +20,5 @@
   ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "build": {
-    "env": {
-      "SKIP_TYPE_CHECK": "true"
-    }
   }
 }

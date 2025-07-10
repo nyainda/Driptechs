@@ -12,6 +12,149 @@ import { sql } from 'drizzle-orm';
 import { sendQuoteEmail } from "./email";
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
+// Invoice generation function
+function generateInvoiceHTML(quote: any): string {
+  const currentDate = new Date().toLocaleDateString();
+  const dueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString(); // 30 days from now
+  
+  return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Invoice - ${quote.id}</title>
+      <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; color: #333; }
+        .invoice-header { display: flex; justify-content: space-between; margin-bottom: 40px; }
+        .company-info { flex: 1; }
+        .invoice-info { flex: 1; text-align: right; }
+        .invoice-title { font-size: 24px; font-weight: bold; color: #16a34a; margin-bottom: 20px; }
+        .section { margin-bottom: 30px; }
+        .section-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; border-bottom: 2px solid #16a34a; padding-bottom: 5px; }
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .detail-item { margin-bottom: 8px; }
+        .detail-label { font-weight: bold; }
+        .items-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        .items-table th, .items-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        .items-table th { background-color: #16a34a; color: white; }
+        .items-table tbody tr:nth-child(even) { background-color: #f9f9f9; }
+        .total-section { text-align: right; margin-top: 30px; }
+        .total-line { margin-bottom: 8px; }
+        .total-amount { font-size: 20px; font-weight: bold; color: #16a34a; }
+        .footer { margin-top: 40px; text-align: center; font-size: 12px; color: #666; }
+        @media print { body { padding: 0; } }
+      </style>
+    </head>
+    <body>
+      <div class="invoice-header">
+        <div class="company-info">
+          <h1 style="color: #16a34a; margin: 0;">DripTech Irrigation</h1>
+          <p style="margin: 5px 0;">Professional Irrigation Solutions</p>
+          <p style="margin: 5px 0;">Email: info@driptech.co.ke</p>
+          <p style="margin: 5px 0;">Phone: +254 700 000 000</p>
+        </div>
+        <div class="invoice-info">
+          <div class="invoice-title">INVOICE</div>
+          <p><strong>Invoice #:</strong> INV-${quote.id.slice(-8).toUpperCase()}</p>
+          <p><strong>Date:</strong> ${currentDate}</p>
+          <p><strong>Due Date:</strong> ${dueDate}</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Bill To</div>
+        <div class="detail-item">
+          <div class="detail-label">${quote.customerName}</div>
+          <div>${quote.customerEmail}</div>
+          ${quote.customerPhone ? `<div>${quote.customerPhone}</div>` : ''}
+          ${quote.customerAddress ? `<div>${quote.customerAddress}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Project Details</div>
+        <div class="details-grid">
+          <div>
+            <div class="detail-item">
+              <span class="detail-label">Project Type:</span> ${quote.projectType}
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Location:</span> ${quote.location}
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Area Size:</span> ${quote.areaSize}
+            </div>
+          </div>
+          <div>
+            <div class="detail-item">
+              <span class="detail-label">Budget:</span> ${quote.budget}
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Timeline:</span> ${quote.timeline}
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Status:</span> ${quote.status.toUpperCase()}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Requirements</div>
+        <p>${quote.requirements}</p>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Service Description</div>
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Quantity</th>
+              <th>Unit Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>${quote.projectType} - ${quote.location}</td>
+              <td>1</td>
+              <td>KES ${quote.totalAmount?.toLocaleString() || 0}</td>
+              <td>KES ${quote.totalAmount?.toLocaleString() || 0}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="total-section">
+        <div class="total-line">
+          <strong>Subtotal: KES ${quote.totalAmount?.toLocaleString() || 0}</strong>
+        </div>
+        <div class="total-line">
+          <strong>VAT (16%): KES ${((quote.totalAmount || 0) * 0.16).toLocaleString()}</strong>
+        </div>
+        <div class="total-line total-amount">
+          <strong>Total Amount: KES ${((quote.totalAmount || 0) * 1.16).toLocaleString()}</strong>
+        </div>
+      </div>
+
+      ${quote.notes ? `
+      <div class="section">
+        <div class="section-title">Notes</div>
+        <p>${quote.notes}</p>
+      </div>
+      ` : ''}
+
+      <div class="footer">
+        <p>Thank you for choosing DripTech Irrigation Solutions!</p>
+        <p>For any inquiries, please contact us at info@driptech.co.ke</p>
+      </div>
+    </body>
+    </html>
+  `;
+}
+
 // Authentication middleware
 const authenticate = (req: any, res: any, next: any) => {
   const token = req.headers.authorization?.replace("Bearer ", "");
@@ -389,6 +532,29 @@ app.get("/api/health", async (req, res) => {
       res.json({ message: "Quote deleted successfully" });
     } catch (error) {
       res.status(500).json({ message: "Failed to delete quote" });
+    }
+  });
+
+  // Invoice generation route
+  app.post("/api/admin/quotes/:id/invoice", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const id = req.params.id;
+      const quote = await storage.getQuote(id);
+      
+      if (!quote) {
+        return res.status(404).json({ message: "Quote not found" });
+      }
+
+      // Generate invoice HTML
+      const invoiceHTML = generateInvoiceHTML(quote);
+      
+      // For now, we'll return the HTML as a downloadable file
+      // In a production environment, you'd use a PDF generation library
+      res.setHeader('Content-Type', 'text/html');
+      res.setHeader('Content-Disposition', `attachment; filename="invoice-${quote.id}.html"`);
+      res.send(invoiceHTML);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to generate invoice" });
     }
   });
 

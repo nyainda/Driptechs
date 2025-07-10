@@ -109,7 +109,8 @@ export const teamMembers = pgTable("team_members", {
   name: text("name").notNull(),
   position: text("position").notNull(),
   bio: text("bio").notNull(),
-  image: text("image").notNull(),
+  photoUrl: text("photo_url"), // New field for photo URL
+  image: text("image"), // Keep for backward compatibility
   email: text("email"),
   linkedin: text("linkedin"),
   order: integer("order").default(0),
@@ -121,14 +122,15 @@ export const teamMembers = pgTable("team_members", {
 export const successStories = pgTable("success_stories", {
   id: uuid("id").primaryKey().defaultRandom(),
   title: text("title").notNull(),
-  client: text("client").notNull(),
+  clientName: text("client_name").notNull(),
   description: text("description").notNull(),
-  projectType: text("project_type").notNull(),
+  category: text("category").notNull().default("Agriculture"),
   location: text("location").notNull(),
   areaSize: text("area_size").notNull(),
   waterSavings: text("water_savings"),
   yieldIncrease: text("yield_increase"),
-  image: text("image").notNull(),
+  photoUrl: text("photo_url"), // New field for photo URL
+  image: text("image"), // Keep for backward compatibility
   completedDate: text("completed_date").notNull(),
   featured: boolean("featured").default(false),
   active: boolean("active").default(true),

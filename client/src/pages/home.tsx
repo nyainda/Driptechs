@@ -3,9 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Droplets, Leaf, TrendingUp, CheckCircle, Wrench, Award, Phone, Mail, Calendar, User, BookOpen, Star, Package } from "lucide-react";
+import { ArrowRight, Droplets, Leaf, TrendingUp, CheckCircle, Wrench, Award, Phone, Mail, Calendar, User, BookOpen, Star, Package, Users, Trophy } from "lucide-react";
 import { Link } from "wouter";
-import type { Product, Project, BlogPost } from "@shared/schema";
+import type { Product, Project, BlogPost, TeamMember, SuccessStory } from "@shared/schema";
 
 // Helper component for a more advanced product card.
 // The 'isFeatured' prop is no longer used in the main layout but kept for potential future use.
@@ -71,10 +71,22 @@ export default function Home() {
     queryFn: () => fetch("/api/blog").then(res => res.json()),
   });
 
+  const { data: teamMembers } = useQuery<TeamMember[]>({
+    queryKey: ["/api/team"],
+    queryFn: () => fetch("/api/team").then(res => res.json()),
+  });
+
+  const { data: successStories } = useQuery<SuccessStory[]>({
+    queryKey: ["/api/success-stories"],
+    queryFn: () => fetch("/api/success-stories").then(res => res.json()),
+  });
+
   // Fetch up to 6 products to display in the premier section.
   const displayProducts = products?.slice(0, 6) || [];
   const recentProjects = projects?.slice(0, 3) || [];
   const latestBlogPosts = blogPosts?.slice(0, 3) || [];
+  const displayTeamMembers = teamMembers?.slice(0, 3) || [];
+  const displaySuccessStories = successStories?.slice(0, 3) || [];
 
   return (
     <div className="flex flex-col">
@@ -234,7 +246,98 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Latest Blog Posts Section (Existing Code) */}
+      {/* Success Stories Section */}
+      <section className="py-24 bg-gray-50 dark:bg-gray-800">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <Trophy className="mx-auto mb-4 h-12 w-12 text-green-600" />
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Success Stories
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Real results from farmers who transformed their operations with our irrigation solutions.
+            </p>
+          </div>
+          {displaySuccessStories.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {displaySuccessStories.map((story) => (
+                <Card key={story.id} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
+                  <div className="aspect-video overflow-hidden">
+                    <img
+                      src={story.photoUrl || 'https://images.unsplash.com/photo-1574943320219-553eb213f72d?w=400&h=225&fit=crop'}
+                      alt={story.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    />
+                  </div>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-3 text-sm text-muted-foreground">
+                      <Badge className="bg-green-100 text-green-800">{story.category}</Badge>
+                      <span>{story.location}</span>
+                    </div>
+                    <CardTitle className="text-lg mb-2 line-clamp-2 group-hover:text-green-600">{story.title}</CardTitle>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{story.description}</p>
+                    <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                      <User className="h-4 w-4 mr-1" />
+                      <span>{story.clientName}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Trophy className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground text-lg">No success stories yet. Coming soon!</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Team Members Section */}
+      <section className="py-24 bg-white dark:bg-gray-900">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <Users className="mx-auto mb-4 h-12 w-12 text-green-600" />
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">
+              Meet Our Expert Team
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+              Dedicated professionals committed to bringing you the best irrigation solutions.
+            </p>
+          </div>
+          {displayTeamMembers.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+              {displayTeamMembers.map((member) => (
+                <Card key={member.id} className="text-center group hover:shadow-xl transition-all duration-300">
+                  <CardContent className="p-6">
+                    <div className="w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full">
+                      <img
+                        src={member.photoUrl || `https://ui-avatars.com/api/?name=${member.name}&background=10b981&color=fff&size=96`}
+                        alt={member.name}
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      />
+                    </div>
+                    <CardTitle className="text-lg mb-2 group-hover:text-green-600">{member.name}</CardTitle>
+                    <p className="text-green-600 font-semibold mb-2">{member.position}</p>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{member.bio}</p>
+                    <div className="flex items-center justify-center text-sm text-gray-600 dark:text-gray-400">
+                      <Mail className="h-4 w-4 mr-1" />
+                      <span>{member.email}</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground text-lg">Meet our team coming soon!</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Latest Blog Posts Section */}
       <section className="py-24 bg-gray-50 dark:bg-gray-800">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
