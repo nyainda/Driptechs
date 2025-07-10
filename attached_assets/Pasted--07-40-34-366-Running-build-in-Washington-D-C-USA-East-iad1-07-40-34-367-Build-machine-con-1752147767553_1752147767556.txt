@@ -1,0 +1,55 @@
+[07:40:34.366] Running build in Washington, D.C., USA (East) – iad1
+[07:40:34.367] Build machine configuration: 2 cores, 8 GB
+[07:40:34.388] Cloning github.com/nyainda/Driptechs (Branch: main, Commit: 77cf04c)
+[07:40:34.730] Cloning completed: 342.000ms
+[07:40:34.860] Restored build cache from previous deployment (73fNiJsUJKinzBXXmPBVDhbSXp7p)
+[07:40:35.260] Running "vercel build"
+[07:40:37.814] Vercel CLI 44.2.13
+[07:40:38.723] Installing dependencies...
+[07:40:44.394] npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+[07:40:44.427] npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+[07:40:50.671] 
+[07:40:50.672] added 636 packages in 12s
+[07:40:50.673] 
+[07:40:50.674] 85 packages are looking for funding
+[07:40:50.674]   run `npm fund` for details
+[07:41:24.091] 
+[07:41:24.092] added 339 packages, and audited 340 packages in 33s
+[07:41:24.093] 
+[07:41:24.093] 50 packages are looking for funding
+[07:41:24.093]   run `npm fund` for details
+[07:41:24.094] 
+[07:41:24.094] found 0 vulnerabilities
+[07:41:24.239] 
+[07:41:24.240] > driptech-client@1.0.0 build
+[07:41:24.240] > vite build
+[07:41:24.241] 
+[07:41:24.552] [36mvite v7.0.4 [32mbuilding for production...[36m[39m
+[07:41:24.894] transforming...
+[07:41:30.312] [32m✓[39m 1890 modules transformed.
+[07:41:30.657] rendering chunks...
+[07:41:30.879] computing gzip size...
+[07:41:30.904] [2mdist/[22m[32mindex.html                 [39m[1m[2m  0.90 kB[22m[1m[22m[2m │ gzip:   0.47 kB[22m
+[07:41:30.905] [2mdist/[22m[2massets/[22m[35mindex-C70dz-zq.css  [39m[1m[2m147.73 kB[22m[1m[22m[2m │ gzip:  21.33 kB[22m
+[07:41:30.905] [2mdist/[22m[2massets/[22m[36mrouter-C3dNlie5.js  [39m[1m[2m  5.42 kB[22m[1m[22m[2m │ gzip:   2.68 kB[22m
+[07:41:30.905] [2mdist/[22m[2massets/[22m[36mui-DIvwBjVH.js      [39m[1m[2m 81.68 kB[22m[1m[22m[2m │ gzip:  27.57 kB[22m
+[07:41:30.905] [2mdist/[22m[2massets/[22m[36mvendor-DavUf6mE.js  [39m[1m[2m141.72 kB[22m[1m[22m[2m │ gzip:  45.48 kB[22m
+[07:41:30.908] [2mdist/[22m[2massets/[22m[36mindex-D77qO_JQ.js   [39m[1m[33m668.29 kB[39m[22m[2m │ gzip: 154.73 kB[22m
+[07:41:30.909] [33m
+[07:41:30.909] (!) Some chunks are larger than 500 kB after minification. Consider:
+[07:41:30.909] - Using dynamic import() to code-split the application
+[07:41:30.910] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[07:41:30.910] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[07:41:30.910] [32m✓ built in 6.32s[39m
+[07:41:31.023] Running "npm run vercel-build"
+[07:41:31.138] npm error code ENOENT
+[07:41:31.139] npm error syscall open
+[07:41:31.139] npm error path /vercel/path1/api/package.json
+[07:41:31.139] npm error errno -2
+[07:41:31.140] npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/vercel/path1/api/package.json'
+[07:41:31.140] npm error enoent This is related to npm not being able to find a file.
+[07:41:31.140] npm error enoent
+[07:41:31.140] npm error A complete log of this run can be found in: /vercel/.npm/_logs/2025-07-10T11_41_31_082Z-debug-0.log
+[07:41:31.146] Error: Command "npm run vercel-build" exited with 254
+[07:41:31.512] 
+[07:41:34.256] Exiting build container

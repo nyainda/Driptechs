@@ -1,7 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./server/routes.js";
-import { initializeDatabase } from './server/init-db.js';
-import { checkDatabaseConnection, getDatabaseConfig } from './server/db.js';
+import { registerRoutes } from "./routes";
+import { setupVite, serveStatic, log } from "./vite";
+import { initializeDatabase } from './init-db';
+import { checkDatabaseConnection, getDatabaseConfig } from './db';
 
 const app = express();
 app.use(express.json());
@@ -31,7 +32,7 @@ app.use((req, res, next) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      console.log(logLine);
+      log(logLine);
     }
   });
 
@@ -59,6 +60,10 @@ const initializeApp = async () => {
   } catch (error) {
     initError = error as Error;
     console.error('❌ Database initialization failed:', error);
+    
+    if (process.env.NODE_ENV !== 'production') {
+      process.exit(1);
+    }
   }
 };
 
@@ -90,25 +95,55 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Initialize and register routes
+// Main application setup
 const setupApp = async () => {
+  // Initialize database first
   await initializeApp();
-  await registerRoutes(app);
   
+  // Register routes
+  const server = await registerRoutes(app);
+
   // Error handler
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
+
     res.status(status).json({ message });
+    
+    // Only throw in development
+    if (process.env.NODE_ENV !== 'production') {
+      throw err;
+    }
   });
-  
+
+  // Setup static serving
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
+
+  // Start server only in development
+  if (process.env.NODE_ENV !== 'production') {
+    const port = 5000;
+    server.listen({
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    }, () => {
+      log(`serving on port ${port}`);
+    });
+  }
+
   return app;
 };
 
-// Vercel serverless function handler
-export default async function handler(req: any, res: any) {
-  if (!isInitialized && !initError) {
-    await setupApp();
-  }
-  return app(req, res);
-}
+// Export function to create app for Vercel
+export const createServer = async () => {
+  return await setupApp();
+};
+
+// Initialize app (don't await in module scope for Vercel)
+setupApp().catch(console.error);
+
+export default app;
