@@ -145,10 +145,10 @@ Changelog:
   - Successfully migrated from Replit Agent to standard Replit environment
   - Fixed PostgreSQL database connection and schema setup
   - Installed all required dependencies (tsx, Node.js packages)
-  - Created optimized Vercel deployment configuration
+  - Created optimized Vercel deployment configuration with proper serverless functions
   - Fixed admin login functionality for cloud deployment
   - Simplified API entry point for better Vercel compatibility
-  - Added comprehensive build and deployment documentation
+  - Added comprehensive build and deployment documentation (DEPLOYMENT.md)
   - Fixed missing database columns (image, active, timestamp) for team members and success stories
   - Created missing UI components (toaster, toast) for complete React application
   - Resolved all API endpoints returning proper responses
@@ -157,6 +157,8 @@ Changelog:
   - Implemented full pricing controls with automatic VAT calculations (16%)
   - Added invoice generation and customer email sending functionality
   - Created enhanced quote editor with item-level pricing and product integration
+  - Fixed Vercel 404 deployment errors with proper API routing and client package structure
+  - Created comprehensive deployment guide with troubleshooting steps
 ```
 
 ## User Preferences
