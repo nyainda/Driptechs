@@ -1,0 +1,136 @@
+[06:20:42.157] Running build in Washington, D.C., USA (East) – iad1
+[06:20:42.157] Build machine configuration: 2 cores, 8 GB
+[06:20:42.170] Cloning github.com/nyainda/Driptechs (Branch: main, Commit: f3b606e)
+[06:20:42.492] Cloning completed: 322.000ms
+[06:20:42.583] Restored build cache from previous deployment (5xvbHQVq7UYiKozMiP7m1ZaBHD7C)
+[06:20:42.888] Running "vercel build"
+[06:20:43.307] Vercel CLI 44.2.13
+[06:20:43.476] WARN! Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply. Learn More: https://vercel.link/unused-build-settings
+[06:20:44.010] Installing dependencies...
+[06:20:44.872] 
+[06:20:44.873] up to date in 630ms
+[06:20:44.873] 
+[06:20:44.873] 21 packages are looking for funding
+[06:20:44.874]   run `npm fund` for details
+[06:20:45.117] Using built-in TypeScript 4.9.5 since "typescript" is missing from "devDependencies"
+[06:20:45.136] error TS5023: Unknown compiler option 'allowImportingTsExtensions'.
+[06:20:45.136] error TS6046: Argument for '--moduleResolution' option must be: 'node', 'classic', 'node16', 'nodenext'.
+[06:20:45.136] 
+[06:20:46.887] server/routes.ts(1,30): error TS2792: Cannot find module 'express'. Did you mean to set the 'moduleResolution' option to 'node', or to add aliases to the 'paths' option?
+[06:20:46.888] server/routes.ts(2,43): error TS2792: Cannot find module 'http'. Did you mean to set the 'moduleResolution' option to 'node', or to add aliases to the 'paths' option?
+[06:20:46.888] server/routes.ts(9,20): error TS2792: Cannot find module 'bcrypt'. Did you mean to set the 'moduleResolution' option to 'node', or to add aliases to the 'paths' option?
+[06:20:46.889] server/routes.ts(10,17): error TS2792: Cannot find module 'jsonwebtoken'. Did you mean to set the 'moduleResolution' option to 'node', or to add aliases to the 'paths' option?
+[06:20:46.889] server/routes.ts(11,21): error TS2792: Cannot find module 'drizzle-orm'. Did you mean to set the 'moduleResolution' option to 'node', or to add aliases to the 'paths' option?
+[06:20:46.889] server/routes.ts(13,20): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+[06:20:46.889] server/routes.ts(216,31): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.890] server/routes.ts(216,36): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.890] server/routes.ts(224,15): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+[06:20:46.890] server/routes.ts(238,38): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.890] server/routes.ts(238,43): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.890] server/routes.ts(279,58): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.891] server/routes.ts(293,35): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.891] server/routes.ts(293,40): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.891] server/routes.ts(305,39): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.891] server/routes.ts(305,44): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.891] server/routes.ts(318,70): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.892] server/routes.ts(318,75): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.892] server/routes.ts(348,73): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.892] server/routes.ts(348,78): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.892] server/routes.ts(359,76): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.892] server/routes.ts(359,81): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.895] server/routes.ts(370,66): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.895] server/routes.ts(370,71): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.895] server/routes.ts(384,77): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.895] server/routes.ts(410,80): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.895] server/routes.ts(430,83): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.896] server/routes.ts(447,34): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.896] server/routes.ts(447,39): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.896] server/routes.ts(463,67): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.896] server/routes.ts(463,72): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.896] server/routes.ts(472,71): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.896] server/routes.ts(472,76): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.897] server/routes.ts(484,71): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.897] server/routes.ts(484,76): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.897] server/routes.ts(535,77): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.897] server/routes.ts(535,82): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.897] server/routes.ts(557,74): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.897] server/routes.ts(557,79): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.898] server/routes.ts(568,80): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.898] server/routes.ts(568,85): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.898] server/routes.ts(592,35): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.898] server/routes.ts(592,40): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.898] server/routes.ts(603,69): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.899] server/routes.ts(603,74): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.899] server/routes.ts(612,70): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.899] server/routes.ts(612,75): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.899] server/routes.ts(623,31): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.899] server/routes.ts(623,36): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.899] server/routes.ts(634,37): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.899] server/routes.ts(634,42): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.900] server/routes.ts(646,65): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.900] server/routes.ts(646,70): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.900] server/routes.ts(655,76): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.900] server/routes.ts(684,69): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.900] server/routes.ts(684,74): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.901] server/routes.ts(695,72): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.901] server/routes.ts(695,77): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.902] server/routes.ts(706,35): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.902] server/routes.ts(706,40): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.902] server/routes.ts(716,69): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.902] server/routes.ts(716,74): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.903] server/routes.ts(726,31): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.903] server/routes.ts(726,36): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.903] server/routes.ts(736,65): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.903] server/routes.ts(736,70): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.903] server/routes.ts(745,66): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.903] server/routes.ts(745,71): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.904] server/routes.ts(755,69): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.904] server/routes.ts(755,74): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.904] server/routes.ts(766,72): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.904] server/routes.ts(766,77): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.904] server/routes.ts(777,42): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.904] server/routes.ts(777,47): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.905] server/routes.ts(789,76): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.905] server/routes.ts(789,81): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.905] server/routes.ts(798,70): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.905] server/routes.ts(798,75): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.905] server/routes.ts(807,77): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.906] server/routes.ts(807,82): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.906] server/routes.ts(817,80): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.906] server/routes.ts(817,85): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.906] server/routes.ts(828,83): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.906] server/routes.ts(828,88): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.906] server/routes.ts(839,42): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.907] server/routes.ts(839,47): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.907] server/routes.ts(860,73): error TS7006: Parameter 'req' implicitly has an 'any' type.
+[06:20:46.907] server/routes.ts(860,78): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.907] server/routes.ts(869,92): error TS7006: Parameter 'res' implicitly has an 'any' type.
+[06:20:46.907] 
+[06:20:46.925] server/db.ts(3,34): error TS2792: Cannot find module '@neondatabase/serverless'. Did you mean to set the 'moduleResolution' option to 'node', or to add aliases to the 'paths' option?
+[06:20:46.925] server/db.ts(4,25): error TS2792: Cannot find module 'drizzle-orm/neon-serverless'. Did you mean to set the 'moduleResolution' option to 'node', or to add aliases to the 'paths' option?
+[06:20:46.925] server/db.ts(5,16): error TS2792: Cannot find module 'ws'. Did you mean to set the 'moduleResolution' option to 'node', or to add aliases to the 'paths' option?
+[06:20:46.925] server/db.ts(10,39): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+[06:20:46.925] server/db.ts(12,6): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+[06:20:46.926] server/db.ts(20,17): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+[06:20:46.926] server/db.ts(41,50): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+[06:20:46.926] 
+[06:20:47.130] server/storage.ts(3,30): error TS2792: Cannot find module 'drizzle-orm'. Did you mean to set the 'moduleResolution' option to 'node', or to add aliases to the 'paths' option?
+[06:20:47.130] server/storage.ts(318,37): error TS7006: Parameter 'v' implicitly has an 'any' type.
+[06:20:47.130] server/storage.ts(337,60): error TS7006: Parameter 'v' implicitly has an 'any' type.
+[06:20:47.131] server/storage.ts(462,24): error TS2591: Cannot find name 'require'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+[06:20:47.131] 
+[06:20:47.193] server/notifications.ts(129,105): error TS7006: Parameter 'l' implicitly has an 'any' type.
+[06:20:47.193] 
+[06:20:47.222] server/email.ts(1,20): error TS2792: Cannot find module '@sendgrid/mail'. Did you mean to set the 'moduleResolution' option to 'node', or to add aliases to the 'paths' option?
+[06:20:47.222] server/email.ts(4,5): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+[06:20:47.222] server/email.ts(5,20): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+[06:20:47.222] server/email.ts(17,8): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+[06:20:47.222] server/email.ts(122,11): error TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Try `npm i --save-dev @types/node` and then add 'node' to the types field in your tsconfig.
+[06:20:47.222] 
+[06:20:48.014] Build Completed in /vercel/output [4s]
+[06:20:48.072] Deploying outputs...
+[06:20:51.185] 
+[06:20:51.318] Deployment completed
+[06:20:54.008] Uploading build cache [5.88 MB]...
+[06:20:54.177] Build cache uploaded: 173.274ms
+[06:20:56.389] Exiting build container
