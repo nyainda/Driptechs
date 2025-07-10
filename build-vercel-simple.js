@@ -1,7 +1,6 @@
-import { build } from 'vite';
-import { build as esbuild } from 'esbuild';
 import fs from 'fs';
 import path from 'path';
+import { execSync } from 'child_process';
 
 async function buildForVercel() {
   console.log('🏗️  Building for Vercel deployment...');
@@ -13,29 +12,12 @@ async function buildForVercel() {
     }
     fs.mkdirSync('dist', { recursive: true });
 
-    // Build frontend with Vite
+    // Build frontend using the existing working build process
     console.log('📦 Building frontend...');
-    await build({
-      root: 'client',
-      build: {
-        outDir: '../dist/public',
-        emptyOutDir: true,
-        sourcemap: false,
-        minify: true,
-        rollupOptions: {
-          output: {
-            manualChunks: {
-              vendor: ['react', 'react-dom'],
-              router: ['wouter'],
-              ui: ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-toast']
-            }
-          }
-        }
-      },
-      define: {
-        'process.env.NODE_ENV': '"production"'
-      }
-    });
+    process.chdir('client');
+    execSync('npm install', { stdio: 'inherit' });
+    execSync('npx vite build --config ../vite.config.ts', { stdio: 'inherit' });
+    process.chdir('..');
     
     console.log('✅ Frontend build completed');
     
@@ -47,7 +29,7 @@ async function buildForVercel() {
       type: "module",
       dependencies: {
         "express": packageJson.dependencies.express,
-        "cors": "^2.8.5",
+        "cors": packageJson.dependencies.cors,
         "dotenv": packageJson.dependencies.dotenv,
         "bcrypt": packageJson.dependencies.bcrypt,
         "jsonwebtoken": packageJson.dependencies.jsonwebtoken,

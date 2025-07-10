@@ -1,82 +1,73 @@
-// Vercel serverless function entry point
-const path = require('path');
-const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { z } = require('zod');
+import express from 'express';
+import { createServer } from 'http';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
-// Create Express app
+// Import your main server module
+import { registerRoutes } from '../server/routes.js';
+import { checkDatabaseConnection } from '../server/db.js';
+
+// Load environment variables
+dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 const app = express();
 
 // Middleware
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://driptech.vercel.app', 'https://www.driptech.co.ke']
+    : ['http://localhost:3000', 'http://localhost:5000'],
+  credentials: true
+}));
 
-// CORS
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Trust proxy for proper IP detection on Vercel
+app.set('trust proxy', 1);
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+// Initialize database and routes
+async function initializeApp() {
+  try {
+    console.log('🔄 Initializing Vercel serverless function...');
+    
+    // Check database connection
+    await checkDatabaseConnection();
+    console.log('✅ Database connection verified');
+    
+    // Register API routes
+    await registerRoutes(app);
+    console.log('✅ API routes registered');
+    
+    console.log('✅ Serverless function ready');
+  } catch (error) {
+    console.error('❌ Failed to initialize serverless function:', error);
+  }
+}
+
+// Initialize on first request (serverless)
+let initialized = false;
+app.use(async (req, res, next) => {
+  if (!initialized) {
+    await initializeApp();
+    initialized = true;
   }
   next();
 });
 
-// Database setup will be handled by the main server when needed
-
-// Basic health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
-});
-
-// Login schema
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6)
-});
-
-// Simple login endpoint
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const { email, password } = loginSchema.parse(req.body);
-    
-    // Check if this is the admin user
-    if (email === 'admin@driptech.co.ke' && password === 'admin123') {
-      const token = jwt.sign(
-        { id: 'admin', email: 'admin@driptech.co.ke', role: 'admin' },
-        process.env.JWT_SECRET || 'your-secret-key',
-        { expiresIn: '7d' }
-      );
-      
-      res.json({ 
-        token, 
-        user: { id: 'admin', email: 'admin@driptech.co.ke', name: 'Admin', role: 'admin' } 
-      });
-    } else {
-      res.status(401).json({ 
-        message: 'Invalid credentials',
-        details: 'Please check your email and password'
-      });
-    }
-  } catch (error) {
-    console.error('Login error:', error);
-    res.status(400).json({ 
-      message: 'Login failed',
-      details: 'Invalid input format'
-    });
-  }
-});
-
-// Fallback for other routes
-app.all('*', (req, res) => {
-  res.status(404).json({ 
-    error: 'Not Found',
-    message: 'This endpoint is not implemented yet',
-    path: req.path
-  });
-});
-
-module.exports = app;
+// Export for Vercel
+export default app;
