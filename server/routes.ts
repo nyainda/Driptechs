@@ -456,7 +456,20 @@ app.get("/api/health", async (req, res) => {
       });
     } catch (error) {
       console.error("Quote creation error:", error);
-      res.status(400).json({ message: "Invalid quote data" });
+      res.status(400).json({ message: "Invalid quote data", details: error.message });
+    }
+  });
+
+  // Admin quote creation endpoint
+  app.post("/api/admin/quotes", authenticate, requireAdmin, async (req, res) => {
+    try {
+      const quoteData = insertQuoteSchema.parse(req.body);
+      const quote = await storage.createQuote(quoteData);
+      
+      res.json(quote);
+    } catch (error) {
+      console.error("Admin quote creation error:", error);
+      res.status(400).json({ message: "Invalid quote data", details: error.message });
     }
   });
 

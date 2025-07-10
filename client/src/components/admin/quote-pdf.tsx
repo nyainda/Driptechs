@@ -32,7 +32,10 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedQuote, setEditedQuote] = useState(quote);
   const [isUpdating, setIsUpdating] = useState(false);
-  
+  const [subtotal, setSubtotal] = useState(0);
+  const [vat, setVat] = useState(0);
+  const [total, setTotal] = useState(0);
+
   const getServiceDescription = (projectType: string) => {
     const serviceDescriptions = {
       'system_design': 'Custom irrigation system design and planning',
@@ -53,7 +56,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
 
   const [items, setItems] = useState<QuoteItem[]>(() => {
     if (quote.items && Array.isArray(quote.items) && quote.items.length > 0) {
-      return quote.items.map((item: any) => ({
+      const initialItems = quote.items.map((item: any) => ({
         id: item.id || Math.random().toString(36).substr(2, 9),
         name: item.name || `${quote.projectType} System`,
         description: item.description || getServiceDescription(quote.projectType),
@@ -62,12 +65,14 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
         unitPrice: parseFloat(item.unitPrice || "0"),
         total: parseFloat(item.total || (parseFloat(item.unitPrice || "0") * parseFloat(item.quantity || "1")))
       }));
+      calculateTotals(initialItems); // Calculate initial totals
+      return initialItems;
     }
-    
+
     // Default items based on project type
     const defaultItems = [];
     const basePrice = parseFloat(quote.totalAmount || "100000");
-    
+
     if (quote.projectType === 'system_design') {
       defaultItems.push({
         id: '1',
@@ -173,7 +178,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
         total: basePrice
       });
     }
-    
+    calculateTotals(defaultItems);
     return defaultItems;
   });
 
@@ -184,16 +189,16 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
     mutationFn: async (data: any) => {
       console.log('Sending update request with data:', data);
       setIsUpdating(true);
-      
+
       try {
         const response = await apiRequest("PUT", `/api/admin/quotes/${quote.id}`, data);
-        
+
         if (!response.ok) {
           const errorData = await response.text();
           console.error('Update failed with response:', errorData);
           throw new Error(`Update failed: ${response.status} ${response.statusText} - ${errorData}`);
         }
-        
+
         return response.json();
       } catch (error) {
         console.error('Update request failed:', error);
@@ -284,9 +289,9 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
       { name: 'System Testing', description: 'Complete system testing and commissioning', unit: 'service', unitPrice: 5000 },
       { name: 'User Training', description: 'Training on system operation and maintenance', unit: 'service', unitPrice: 3000 }
     ];
-    
+
     const randomSuggestion = materialSuggestions[Math.floor(Math.random() * materialSuggestions.length)];
-    
+
     const newItem: QuoteItem = {
       id: Math.random().toString(36).substr(2, 9),
       name: randomSuggestion.name,
@@ -296,7 +301,19 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
       unitPrice: randomSuggestion.unitPrice,
       total: randomSuggestion.unitPrice
     };
+
     setItems([...items, newItem]);
+    calculateTotals([...items, newItem]);
+  };
+
+  const calculateTotals = (itemsList = items) => {
+    const subtotalValue = itemsList.reduce((sum, item) => sum + (item.total || 0), 0);
+    const vatValue = subtotalValue * 0.16;
+    const totalValue = subtotalValue + vatValue;
+
+    setSubtotal(subtotalValue);
+    setVat(vatValue);
+    setTotal(totalValue);
   };
 
   const updateItem = (id: string, field: keyof QuoteItem, value: any) => {
@@ -310,10 +327,22 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
       }
       return item;
     }));
+    calculateTotals(items.map(item => {
+      if (item.id === id) {
+        const updatedItem = { ...item, [field]: value };
+        if (field === 'quantity' || field === 'unitPrice') {
+          updatedItem.total = updatedItem.quantity * updatedItem.unitPrice;
+        }
+        return updatedItem;
+      }
+      return item;
+    }));
   };
 
   const removeItem = (id: string) => {
-    setItems(items.filter(item => item.id !== id));
+    const updatedItems = items.filter(item => item.id !== id);
+    setItems(updatedItems);
+    calculateTotals(updatedItems);
   };
 
   const calculateSubtotal = () => {
@@ -331,8 +360,8 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
   const handleSave = () => {
     const subtotal = calculateSubtotal();
     const vat = calculateVAT();
-    const total = calculateTotal();
-    
+    const totalAmount = calculateTotal();
+
     // Prepare the update data - only include fields that should be updated
     const updatedQuoteData = {
       customerName: editedQuote.customerName,
@@ -350,10 +379,10 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
       })),
       totalAmount: subtotal.toString(),
       vatAmount: vat.toString(),
-      finalTotal: total.toString(),
+      finalTotal: totalAmount.toString(),
       // Don't include createdAt, updatedAt will be set by backend
     };
-    
+
     console.log('Preparing to update quote with data:', updatedQuoteData);
     updateQuoteMutation.mutate(updatedQuoteData);
   };
@@ -361,7 +390,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
   const handleDownloadPDF = () => {
     const subtotal = calculateSubtotal();
     const vat = calculateVAT();
-    const total = calculateTotal();
+    const totalAmount = calculateTotal();
 
     const htmlContent = `
       <!DOCTYPE html>
@@ -548,7 +577,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
 
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = `DripTech-Quote-${quote.id.slice(0, 8)}-${quote.customerName.replace(/\s+/g, '-')}.html`;
@@ -767,7 +796,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
                 </Button>
               )}
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full border-collapse border border-border">
                 <thead>
@@ -872,16 +901,16 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
             <div className="w-80 space-y-2">
               <div className="flex justify-between">
                 <span>Subtotal:</span>
-                <span>{formatCurrency(calculateSubtotal())}</span>
+                <span>{formatCurrency(subtotal)}</span>
               </div>
               <div className="flex justify-between">
                 <span>VAT (16%):</span>
-                <span>{formatCurrency(calculateVAT())}</span>
+                <span>{formatCurrency(vat)}</span>
               </div>
               <Separator />
               <div className="flex justify-between text-lg font-bold">
                 <span>Total Amount:</span>
-                <span className="text-blue-600">{formatCurrency(calculateTotal())}</span>
+                <span className="text-blue-600">{formatCurrency(total)}</span>
               </div>
             </div>
           </div>

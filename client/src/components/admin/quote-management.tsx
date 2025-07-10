@@ -64,19 +64,45 @@ function QuoteForm({ quote, onSuccess, onCancel }: QuoteFormProps) {
     },
   });
 
-  const createMutation = useMutation({
+  const createQuoteMutation = useMutation({
     mutationFn: async (data: QuoteFormData) => {
-      return await apiRequest("POST", "/api/admin/quotes", data);
+      const submitData = {
+        ...data,
+        customerName: data.customerName || '',
+        customerEmail: data.customerEmail || '',
+        customerPhone: data.customerPhone || '',
+        customerAddress: data.customerAddress || '',
+        projectType: data.projectType || 'greenhouse',
+        areaSize: data.areaSize || '',
+        location: data.location || '',
+        requirements: data.requirements || '',
+        budget: data.budget || '',
+        timeline: data.timeline || '',
+        status: data.status || 'pending',
+        totalAmount: data.totalAmount || 0,
+        notes: data.notes || ''
+      };
+
+      const response = await apiRequest("POST", "/api/quotes", submitData);
+      if (!response.ok) {
+        throw new Error('Failed to create quote');
+      }
+      return response.json();
     },
     onSuccess: () => {
-      toast({ title: "Success", description: "Quote created successfully" });
       queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
-      onSuccess();
+      toast({
+        title: "Quote Created",
+        description: "Quote has been successfully created.",
+      });
+      form.reset();
+      onSuccess?.();
     },
-    onError: (error: any) => {
+    onError: (error) => {
+      console.error('Quote creation error:', error);
       toast({
         title: "Error",
-        description: error.response?.data?.message || "Failed to create quote",
+        description: "Failed to create quote. Please try again.",
         variant: "destructive",
       });
     },
@@ -100,15 +126,15 @@ function QuoteForm({ quote, onSuccess, onCancel }: QuoteFormProps) {
     },
   });
 
-  const onSubmit = (data: QuoteFormData) => {
-    if (quote) {
-      updateMutation.mutate(data);
-    } else {
-      createMutation.mutate(data);
+  const onSubmit = async (data: QuoteFormData) => {
+    try {
+      await createQuoteMutation.mutateAsync(data);
+    } catch (error) {
+      console.error('Form submission error:', error);
     }
   };
 
-  const isLoading = createMutation.isPending || updateMutation.isPending;
+  const isLoading = createQuoteMutation.isPending || updateMutation.isPending;
 
   return (
     <div className="space-y-6">
@@ -317,7 +343,7 @@ export default function QuoteManagement() {
   const generateInvoice = async (quote: Quote) => {
     try {
       const response = await apiRequest("POST", `/api/admin/quotes/${quote.id}/invoice`);
-      
+
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
