@@ -81,12 +81,11 @@ export default function Home() {
     queryFn: () => fetch("/api/success-stories").then(res => res.json()),
   });
 
-  // Fetch up to 6 products to display in the premier section.
+  // Data will be sliced inline for better error handling
+
   const displayProducts = products?.slice(0, 6) || [];
   const recentProjects = projects?.slice(0, 3) || [];
   const latestBlogPosts = blogPosts?.slice(0, 3) || [];
-  const displayTeamMembers = Array.isArray(teamMembers) ? teamMembers.slice(0, 3) : [];
-  const displaySuccessStories = Array.isArray(successStories) ? successStories.slice(0, 3) : [];
 
   return (
     <div className="flex flex-col">
@@ -258,7 +257,8 @@ export default function Home() {
               Real results from farmers who transformed their operations with our irrigation solutions.
             </p>
           </div>
-          {(successStories || []).slice(0, 3).map((story) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {(successStories || []).slice(0, 3).map((story) => (
                 <Card key={story.id} className="overflow-hidden group hover:shadow-xl transition-all duration-300">
                   <div className="aspect-video overflow-hidden">
                     <img
@@ -303,7 +303,8 @@ export default function Home() {
               Dedicated professionals committed to bringing you the best irrigation solutions.
             </p>
           </div>
-          {(teamMembers || []).slice(0, 3).map((member) => (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+            {(teamMembers || []).slice(0, 3).map((member) => (
                 <Card key={member.id} className="text-center group hover:shadow-xl transition-all duration-300">
                   <CardContent className="p-6">
                     <div className="w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full">
