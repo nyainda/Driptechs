@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./server/routes.js";
-import { initializeDatabase } from './server/init-db.js';
-import { checkDatabaseConnection, getDatabaseConfig } from './server/db.js';
+import { registerRoutes } from "./server/routes.js"; // Keep .js for ES modules
+import { initializeDatabase } from './server/init-db.js'; // Keep .js for ES modules
+import { checkDatabaseConnection, getDatabaseConfig } from './server/db.js'; // Keep .js for ES modules
 
 const app = express();
 app.use(express.json());
@@ -28,7 +28,7 @@ app.use((req, res, next) => {
       }
 
       if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
+        logLine = logLine.slice(0, 79) + "...";
       }
 
       console.log(logLine);
@@ -90,25 +90,29 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Initialize and register routes
+// Initialize and register routes once
+let appSetup = false;
+
 const setupApp = async () => {
-  await initializeApp();
-  await registerRoutes(app);
-  
-  // Error handler
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-    res.status(status).json({ message });
-  });
+  if (!appSetup) {
+    await initializeApp();
+    await registerRoutes(app);
+    
+    // Error handler
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
+      res.status(status).json({ message });
+    });
+    
+    appSetup = true;
+  }
   
   return app;
 };
 
 // Vercel serverless function handler
 export default async function handler(req: any, res: any) {
-  if (!isInitialized && !initError) {
-    await setupApp();
-  }
-  return app(req, res);
+  const appInstance = await setupApp();
+  return appInstance(req, res);
 }
