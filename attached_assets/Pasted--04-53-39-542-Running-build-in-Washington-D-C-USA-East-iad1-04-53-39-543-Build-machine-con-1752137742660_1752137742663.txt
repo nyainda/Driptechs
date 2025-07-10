@@ -1,0 +1,35 @@
+[04:53:39.542] Running build in Washington, D.C., USA (East) – iad1
+[04:53:39.543] Build machine configuration: 2 cores, 8 GB
+[04:53:39.561] Cloning github.com/nyainda/Driptechs (Branch: main, Commit: f1b4208)
+[04:53:39.974] Cloning completed: 412.000ms
+[04:53:40.833] Restored build cache from previous deployment (2qHxNr81tnHbqBQQ5Kubucy6VWBT)
+[04:53:41.374] Running "vercel build"
+[04:53:41.807] Vercel CLI 44.2.13
+[04:53:41.983] WARN! Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply. Learn More: https://vercel.link/unused-build-settings
+[04:53:43.373] Installing dependencies...
+[04:53:44.322] 
+[04:53:44.323] up to date in 680ms
+[04:53:44.323] 
+[04:53:44.324] 22 packages are looking for funding
+[04:53:44.324]   run `npm fund` for details
+[04:53:44.584] Using TypeScript 5.6.3 (local user-provided)
+[04:53:52.468] server/routes.ts(872,26): error TS2339: Property 'user' does not exist on type 'Request<{}, any, any, ParsedQs, Record<string, any>>'.
+[04:53:52.469] 
+[04:53:53.191] server/storage.ts(453,32): error TS2769: No overload matches this call.
+[04:53:53.192]   Overload 1 of 2, '(value: { email: string | SQL<unknown> | Placeholder<string, any>; password: string | SQL<unknown> | Placeholder<string, any>; name: string | SQL<unknown> | Placeholder<...>; id?: string | ... 2 more ... | undefined; role?: string | ... 2 more ... | undefined; phone?: string | ... 3 more ... | undefined; createdAt?: Date | ... 3 more ... | undefined; }): PgInsertBase<...>', gave the following error.
+[04:53:53.193]     Object literal may only specify known properties, and 'updatedAt' does not exist in type '{ email: string | SQL<unknown> | Placeholder<string, any>; password: string | SQL<unknown> | Placeholder<string, any>; name: string | SQL<unknown> | Placeholder<string, any>; id?: string | ... 2 more ... | undefined; role?: string | ... 2 more ... | undefined; phone?: string | ... 3 more ... | undefined; createdAt?:...'.
+[04:53:53.193]   Overload 2 of 2, '(values: { email: string | SQL<unknown> | Placeholder<string, any>; password: string | SQL<unknown> | Placeholder<string, any>; name: string | SQL<unknown> | Placeholder<...>; id?: string | ... 2 more ... | undefined; role?: string | ... 2 more ... | undefined; phone?: string | ... 3 more ... | undefined; createdAt?: Date | ... 3 more ... | undefined; }[]): PgInsertBase<...>', gave the following error.
+[04:53:53.193]     Object literal may only specify known properties, and 'id' does not exist in type '{ email: string | SQL<unknown> | Placeholder<string, any>; password: string | SQL<unknown> | Placeholder<string, any>; name: string | SQL<unknown> | Placeholder<string, any>; id?: string | ... 2 more ... | undefined; role?: string | ... 2 more ... | undefined; phone?: string | ... 3 more ... | undefined; createdAt?:...'.
+[04:53:53.193] 
+[04:53:53.280] server/email.ts(27,7): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+[04:53:53.280]   Type 'undefined' is not assignable to type 'string'.
+[04:53:53.280] 
+[04:53:55.443] Warning: Node.js functions are compiled from ESM to CommonJS. If this is not intended, add "type": "module" to your package.json file.
+[04:53:55.444] Compiling "index.js" from ESM to CommonJS...
+[04:53:55.769] Build Completed in /vercel/output [12s]
+[04:53:55.929] Deploying outputs...
+[04:54:00.152] 
+[04:54:00.330] Deployment completed
+[04:54:16.380] Uploading build cache [91.72 MB]...
+[04:54:17.997] Build cache uploaded: 1.625s
+[04:54:20.226] Exiting build container
