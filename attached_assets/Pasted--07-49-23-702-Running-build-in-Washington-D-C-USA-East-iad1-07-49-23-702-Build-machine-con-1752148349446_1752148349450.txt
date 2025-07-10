@@ -1,0 +1,82 @@
+[07:49:23.702] Running build in Washington, D.C., USA (East) – iad1
+[07:49:23.702] Build machine configuration: 2 cores, 8 GB
+[07:49:23.717] Cloning github.com/nyainda/Driptechs (Branch: main, Commit: 0b97ffb)
+[07:49:24.067] Cloning completed: 350.000ms
+[07:49:24.177] Restored build cache from previous deployment (73fNiJsUJKinzBXXmPBVDhbSXp7p)
+[07:49:24.502] Running "vercel build"
+[07:49:24.944] Vercel CLI 44.2.13
+[07:49:25.785] Installing dependencies...
+[07:49:31.388] npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+[07:49:31.436] npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+[07:49:37.306] 
+[07:49:37.306] added 636 packages in 11s
+[07:49:37.307] 
+[07:49:37.307] 85 packages are looking for funding
+[07:49:37.307]   run `npm fund` for details
+[07:50:03.096] 
+[07:50:03.098] added 339 packages, and audited 340 packages in 26s
+[07:50:03.099] 
+[07:50:03.099] 50 packages are looking for funding
+[07:50:03.100]   run `npm fund` for details
+[07:50:03.100] 
+[07:50:03.100] found 0 vulnerabilities
+[07:50:03.233] 
+[07:50:03.233] > driptech-client@1.0.0 build
+[07:50:03.233] > vite build
+[07:50:03.234] 
+[07:50:03.542] [36mvite v7.0.4 [32mbuilding for production...[36m[39m
+[07:50:03.607] transforming...
+[07:50:09.141] [32m✓[39m 1890 modules transformed.
+[07:50:09.489] rendering chunks...
+[07:50:09.697] computing gzip size...
+[07:50:09.784] [2mdist/[22m[32mindex.html                 [39m[1m[2m  0.90 kB[22m[1m[22m[2m │ gzip:   0.47 kB[22m
+[07:50:09.786] [2mdist/[22m[2massets/[22m[35mindex-C70dz-zq.css  [39m[1m[2m147.73 kB[22m[1m[22m[2m │ gzip:  21.33 kB[22m
+[07:50:09.786] [2mdist/[22m[2massets/[22m[36mrouter-C3dNlie5.js  [39m[1m[2m  5.42 kB[22m[1m[22m[2m │ gzip:   2.68 kB[22m
+[07:50:09.789] [2mdist/[22m[2massets/[22m[36mui-DIvwBjVH.js      [39m[1m[2m 81.68 kB[22m[1m[22m[2m │ gzip:  27.57 kB[22m
+[07:50:09.790] [2mdist/[22m[2massets/[22m[36mvendor-DavUf6mE.js  [39m[1m[2m141.72 kB[22m[1m[22m[2m │ gzip:  45.48 kB[22m
+[07:50:09.790] [2mdist/[22m[2massets/[22m[36mindex-D77qO_JQ.js   [39m[1m[33m668.29 kB[39m[22m[2m │ gzip: 154.73 kB[22m
+[07:50:09.790] [32m✓ built in 6.21s[39m
+[07:50:09.790] [33m
+[07:50:09.791] (!) Some chunks are larger than 500 kB after minification. Consider:
+[07:50:09.791] - Using dynamic import() to code-split the application
+[07:50:09.791] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[07:50:09.791] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[07:50:09.889] Installing dependencies...
+[07:50:10.459] 
+[07:50:10.460] removed 3 packages, and changed 1 package in 509ms
+[07:50:10.461] 
+[07:50:10.461] 21 packages are looking for funding
+[07:50:10.461]   run `npm fund` for details
+[07:50:10.709] Using TypeScript 5.8.3 (local user-provided)
+[07:50:13.649] api/server/db.ts(6,25): error TS2307: Cannot find module '@shared/schema' or its corresponding type declarations.
+[07:50:13.650] 
+[07:50:14.697] Using TypeScript 5.8.3 (local user-provided)
+[07:50:15.241] api/server/email.ts(2,28): error TS2307: Cannot find module '@shared/schema' or its corresponding type declarations.
+[07:50:15.242] 
+[07:50:15.704] Using TypeScript 5.8.3 (local user-provided)
+[07:50:16.227] api/server/routes.ts(8,8): error TS2307: Cannot find module '@shared/schema' or its corresponding type declarations.
+[07:50:16.228] api/server/routes.ts(892,54): error TS7006: Parameter 'acc' implicitly has an 'any' type.
+[07:50:16.228] api/server/routes.ts(892,59): error TS7006: Parameter 'achievement' implicitly has an 'any' type.
+[07:50:16.228] api/server/routes.ts(896,45): error TS7006: Parameter 'ua' implicitly has an 'any' type.
+[07:50:16.228] 
+[07:50:16.321] api/server/vite.ts(7,24): error TS2307: Cannot find module '../vite.config' or its corresponding type declarations.
+[07:50:16.321] 
+[07:50:16.461] api/server/init-db.ts(3,83): error TS2307: Cannot find module '@shared/schema' or its corresponding type declarations.
+[07:50:16.462] 
+[07:50:16.666] api/server/storage.ts(2,181): error TS2307: Cannot find module '@shared/schema' or its corresponding type declarations.
+[07:50:16.667] api/server/storage.ts(10,8): error TS2307: Cannot find module '@shared/schema' or its corresponding type declarations.
+[07:50:16.667] 
+[07:50:16.697] api/server/notifications.ts(1,28): error TS2307: Cannot find module '@shared/schema' or its corresponding type declarations.
+[07:50:16.697] api/server/notifications.ts(129,105): error TS7006: Parameter 'l' implicitly has an 'any' type.
+[07:50:16.698] 
+[07:50:22.829] Using TypeScript 5.8.3 (local user-provided)
+[07:50:23.474] Using TypeScript 5.8.3 (local user-provided)
+[07:50:23.533] Using TypeScript 5.8.3 (local user-provided)
+[07:50:24.574] Using TypeScript 5.8.3 (local user-provided)
+[07:50:25.480] Using TypeScript 5.8.3 (local user-provided)
+[07:50:29.288] Using TypeScript 5.8.3 (local user-provided)
+[07:50:31.451] Using TypeScript 5.8.3 (local user-provided)
+[07:50:32.687] Build Completed in /vercel/output [1m]
+[07:50:33.137] Deploying outputs...
+[07:50:42.649] 
+[07:50:42.839] Deployment completed

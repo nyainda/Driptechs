@@ -1,4 +1,4 @@
-import type { Quote } from "@shared/schema";
+import type { Quote } from "../shared/schema.js";
 
 export class NotificationService {
   static async sendQuoteEmail(quote: Quote): Promise<void> {
@@ -126,7 +126,7 @@ Check your email for the detailed quote. Questions? Reply to this message!
             <div style="color: #6b7280; font-size: 14px; line-height: 1.6;">
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 <div>
-                  <strong>Service Type:</strong> ${quote.projectType.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}<br>
+                  <strong>Service Type:</strong> ${quote.projectType.replace('_', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}<br>
                   <strong>Area Size:</strong> ${quote.areaSize}<br>
                   <strong>Location:</strong> ${quote.location}
                 </div>

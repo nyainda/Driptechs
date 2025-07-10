@@ -1,5 +1,5 @@
 import sgMail from '@sendgrid/mail';
-import type { Quote } from '@shared/schema';
+import type { Quote } from '../shared/schema.js';
 
 if (process.env.SENDGRID_API_KEY) {
   sgMail.setApiKey(process.env.SENDGRID_API_KEY);

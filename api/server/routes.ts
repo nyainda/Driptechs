@@ -5,7 +5,7 @@ import {
   insertProductSchema, insertQuoteSchema, insertProjectSchema, 
   insertBlogPostSchema, insertContactSchema, insertTeamMemberSchema, 
   insertSuccessStorySchema, loginSchema, insertUserSchema 
-} from "@shared/schema";
+} from "../shared/schema.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sql } from 'drizzle-orm';
@@ -889,11 +889,11 @@ app.get("/api/health", async (req, res) => {
         unlockedAchievements: userAchievements.length,
         gamificationStats: finalStats,
         newlyUnlocked: newAchievements,
-        achievementsByCategory: achievements.reduce((acc, achievement) => {
+        achievementsByCategory: achievements.reduce((acc: Record<string, any[]>, achievement: any) => {
           if (!acc[achievement.category]) acc[achievement.category] = [];
           acc[achievement.category].push({
             ...achievement,
-            unlocked: userAchievements.some(ua => ua.achievementId === achievement.id)
+            unlocked: userAchievements.some((ua: any) => ua.achievementId === achievement.id)
           });
           return acc;
         }, {} as Record<string, any[]>)

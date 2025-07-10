@@ -1,5 +1,5 @@
 import { db } from "./db";
-import { users, products, quotes, projects, blogPosts, contacts, teamMembers, successStories, pageViews, websiteAnalytics, achievements, userAchievements, gamificationStats } from "@shared/schema";
+import { users, products, quotes, projects, blogPosts, contacts, teamMembers, successStories, pageViews, websiteAnalytics, achievements, userAchievements, gamificationStats } from "../shared/schema.js";
 import { eq, asc, sql } from "drizzle-orm";
 import { NotificationService } from "./notifications";
 import type { 
@@ -7,7 +7,7 @@ import type {
   InsertProduct, InsertQuote, InsertProject, InsertBlogPost, InsertContact, InsertUser, TeamMember, InsertTeamMember,
   SuccessStory, InsertSuccessStory, PageView, InsertPageView, WebsiteAnalytics, InsertWebsiteAnalytics,
   Achievement, InsertAchievement, UserAchievement, InsertUserAchievement, GamificationStats, InsertGamificationStats
-} from "@shared/schema";
+} from "../shared/schema.js";
 
 export class Storage {
   // Flag to track if we're in demo mode (when no real data exists)
