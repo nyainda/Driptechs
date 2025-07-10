@@ -144,8 +144,10 @@ export const pageViews = pgTable("page_views", {
   page: text("page").notNull(),
   userAgent: text("user_agent"),
   ipAddress: text("ip_address"),
-  timestamp: timestamp("timestamp").defaultNow(),
-  sessionId: text("session_id"),
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  sessionId: text("session_id").notNull(),
+  referrer: text("referrer"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const websiteAnalytics = pgTable("website_analytics", {

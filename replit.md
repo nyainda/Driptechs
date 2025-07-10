@@ -153,6 +153,10 @@ Changelog:
   - Created missing UI components (toaster, toast) for complete React application
   - Resolved all API endpoints returning proper responses
   - Completed Vercel deployment configuration with proper serverless function setup
+  - Enhanced quote management system with comprehensive editing capabilities
+  - Implemented full pricing controls with automatic VAT calculations (16%)
+  - Added invoice generation and customer email sending functionality
+  - Created enhanced quote editor with item-level pricing and product integration
 ```
 
 ## User Preferences

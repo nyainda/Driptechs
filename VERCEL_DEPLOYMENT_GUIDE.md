@@ -36,7 +36,12 @@ This guide provides step-by-step instructions for deploying the DripTech irrigat
 4. Select the main branch
 
 ### 2. Configure Build Settings
-Vercel will automatically detect the configuration from `vercel.json`. No manual configuration needed.
+1. In your Vercel dashboard, go to Project Settings
+2. Under "Build & Output Settings":
+   - Build Command: `cd client && npm install && npm run build`
+   - Output Directory: `client/dist`
+   - Install Command: `npm install`
+3. Vercel will use the simplified `vercel.json` configuration
 
 ### 3. Environment Variables
 Add these environment variables in Vercel dashboard:
