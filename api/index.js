@@ -3,8 +3,6 @@ const path = require('path');
 const express = require('express');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { neon } = require('@neondatabase/serverless');
-const { drizzle } = require('drizzle-orm/neon-http');
 const { z } = require('zod');
 
 // Create Express app
@@ -27,9 +25,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Database setup
-const sql = neon(process.env.DATABASE_URL);
-const db = drizzle(sql);
+// Database setup will be handled by the main server when needed
 
 // Basic health check
 app.get('/api/health', (req, res) => {
