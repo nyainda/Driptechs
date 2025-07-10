@@ -203,12 +203,10 @@ export const gamificationStats = pgTable("gamification_stats", {
 });
 
 // Schema validation
-export const insertUserSchema = createInsertSchema(users).pick({
-  email: true,
-  password: true,
-  name: true,
-  role: true,
-  phone: true,
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({

@@ -1,6 +1,6 @@
 
 import { db } from './db';
-import { users, products, blogPosts, projects, successStories, teamMembers } from '../shared/schema.js';
+import { users, products, blogPosts, projects, successStories, teamMembers } from '../shared/schema-simple.js';
 import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 

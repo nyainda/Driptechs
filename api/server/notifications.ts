@@ -1,4 +1,4 @@
-import type { Quote } from "../shared/schema.js";
+import type { Quote } from "../shared/schema-simple.js";
 
 export class NotificationService {
   static async sendQuoteEmail(quote: Quote): Promise<void> {

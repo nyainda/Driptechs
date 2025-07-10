@@ -1,6 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+// import { setupVite, serveStatic, log } from "./vite"; // Removed for Vercel deployment
 import { initializeDatabase } from './init-db';
 import { checkDatabaseConnection, getDatabaseConfig } from './db';
 
@@ -32,7 +32,7 @@ app.use((req, res, next) => {
         logLine = logLine.slice(0, 79) + "…";
       }
 
-      log(logLine);
+      console.log(logLine);
     }
   });
 

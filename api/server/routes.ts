@@ -5,7 +5,7 @@ import {
   insertProductSchema, insertQuoteSchema, insertProjectSchema, 
   insertBlogPostSchema, insertContactSchema, insertTeamMemberSchema, 
   insertSuccessStorySchema, loginSchema, insertUserSchema 
-} from "../shared/schema.js";
+} from "../shared/schema-simple.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sql } from 'drizzle-orm';
