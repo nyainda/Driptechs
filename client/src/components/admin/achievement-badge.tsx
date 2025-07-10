@@ -24,7 +24,7 @@ interface AchievementBadgeProps {
 const rarityConfig = {
   common: { 
     bgColor: "bg-gray-100 dark:bg-gray-800", 
-    borderColor: "border-gray-300 dark:border-gray-500",
+    borderColor: "border-gray-300 dark:border-gray-600",
     icon: Star,
     glow: ""
   },
