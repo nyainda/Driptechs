@@ -229,31 +229,33 @@ export class Storage {
       const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
       const currentMonthQuotes = quotes.filter(q => {
-        const date = new Date(q.createdAt);
+        const date = q.createdAt ? new Date(q.createdAt) : new Date();
         return date.getMonth() === currentMonth && date.getFullYear() === currentYear;
       });
 
       const lastMonthQuotes = quotes.filter(q => {
-        const date = new Date(q.createdAt);
+        const date = q.createdAt ? new Date(q.createdAt) : new Date();
         return date.getMonth() === lastMonth && date.getFullYear() === lastMonthYear;
       });
 
-      // Calculate revenue from quotes
+      // Calculate revenue from quotes  
       const currentRevenue = currentMonthQuotes.reduce((sum, quote) => {
-        return sum + parseFloat(quote.finalTotal || quote.totalAmount || "0");
+        const amount = (quote as any).finalTotal || quote.totalAmount || "0";
+        return sum + parseFloat(String(amount));
       }, 0);
 
       const lastRevenue = lastMonthQuotes.reduce((sum, quote) => {
-        return sum + parseFloat(quote.finalTotal || quote.totalAmount || "0");
+        const amount = (quote as any).finalTotal || quote.totalAmount || "0";
+        return sum + parseFloat(String(amount));
       }, 0);
 
       const quoteGrowth = lastMonthQuotes.length > 0 
         ? ((currentMonthQuotes.length - lastMonthQuotes.length) / lastMonthQuotes.length * 100).toFixed(1)
-        : 0;
+        : "0";
 
       const revenueGrowth = lastRevenue > 0 
         ? ((currentRevenue - lastRevenue) / lastRevenue * 100).toFixed(1)
-        : 0;
+        : "0";
 
       const activeProjects = projects.filter(p => p.status === 'in_progress').length;
 
@@ -448,7 +450,7 @@ export class Storage {
         const bcrypt = require('bcrypt');
         const hashedPassword = await bcrypt.hash("admin123", 10);
 
-        await this.db.insert(users).values({
+        await db.insert(users).values({
           id: Math.random().toString(36).substr(2, 9),
           name: "Admin User",
           email: "admin@driptech.co.ke",

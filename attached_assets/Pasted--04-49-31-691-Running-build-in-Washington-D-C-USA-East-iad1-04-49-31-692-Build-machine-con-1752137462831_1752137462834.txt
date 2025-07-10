@@ -1,0 +1,51 @@
+[04:49:31.691] Running build in Washington, D.C., USA (East) – iad1
+[04:49:31.692] Build machine configuration: 2 cores, 8 GB
+[04:49:31.725] Cloning github.com/nyainda/Driptechs (Branch: main, Commit: 6915a40)
+[04:49:32.048] Cloning completed: 323.000ms
+[04:49:32.867] Restored build cache from previous deployment (AHPX1KMR9AjC7Y8yNA8irNLri9ae)
+[04:49:33.298] Running "vercel build"
+[04:49:33.842] Vercel CLI 44.2.13
+[04:49:34.015] WARN! Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply. Learn More: https://vercel.link/unused-build-settings
+[04:49:34.627] Installing dependencies...
+[04:49:48.529] 
+[04:49:48.530] added 118 packages in 14s
+[04:49:48.531] 
+[04:49:48.531] 22 packages are looking for funding
+[04:49:48.531]   run `npm fund` for details
+[04:49:48.805] Using TypeScript 5.6.3 (local user-provided)
+[04:49:56.805] server/routes.ts(872,26): error TS2339: Property 'user' does not exist on type 'Request<{}, any, any, ParsedQs, Record<string, any>>'.
+[04:49:56.806] 
+[04:49:57.505] server/storage.ts(232,31): error TS2769: No overload matches this call.
+[04:49:57.505]   Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+[04:49:57.505]     Argument of type 'Date | null' is not assignable to parameter of type 'string | number | Date'.
+[04:49:57.506]       Type 'null' is not assignable to type 'string | number | Date'.
+[04:49:57.506]   Overload 2 of 4, '(value: string | number): Date', gave the following error.
+[04:49:57.506]     Argument of type 'Date | null' is not assignable to parameter of type 'string | number'.
+[04:49:57.506]       Type 'null' is not assignable to type 'string | number'.
+[04:49:57.506] server/storage.ts(237,31): error TS2769: No overload matches this call.
+[04:49:57.507]   Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+[04:49:57.507]     Argument of type 'Date | null' is not assignable to parameter of type 'string | number | Date'.
+[04:49:57.507]       Type 'null' is not assignable to type 'string | number | Date'.
+[04:49:57.507]   Overload 2 of 4, '(value: string | number): Date', gave the following error.
+[04:49:57.507]     Argument of type 'Date | null' is not assignable to parameter of type 'string | number'.
+[04:49:57.508]       Type 'null' is not assignable to type 'string | number'.
+[04:49:57.508] server/storage.ts(243,39): error TS2339: Property 'finalTotal' does not exist on type '{ id: string; createdAt: Date | null; status: string; currency: string; updatedAt: Date | null; customerName: string; customerEmail: string; customerPhone: string; projectType: string; ... 15 more ...; deliveryMethod: string | null; }'.
+[04:49:57.508] server/storage.ts(247,39): error TS2339: Property 'finalTotal' does not exist on type '{ id: string; createdAt: Date | null; status: string; currency: string; updatedAt: Date | null; customerName: string; customerEmail: string; customerPhone: string; projectType: string; ... 15 more ...; deliveryMethod: string | null; }'.
+[04:49:57.508] server/storage.ts(265,33): error TS2345: Argument of type 'string | 0' is not assignable to parameter of type 'string'.
+[04:49:57.509]   Type 'number' is not assignable to type 'string'.
+[04:49:57.509] server/storage.ts(266,35): error TS2345: Argument of type 'string | 0' is not assignable to parameter of type 'string'.
+[04:49:57.509]   Type 'number' is not assignable to type 'string'.
+[04:49:57.509] server/storage.ts(451,20): error TS2339: Property 'db' does not exist on type 'Storage'.
+[04:49:57.509] 
+[04:49:57.620] server/email.ts(27,7): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+[04:49:57.620]   Type 'undefined' is not assignable to type 'string'.
+[04:49:57.621] 
+[04:49:59.661] Warning: Node.js functions are compiled from ESM to CommonJS. If this is not intended, add "type": "module" to your package.json file.
+[04:49:59.662] Compiling "index.js" from ESM to CommonJS...
+[04:49:59.989] Build Completed in /vercel/output [25s]
+[04:50:00.154] Deploying outputs...
+[04:50:06.076] 
+[04:50:06.244] Deployment completed
+[04:50:22.236] Uploading build cache [91.72 MB]...
+[04:50:23.207] Build cache uploaded: 973.944ms
+[04:50:25.454] Exiting build container

@@ -79,7 +79,7 @@ export function generateQuoteEmailHTML(quote: Quote): string {
             ${quote.cropType ? `<tr><th>Crop Type:</th><td>${quote.cropType}</td></tr>` : ''}
             ${quote.waterSource ? `<tr><th>Water Source:</th><td>${quote.waterSource}</td></tr>` : ''}
             ${quote.budgetRange ? `<tr><th>Budget Range:</th><td>${quote.budgetRange}</td></tr>` : ''}
-            ${quote.totalAmount ? `<tr><th>Total Amount:</th><td>${quote.currency} ${parseFloat(quote.totalAmount).toLocaleString()}</td></tr>` : ''}
+            ${quote.totalAmount ? `<tr><th>Total Amount:</th><td>${quote.currency} ${parseFloat(quote.totalAmount || '0').toLocaleString()}</td></tr>` : ''}
           </table>
         </div>
         
@@ -119,9 +119,9 @@ export async function sendQuoteEmail(quote: Quote): Promise<boolean> {
   
   return await sendEmail({
     to: quote.customerEmail,
-    from: 'quotes@driptech.co.ke',
+    from: process.env.SENDGRID_FROM_EMAIL || 'quotes@driptech.co.ke',
     subject: `Your DripTech Irrigation Quote - ${quote.projectType}`,
     html: emailHTML,
-    text: `Dear ${quote.customerName},\n\nThank you for your interest in our irrigation solutions. Your quote for ${quote.projectType} in ${quote.location} is ready.\n\nProject Details:\n- Area Size: ${quote.areaSize}\n${quote.cropType ? `- Crop Type: ${quote.cropType}\n` : ''}${quote.totalAmount ? `- Total Amount: ${quote.currency} ${parseFloat(quote.totalAmount).toLocaleString()}\n` : ''}\nOur team will contact you within 24 hours.\n\nBest regards,\nDripTech Irrigation Solutions\nPhone: +254 700 000 000\nEmail: info@driptech.co.ke`
+    text: `Dear ${quote.customerName},\n\nThank you for your interest in our irrigation solutions. Your quote for ${quote.projectType} in ${quote.location} is ready.\n\nProject Details:\n- Area Size: ${quote.areaSize}\n${quote.cropType ? `- Crop Type: ${quote.cropType}\n` : ''}${quote.totalAmount ? `- Total Amount: ${quote.currency} ${parseFloat(quote.totalAmount || '0').toLocaleString()}\n` : ''}\nOur team will contact you within 24 hours.\n\nBest regards,\nDripTech Irrigation Solutions\nPhone: +254 700 000 000\nEmail: info@driptech.co.ke`
   });
 }

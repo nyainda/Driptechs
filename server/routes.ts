@@ -432,7 +432,7 @@ app.get("/api/health", async (req, res) => {
       const id = req.params.id;
       
       // Prevent deleting own account
-      if (id === req.user.id.toString()) {
+      if (id === (req as any).user.id.toString()) {
         return res.status(400).json({ message: "Cannot delete your own account" });
       }
       

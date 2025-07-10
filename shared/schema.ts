@@ -48,6 +48,8 @@ export const quotes = pgTable("quotes", {
   requirements: text("requirements"),
   status: text("status").notNull().default("pending"), // pending, in_progress, completed, cancelled, sent
   totalAmount: decimal("total_amount", { precision: 12, scale: 2 }),
+  vatAmount: decimal("vat_amount", { precision: 12, scale: 2 }),
+  finalTotal: decimal("final_total", { precision: 12, scale: 2 }),
   currency: text("currency").notNull().default("KSH"),
   items: jsonb("items").default([]), // Array of quote items
   notes: text("notes"),
