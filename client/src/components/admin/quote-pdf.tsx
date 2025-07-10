@@ -358,22 +358,99 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
   };
 
   const handleSave = () => {
+    // Validate required fields
+    if (!editedQuote.customerName?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Customer name is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!editedQuote.customerEmail?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Customer email is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(editedQuote.customerEmail)) {
+      toast({
+        title: "Validation Error",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!editedQuote.location?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Location is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate items
+    if (items.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "At least one item is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate each item
+    for (const item of items) {
+      if (!item.name?.trim()) {
+        toast({
+          title: "Validation Error",
+          description: "All items must have a name.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (item.quantity <= 0) {
+        toast({
+          title: "Validation Error",
+          description: "All items must have a quantity greater than 0.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (item.unitPrice < 0) {
+        toast({
+          title: "Validation Error",
+          description: "All items must have a unit price of 0 or greater.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     const subtotal = calculateSubtotal();
     const vat = calculateVAT();
     const totalAmount = calculateTotal();
 
     // Prepare the update data - only include fields that should be updated
     const updatedQuoteData = {
-      customerName: editedQuote.customerName,
-      customerEmail: editedQuote.customerEmail,
-      customerPhone: editedQuote.customerPhone,
-      location: editedQuote.location,
+      customerName: editedQuote.customerName.trim(),
+      customerEmail: editedQuote.customerEmail.trim(),
+      customerPhone: editedQuote.customerPhone?.trim() || '',
+      location: editedQuote.location.trim(),
       items: items.map(item => ({
         id: item.id,
-        name: item.name,
-        description: item.description,
+        name: item.name.trim(),
+        description: item.description.trim(),
         quantity: item.quantity,
-        unit: item.unit,
+        unit: item.unit.trim(),
         unitPrice: item.unitPrice,
         total: item.total
       })),
@@ -720,18 +797,23 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
                       value={editedQuote.customerName}
                       onChange={(e) => setEditedQuote({...editedQuote, customerName: e.target.value})}
                       className="font-medium"
+                      placeholder="Customer name"
                     />
                     <Input
                       value={editedQuote.customerEmail}
                       onChange={(e) => setEditedQuote({...editedQuote, customerEmail: e.target.value})}
+                      type="email"
+                      placeholder="Customer email"
                     />
                     <Input
                       value={editedQuote.customerPhone}
                       onChange={(e) => setEditedQuote({...editedQuote, customerPhone: e.target.value})}
+                      placeholder="Customer phone"
                     />
                     <Input
                       value={editedQuote.location}
                       onChange={(e) => setEditedQuote({...editedQuote, location: e.target.value})}
+                      placeholder="Project location"
                     />
                   </div>
                 ) : (
@@ -746,7 +828,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">Project Details:</h3>
-              <div className="space-y-2">
+              <div className="bg-muted p-4 rounded-lg space-y-2">
                 <div className="grid grid-cols-2 gap-2">
                   <span className="font-medium">Type:</span>
                   <span>{quote.projectType}</span>
@@ -769,6 +851,11 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
                   <div className="grid grid-cols-2 gap-2">
                     <span className="font-medium">Budget Range:</span>
                     <span>{quote.budgetRange}</span>
+                  </div>
+                )}
+                {isEditing && (
+                  <div className="text-xs text-muted-foreground mt-2 p-2 bg-yellow-50 dark:bg-yellow-950 rounded border">
+                    <strong>Note:</strong> Project details (type, area size, etc.) cannot be modified after quote creation. Only customer information and quote items can be edited.
                   </div>
                 )}
               </div>

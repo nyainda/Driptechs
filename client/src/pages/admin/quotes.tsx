@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -5,14 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { getAuthToken, getUser, clearAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { generateQuotePDF } from "@/lib/pdf";
 import { 
   FileText, 
   Download, 
@@ -46,6 +44,7 @@ export default function AdminQuotes() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
+  const [showQuoteDialog, setShowQuoteDialog] = useState(false);
 
   // Redirect if not authenticated
   if (!token || !user) {
@@ -179,6 +178,11 @@ export default function AdminQuotes() {
     }
   };
 
+  const handleViewQuote = (quote: Quote) => {
+    setSelectedQuote(quote);
+    setShowQuoteDialog(true);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
@@ -193,47 +197,6 @@ export default function AdminQuotes() {
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
     }
   };
-
-  if (selectedQuote) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center">
-                <Button
-                  variant="ghost"
-                  onClick={() => setSelectedQuote(null)}
-                  className="mr-4"
-                >
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back to Quotes
-                </Button>
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                  Quote #{selectedQuote.id.slice(0, 8)} - {selectedQuote.customerName}
-                </h1>
-              </div>
-              <Badge className={getStatusColor(selectedQuote.status)}>
-                {selectedQuote.status.replace('_', ' ').toUpperCase()}
-              </Badge>
-            </div>
-          </div>
-        </header>
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Dialog open={!!selectedQuote} onOpenChange={() => setSelectedQuote(null)}>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" aria-describedby="quote-details">
-            <DialogHeader>
-              <DialogTitle>Quote #{selectedQuote?.id.slice(0, 8)} - {selectedQuote?.customerName}</DialogTitle>
-            </DialogHeader>
-            <div id="quote-details">
-              {selectedQuote && <QuotePDF quote={selectedQuote} />}
-            </div>
-          </DialogContent>
-        </Dialog>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -409,7 +372,7 @@ export default function AdminQuotes() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setSelectedQuote(quote)}
+                        onClick={() => handleViewQuote(quote)}
                         className="bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         <Eye className="h-4 w-4 mr-1" />
@@ -457,6 +420,21 @@ export default function AdminQuotes() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Quote Detail Dialog */}
+      <Dialog open={showQuoteDialog} onOpenChange={setShowQuoteDialog}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Quote #{selectedQuote?.id.slice(0, 8)} - {selectedQuote?.customerName}
+            </DialogTitle>
+            <DialogDescription>
+              View and manage quote details, pricing, and customer information.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedQuote && <QuotePDF quote={selectedQuote} />}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
