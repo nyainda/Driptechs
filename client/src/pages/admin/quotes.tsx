@@ -47,23 +47,38 @@ export default function AdminQuotes() {
   const [showQuoteDialog, setShowQuoteDialog] = useState(false);
 
   // Redirect if not authenticated
+  useEffect(() => {
+    if (!token || !user) {
+      setLocation("/admin");
+    }
+  }, [token, user, setLocation]);
+
   if (!token || !user) {
-    setLocation("/admin");
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 dark:border-blue-400 border-t-transparent" />
+      </div>
+    );
   }
 
   const { data: quotes, isLoading } = useQuery<Quote[]>({
     queryKey: ["/api/admin/quotes"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/admin/quotes");
+      if (!response.ok) {
+        throw new Error('Failed to fetch quotes');
+      }
       return response.json();
     },
     enabled: !!token,
   });
 
   const updateQuoteMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: number; data: Partial<Quote> }) => {
+    mutationFn: async ({ id, data }: { id: string; data: Partial<Quote> }) => {
       const response = await apiRequest("PUT", `/api/admin/quotes/${id}`, data);
+      if (!response.ok) {
+        throw new Error('Failed to update quote');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -139,7 +154,7 @@ export default function AdminQuotes() {
     const dataStr = JSON.stringify(quoteData, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
 
-    const exportFileDefaultName = `quote-${quote.id}.json`;
+    const exportFileDefaultName = `quote-${quote.id.slice(0, 8)}.json`;
 
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
@@ -149,17 +164,17 @@ export default function AdminQuotes() {
 
   const filteredQuotes = quotes?.filter((quote) => {
     const matchesSearch = 
-      quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quote.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quote.projectType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quote.location.toLowerCase().includes(searchTerm.toLowerCase());
+      quote.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quote.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quote.projectType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quote.location?.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === "all" || quote.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   }) || [];
 
-  const handleStatusChange = (quoteId: number, newStatus: string) => {
+  const handleStatusChange = (quoteId: string, newStatus: string) => {
     updateQuoteMutation.mutate({
       id: quoteId,
       data: { status: newStatus }
@@ -224,7 +239,7 @@ export default function AdminQuotes() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="admin-card">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -235,7 +250,7 @@ export default function AdminQuotes() {
               </div>
             </CardContent>
           </Card>
-          <Card className="admin-card">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -248,7 +263,7 @@ export default function AdminQuotes() {
               </div>
             </CardContent>
           </Card>
-          <Card className="admin-card">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -261,7 +276,7 @@ export default function AdminQuotes() {
               </div>
             </CardContent>
           </Card>
-          <Card className="admin-card">
+          <Card>
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -277,7 +292,7 @@ export default function AdminQuotes() {
         </div>
 
         {/* Filters */}
-        <Card className="admin-card mb-6">
+        <Card className="mb-6">
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
@@ -306,7 +321,7 @@ export default function AdminQuotes() {
         </Card>
 
         {/* Quotes List */}
-        <Card className="admin-card">
+        <Card>
           <CardHeader>
             <CardTitle>Quotes ({filteredQuotes.length})</CardTitle>
           </CardHeader>
@@ -336,28 +351,28 @@ export default function AdminQuotes() {
                   <div key={quote.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center space-x-4">
-                        <h3 className="font-semibold">Quote #{quote.id}</h3>
-                        <Badge className={getStatusColor(quote.status)}>
-                          {quote.status.replace('_', ' ').toUpperCase()}
+                        <h3 className="font-semibold">Quote #{quote.id.slice(0, 8)}</h3>
+                        <Badge className={getStatusColor(quote.status || 'pending')}>
+                          {(quote.status || 'pending').replace('_', ' ').toUpperCase()}
                         </Badge>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center space-x-2">
                           <User className="h-4 w-4" />
-                          <span>{quote.customerName}</span>
+                          <span>{quote.customerName || 'N/A'}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <MapPin className="h-4 w-4" />
-                          <span>{quote.location}</span>
+                          <span>{quote.location || 'N/A'}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <FileText className="h-4 w-4" />
-                          <span>{quote.projectType} - {quote.areaSize}</span>
+                          <span>{quote.projectType || 'N/A'} - {quote.areaSize || 'N/A'}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Calendar className="h-4 w-4" />
-                          <span>{new Date(quote.createdAt!).toLocaleDateString()}</span>
+                          <span>{quote.createdAt ? new Date(quote.createdAt).toLocaleDateString() : 'N/A'}</span>
                         </div>
                       </div>
 
@@ -380,7 +395,7 @@ export default function AdminQuotes() {
                       </Button>
 
                       <Select
-                        value={quote.status}
+                        value={quote.status || 'pending'}
                         onValueChange={(value) => handleStatusChange(quote.id, value)}
                       >
                         <SelectTrigger className="w-32">
