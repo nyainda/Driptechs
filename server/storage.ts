@@ -93,7 +93,7 @@ export class Storage {
 
   // Quote management
   async getQuotes(): Promise<Quote[]> {
-    return await db.select().from(quotes);
+    return await db.select().from(quotes).orderBy(sql`created_at DESC`);
   }
 
   async getQuote(id: string): Promise<Quote | null> {
