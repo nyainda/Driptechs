@@ -11,11 +11,12 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Plus, Edit, Trash2, Eye, FileText, Download } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, FileText, Download, Calculator, DollarSign, Send } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import type { Quote, Product } from "@shared/schema";
+import EnhancedQuoteEditor from "./enhanced-quote-editor";
 
 const quoteSchema = z.object({
   customerName: z.string().min(1, "Customer name is required"),
@@ -292,6 +293,7 @@ export default function QuoteManagement() {
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [formMode, setFormMode] = useState<"create" | "edit">("create");
+  const [editingQuote, setEditingQuote] = useState<Quote | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -346,9 +348,11 @@ export default function QuoteManagement() {
   };
 
   const handleEdit = (quote: Quote) => {
-    setSelectedQuote(quote);
-    setFormMode("edit");
-    setShowForm(true);
+    setEditingQuote(quote);
+  };
+
+  const handleEnhancedEdit = (quote: Quote) => {
+    setEditingQuote(quote);
   };
 
   const handleCreate = () => {
@@ -383,6 +387,19 @@ export default function QuoteManagement() {
       default: return "bg-gray-100 text-gray-800";
     }
   };
+
+  if (editingQuote) {
+    return (
+      <EnhancedQuoteEditor
+        quote={editingQuote}
+        onSave={(updatedQuote) => {
+          setEditingQuote(null);
+          queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
+        }}
+        onCancel={() => setEditingQuote(null)}
+      />
+    );
+  }
 
   if (showForm) {
     return (
@@ -451,27 +468,50 @@ export default function QuoteManagement() {
                           {quote.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>${quote.totalAmount?.toLocaleString() || 0}</TableCell>
+                      <TableCell>
+                        <div className="font-semibold">
+                          KES {parseFloat(quote.finalTotal || quote.totalAmount || '0').toLocaleString()}
+                        </div>
+                      </TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleEdit(quote)}
+                            title="Edit Quote with Full Editor"
                           >
-                            <Edit className="w-4 h-4" />
+                            <Calculator className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => generateInvoice(quote)}
+                            title="Generate Invoice"
                           >
                             <FileText className="w-4 h-4" />
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
+                            onClick={async () => {
+                              try {
+                                await apiRequest("POST", `/api/admin/quotes/${quote.id}/send`);
+                                toast({ title: "Success", description: "Quote sent to customer" });
+                                queryClient.invalidateQueries({ queryKey: ["/api/admin/quotes"] });
+                              } catch (error) {
+                                toast({ title: "Error", description: "Failed to send quote", variant: "destructive" });
+                              }
+                            }}
+                            title="Send Quote to Customer"
+                          >
+                            <Send className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
                             onClick={() => handleDelete(quote)}
+                            title="Delete Quote"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
