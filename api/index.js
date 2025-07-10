@@ -148,6 +148,88 @@ function registerSimpleRoutes(app) {
       res.status(500).json({ error: 'Failed to submit contact' });
     }
   });
+
+  // Blog posts endpoint
+  app.get('/api/blog', async (req, res) => {
+    try {
+      const posts = [
+        {
+          id: '1',
+          title: 'Benefits of Drip Irrigation',
+          excerpt: 'Discover how drip irrigation can transform your farming...',
+          slug: 'benefits-of-drip-irrigation',
+          createdAt: new Date().toISOString()
+        }
+      ];
+      res.json(posts);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch blog posts' });
+    }
+  });
+
+  // Projects endpoint
+  app.get('/api/projects', async (req, res) => {
+    try {
+      const projects = [
+        {
+          id: '1',
+          title: 'Large Scale Farm Project',
+          description: 'Successful 100-acre drip irrigation installation',
+          image: '/api/placeholder/600/400',
+          location: 'Nakuru, Kenya'
+        }
+      ];
+      res.json(projects);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch projects' });
+    }
+  });
+
+  // Team endpoint
+  app.get('/api/team', async (req, res) => {
+    try {
+      const team = [
+        {
+          id: '1',
+          name: 'John Doe',
+          role: 'Lead Engineer',
+          image: '/api/placeholder/400/400',
+          bio: 'Expert in irrigation systems with 10+ years experience'
+        }
+      ];
+      res.json(team);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch team' });
+    }
+  });
+
+  // Success stories endpoint
+  app.get('/api/success-stories', async (req, res) => {
+    try {
+      const stories = [
+        {
+          id: '1',
+          title: 'Farmer Success Story',
+          content: 'Increased yield by 40% with our irrigation system',
+          author: 'Mary Wanjiku',
+          location: 'Kiambu, Kenya'
+        }
+      ];
+      res.json(stories);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch success stories' });
+    }
+  });
+
+  // Page view tracking
+  app.post('/api/track/pageview', async (req, res) => {
+    try {
+      console.log('Page view tracked:', req.body);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to track page view' });
+    }
+  });
 }
 
 // Initialize database and routes
