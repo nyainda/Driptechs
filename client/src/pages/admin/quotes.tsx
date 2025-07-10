@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
@@ -6,11 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { getAuthToken, getUser, clearAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { generateQuotePDF } from "@/lib/pdf";
 import { 
   FileText, 
   Download, 
@@ -44,41 +46,25 @@ export default function AdminQuotes() {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [selectedQuote, setSelectedQuote] = useState<Quote | null>(null);
-  const [showQuoteDialog, setShowQuoteDialog] = useState(false);
 
   // Redirect if not authenticated
-  useEffect(() => {
-    if (!token || !user) {
-      setLocation("/admin");
-    }
-  }, [token, user, setLocation]);
-
   if (!token || !user) {
-    return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 dark:border-blue-400 border-t-transparent" />
-      </div>
-    );
+    setLocation("/admin");
+    return null;
   }
 
   const { data: quotes, isLoading } = useQuery<Quote[]>({
     queryKey: ["/api/admin/quotes"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/admin/quotes");
-      if (!response.ok) {
-        throw new Error('Failed to fetch quotes');
-      }
       return response.json();
     },
     enabled: !!token,
   });
 
   const updateQuoteMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<Quote> }) => {
+    mutationFn: async ({ id, data }: { id: number; data: Partial<Quote> }) => {
       const response = await apiRequest("PUT", `/api/admin/quotes/${id}`, data);
-      if (!response.ok) {
-        throw new Error('Failed to update quote');
-      }
       return response.json();
     },
     onSuccess: () => {
@@ -154,7 +140,7 @@ export default function AdminQuotes() {
     const dataStr = JSON.stringify(quoteData, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
 
-    const exportFileDefaultName = `quote-${quote.id.slice(0, 8)}.json`;
+    const exportFileDefaultName = `quote-${quote.id}.json`;
 
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
@@ -164,17 +150,17 @@ export default function AdminQuotes() {
 
   const filteredQuotes = quotes?.filter((quote) => {
     const matchesSearch = 
-      quote.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quote.customerEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quote.projectType?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      quote.location?.toLowerCase().includes(searchTerm.toLowerCase());
+      quote.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quote.customerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quote.projectType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      quote.location.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === "all" || quote.status === statusFilter;
 
     return matchesSearch && matchesStatus;
   }) || [];
 
-  const handleStatusChange = (quoteId: string, newStatus: string) => {
+  const handleStatusChange = (quoteId: number, newStatus: string) => {
     updateQuoteMutation.mutate({
       id: quoteId,
       data: { status: newStatus }
@@ -193,11 +179,6 @@ export default function AdminQuotes() {
     }
   };
 
-  const handleViewQuote = (quote: Quote) => {
-    setSelectedQuote(quote);
-    setShowQuoteDialog(true);
-  };
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "pending":
@@ -212,6 +193,47 @@ export default function AdminQuotes() {
         return "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200";
     }
   };
+
+  if (selectedQuote) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  onClick={() => setSelectedQuote(null)}
+                  className="mr-4"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Quotes
+                </Button>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                  Quote #{selectedQuote.id.slice(0, 8)} - {selectedQuote.customerName}
+                </h1>
+              </div>
+              <Badge className={getStatusColor(selectedQuote.status)}>
+                {selectedQuote.status.replace('_', ' ').toUpperCase()}
+              </Badge>
+            </div>
+          </div>
+        </header>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Dialog open={!!selectedQuote} onOpenChange={() => setSelectedQuote(null)}>
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" aria-describedby="quote-details">
+            <DialogHeader>
+              <DialogTitle>Quote #{selectedQuote?.id.slice(0, 8)} - {selectedQuote?.customerName}</DialogTitle>
+            </DialogHeader>
+            <div id="quote-details">
+              {selectedQuote && <QuotePDF quote={selectedQuote} />}
+            </div>
+          </DialogContent>
+        </Dialog>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -239,7 +261,7 @@ export default function AdminQuotes() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
+          <Card className="admin-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -250,7 +272,7 @@ export default function AdminQuotes() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="admin-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -263,7 +285,7 @@ export default function AdminQuotes() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="admin-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -276,7 +298,7 @@ export default function AdminQuotes() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="admin-card">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -292,7 +314,7 @@ export default function AdminQuotes() {
         </div>
 
         {/* Filters */}
-        <Card className="mb-6">
+        <Card className="admin-card mb-6">
           <CardContent className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
@@ -321,7 +343,7 @@ export default function AdminQuotes() {
         </Card>
 
         {/* Quotes List */}
-        <Card>
+        <Card className="admin-card">
           <CardHeader>
             <CardTitle>Quotes ({filteredQuotes.length})</CardTitle>
           </CardHeader>
@@ -351,28 +373,28 @@ export default function AdminQuotes() {
                   <div key={quote.id} className="flex items-center justify-between p-4 bg-muted rounded-lg">
                     <div className="flex-1 space-y-2">
                       <div className="flex items-center space-x-4">
-                        <h3 className="font-semibold">Quote #{quote.id.slice(0, 8)}</h3>
-                        <Badge className={getStatusColor(quote.status || 'pending')}>
-                          {(quote.status || 'pending').replace('_', ' ').toUpperCase()}
+                        <h3 className="font-semibold">Quote #{quote.id}</h3>
+                        <Badge className={getStatusColor(quote.status)}>
+                          {quote.status.replace('_', ' ').toUpperCase()}
                         </Badge>
                       </div>
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
                         <div className="flex items-center space-x-2">
                           <User className="h-4 w-4" />
-                          <span>{quote.customerName || 'N/A'}</span>
+                          <span>{quote.customerName}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <MapPin className="h-4 w-4" />
-                          <span>{quote.location || 'N/A'}</span>
+                          <span>{quote.location}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <FileText className="h-4 w-4" />
-                          <span>{quote.projectType || 'N/A'} - {quote.areaSize || 'N/A'}</span>
+                          <span>{quote.projectType} - {quote.areaSize}</span>
                         </div>
                         <div className="flex items-center space-x-2">
                           <Calendar className="h-4 w-4" />
-                          <span>{quote.createdAt ? new Date(quote.createdAt).toLocaleDateString() : 'N/A'}</span>
+                          <span>{new Date(quote.createdAt!).toLocaleDateString()}</span>
                         </div>
                       </div>
 
@@ -387,7 +409,7 @@ export default function AdminQuotes() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleViewQuote(quote)}
+                        onClick={() => setSelectedQuote(quote)}
                         className="bg-blue-600 hover:bg-blue-700 text-white"
                       >
                         <Eye className="h-4 w-4 mr-1" />
@@ -395,7 +417,7 @@ export default function AdminQuotes() {
                       </Button>
 
                       <Select
-                        value={quote.status || 'pending'}
+                        value={quote.status}
                         onValueChange={(value) => handleStatusChange(quote.id, value)}
                       >
                         <SelectTrigger className="w-32">
@@ -435,21 +457,6 @@ export default function AdminQuotes() {
           </CardContent>
         </Card>
       </div>
-
-      {/* Quote Detail Dialog */}
-      <Dialog open={showQuoteDialog} onOpenChange={setShowQuoteDialog}>
-        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              Quote #{selectedQuote?.id.slice(0, 8)} - {selectedQuote?.customerName}
-            </DialogTitle>
-            <DialogDescription>
-              View and manage quote details, pricing, and customer information.
-            </DialogDescription>
-          </DialogHeader>
-          {selectedQuote && <QuotePDF quote={selectedQuote} />}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
