@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "npm run build:simple",
+  "buildCommand": "npm run build",
   "outputDirectory": "dist/public",
   "functions": {
     "api/index.js": {

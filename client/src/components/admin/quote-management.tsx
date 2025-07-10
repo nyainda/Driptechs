@@ -113,26 +113,32 @@ function QuoteForm({ quote, onSuccess, onCancel }: QuoteFormProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="customerName">Customer Name</Label>
-          <Input
-            id="customerName"
-            {...form.register("customerName")}
-            placeholder="Enter customer name"
-          />
-          {form.formState.errors.customerName && (
-            <p className="text-sm text-red-500 mt-1">{form.formState.errors.customerName.message}</p>
-          )}
-        </div>
+          <div>
+            <Label htmlFor="customerName">Customer Name *</Label>
+            <Input
+              id="customerName"
+              {...form.register('customerName', { required: 'Customer name is required' })}
+              placeholder="Enter customer name"
+            />
+            {form.formState.errors.customerName && (
+              <p className="text-sm text-red-500 mt-1">{form.formState.errors.customerName.message}</p>
+            )}
+          </div>
 
-        <div>
-          <Label htmlFor="customerEmail">Customer Email</Label>
-          <Input
-            id="customerEmail"
-            type="email"
-            {...form.register("customerEmail")}
-            placeholder="Enter customer email"
-          />
+          <div>
+            <Label htmlFor="customerEmail">Customer Email *</Label>
+            <Input
+              id="customerEmail"
+              type="email"
+              {...form.register('customerEmail', { 
+                required: 'Customer email is required',
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: 'Invalid email address'
+                }
+              })}
+              placeholder="Enter customer email"
+            />
           {form.formState.errors.customerEmail && (
             <p className="text-sm text-red-500 mt-1">{form.formState.errors.customerEmail.message}</p>
           )}
@@ -160,11 +166,11 @@ function QuoteForm({ quote, onSuccess, onCancel }: QuoteFormProps) {
         </div>
 
         <div>
-          <Label htmlFor="projectType">Project Type</Label>
+          <Label htmlFor="projectType">Project Type *</Label>
           <Input
             id="projectType"
-            {...form.register("projectType")}
-            placeholder="Enter project type"
+            {...form.register('projectType', { required: 'Project type is required' })}
+            placeholder="e.g., Drip Irrigation, Greenhouse Setup"
           />
           {form.formState.errors.projectType && (
             <p className="text-sm text-red-500 mt-1">{form.formState.errors.projectType.message}</p>
@@ -317,7 +323,7 @@ export default function QuoteManagement() {
   const generateInvoice = async (quote: Quote) => {
     try {
       const response = await apiRequest("POST", `/api/admin/quotes/${quote.id}/invoice`);
-      
+
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);

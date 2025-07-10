@@ -32,7 +32,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedQuote, setEditedQuote] = useState(quote);
   const [isUpdating, setIsUpdating] = useState(false);
-  
+
   const getServiceDescription = (projectType: string) => {
     const serviceDescriptions = {
       'system_design': 'Custom irrigation system design and planning',
@@ -63,11 +63,11 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
         total: parseFloat(item.total || (parseFloat(item.unitPrice || "0") * parseFloat(item.quantity || "1")))
       }));
     }
-    
+
     // Default items based on project type
     const defaultItems = [];
     const basePrice = parseFloat(quote.totalAmount || "100000");
-    
+
     if (quote.projectType === 'system_design') {
       defaultItems.push({
         id: '1',
@@ -173,7 +173,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
         total: basePrice
       });
     }
-    
+
     return defaultItems;
   });
 
@@ -184,16 +184,16 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
     mutationFn: async (data: any) => {
       console.log('Sending update request with data:', data);
       setIsUpdating(true);
-      
+
       try {
         const response = await apiRequest("PUT", `/api/admin/quotes/${quote.id}`, data);
-        
+
         if (!response.ok) {
           const errorData = await response.text();
           console.error('Update failed with response:', errorData);
           throw new Error(`Update failed: ${response.status} ${response.statusText} - ${errorData}`);
         }
-        
+
         return response.json();
       } catch (error) {
         console.error('Update request failed:', error);
@@ -284,9 +284,9 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
       { name: 'System Testing', description: 'Complete system testing and commissioning', unit: 'service', unitPrice: 5000 },
       { name: 'User Training', description: 'Training on system operation and maintenance', unit: 'service', unitPrice: 3000 }
     ];
-    
+
     const randomSuggestion = materialSuggestions[Math.floor(Math.random() * materialSuggestions.length)];
-    
+
     const newItem: QuoteItem = {
       id: Math.random().toString(36).substr(2, 9),
       name: randomSuggestion.name,
@@ -332,7 +332,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
     const subtotal = calculateSubtotal();
     const vat = calculateVAT();
     const total = calculateTotal();
-    
+
     // Prepare the update data - only include fields that should be updated
     const updatedQuoteData = {
       customerName: editedQuote.customerName,
@@ -353,7 +353,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
       finalTotal: total.toString(),
       // Don't include createdAt, updatedAt will be set by backend
     };
-    
+
     console.log('Preparing to update quote with data:', updatedQuoteData);
     updateQuoteMutation.mutate(updatedQuoteData);
   };
@@ -548,7 +548,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
 
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
-    
+
     const link = document.createElement('a');
     link.href = url;
     link.download = `DripTech-Quote-${quote.id.slice(0, 8)}-${quote.customerName.replace(/\s+/g, '-')}.html`;
@@ -767,7 +767,7 @@ export default function QuotePDF({ quote }: QuotePDFProps) {
                 </Button>
               )}
             </div>
-            
+
             <div className="overflow-x-auto">
               <table className="w-full border-collapse border border-border">
                 <thead>
