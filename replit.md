@@ -159,6 +159,7 @@ Changelog:
   - Created enhanced quote editor with item-level pricing and product integration
   - Fixed Vercel 404 deployment errors with proper API routing and client package structure
   - Created comprehensive deployment guide with troubleshooting steps
+  - Added PostgreSQL database with complete schema deployment
 ```
 
 ## User Preferences
