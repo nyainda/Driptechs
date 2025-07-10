@@ -1,10 +1,8 @@
 {
   "version": 2,
+  "buildCommand": "echo 'Using pre-built client files'",
+  "outputDirectory": "client/dist",
   "builds": [
-    {
-      "src": "public/**/*",
-      "use": "@vercel/static"
-    },
     {
       "src": "api/index.js",
       "use": "@vercel/node"
@@ -17,7 +15,12 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/public/index.html"
+      "dest": "/index.html"
     }
-  ]
+  ],
+  "functions": {
+    "api/index.js": {
+      "maxDuration": 30
+    }
+  }
 }
