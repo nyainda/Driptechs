@@ -221,13 +221,11 @@ export default function AdminQuotes() {
         </header>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Dialog open={!!selectedQuote} onOpenChange={() => setSelectedQuote(null)}>
-          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" aria-describedby="quote-details">
+          <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Quote #{selectedQuote?.id.slice(0, 8)} - {selectedQuote?.customerName}</DialogTitle>
             </DialogHeader>
-            <div id="quote-details">
-              {selectedQuote && <QuotePDF quote={selectedQuote} />}
-            </div>
+            {selectedQuote && <QuotePDF quote={selectedQuote} />}
           </DialogContent>
         </Dialog>
         </div>
