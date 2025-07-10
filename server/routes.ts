@@ -726,10 +726,10 @@ app.get("/api/health", async (req, res) => {
   app.get("/api/team", async (req, res) => {
     try {
       const teamMembers = await storage.getTeamMembers();
-      res.json(teamMembers);
+      res.json(Array.isArray(teamMembers) ? teamMembers : []);
     } catch (error) {
       console.error("Team members error:", error);
-      res.status(500).json({ message: "Failed to fetch team members" });
+      res.json([]);
     }
   });
 
@@ -778,11 +778,11 @@ app.get("/api/health", async (req, res) => {
     try {
       const stories = await storage.getSuccessStories();
       // Only return active stories for public view
-      const activeStories = stories.filter(s => s.active);
+      const activeStories = Array.isArray(stories) ? stories.filter(s => s.active) : [];
       res.json(activeStories);
     } catch (error) {
       console.error("Success stories error:", error);
-      res.status(500).json({ message: "Failed to fetch success stories" });
+      res.json([]);
     }
   });
 

@@ -297,7 +297,7 @@ export class Storage {
 
   async trackPageView(data: { page: string; userAgent: string; ipAddress: string; sessionId: string }) {
     try {
-      await this.db.execute(sql`
+      await db.execute(sql`
         INSERT INTO page_views (page, user_agent, ip_address, session_id, created_at)
         VALUES (${data.page}, ${data.userAgent}, ${data.ipAddress}, ${data.sessionId}, NOW())
       `);
@@ -463,13 +463,11 @@ export class Storage {
         const hashedPassword = await bcrypt.hash("admin123", 10);
 
         await db.insert(users).values({
-          id: Math.random().toString(36).substr(2, 9),
           name: "Admin User",
           email: "admin@driptech.co.ke",
           password: hashedPassword,
           role: "super_admin",
-          createdAt: new Date(),
-          updatedAt: new Date()
+          createdAt: new Date()
         });
         console.log("✅ Admin user created");
       }
