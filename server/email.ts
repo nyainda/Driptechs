@@ -64,12 +64,12 @@ export function generateQuoteEmailHTML(quote: Quote): string {
         <h1>DripTech Irrigation Solutions</h1>
         <p>Your Quote is Ready!</p>
       </div>
-      
+
       <div class="content">
         <h2>Dear ${quote.customerName},</h2>
-        
+
         <p>Thank you for your interest in our irrigation solutions. We've prepared a customized quote based on your requirements.</p>
-        
+
         <div class="quote-details">
           <h3>Quote Details</h3>
           <table>
@@ -82,27 +82,27 @@ export function generateQuoteEmailHTML(quote: Quote): string {
             ${quote.totalAmount ? `<tr><th>Total Amount:</th><td>${quote.currency} ${parseFloat(quote.totalAmount || '0').toLocaleString()}</td></tr>` : ''}
           </table>
         </div>
-        
+
         ${quote.requirements ? `
           <div class="quote-details">
             <h3>Your Requirements</h3>
             <p>${quote.requirements}</p>
           </div>
         ` : ''}
-        
+
         ${quote.notes ? `
           <div class="quote-details">
             <h3>Additional Notes</h3>
             <p>${quote.notes}</p>
           </div>
         ` : ''}
-        
+
         <p>Our team will contact you within 24 hours to discuss the next steps and answer any questions you may have.</p>
-        
+
         <a href="tel:+254700000000" class="button">Call Us: +254 700 000 000</a>
         <a href="mailto:info@driptech.co.ke" class="button">Email Us</a>
       </div>
-      
+
       <div class="footer">
         <p><strong>DripTech Irrigation Solutions</strong></p>
         <p>Professional irrigation systems for modern agriculture</p>
@@ -116,7 +116,7 @@ export function generateQuoteEmailHTML(quote: Quote): string {
 
 export async function sendQuoteEmail(quote: Quote): Promise<boolean> {
   const emailHTML = generateQuoteEmailHTML(quote);
-  
+
   return await sendEmail({
     to: quote.customerEmail,
     from: process.env.SENDGRID_FROM_EMAIL || 'quotes@driptech.co.ke',

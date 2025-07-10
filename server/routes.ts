@@ -661,7 +661,7 @@ app.get("/api/health", async (req, res) => {
         ...req.body,
         category: req.body.category || "General",
         tags: req.body.tags || [],
-        authorId: req.user.id,
+        authorId: (req as any).user.id,
         published: req.body.published || false,
       };
       
@@ -866,7 +866,7 @@ app.get("/api/health", async (req, res) => {
     }
   });
 
-  app.get("/api/admin/gamification-overview", authenticate, requireAdmin, async (req, res) => {
+  app.get("/api/admin/gamification-overview", authenticate, requireAdmin, async (req: any, res) => {
     try {
       // Get current user's gamification data
       const userId = req.user.id;

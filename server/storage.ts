@@ -37,7 +37,14 @@ export class Storage {
   }
 
   async createUser(userData: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(userData).returning();
+    const [user] = await db.insert(users).values({
+      email: userData.email,
+      password: userData.password,
+      name: userData.name,
+      role: userData.role || 'user',
+      phone: userData.phone,
+      createdAt: new Date()
+    }).returning();
     return user;
   }
 
@@ -288,10 +295,15 @@ export class Storage {
     }
   }
 
-  // Analytics tracking methods
-  async trackPageView(pageViewData: InsertPageView): Promise<PageView> {
-    const [pageView] = await db.insert(pageViews).values(pageViewData).returning();
-    return pageView;
+  async trackPageView(data: { page: string; userAgent: string; ipAddress: string; sessionId: string }) {
+    try {
+      await this.db.execute(sql`
+        INSERT INTO page_views (page, user_agent, ip_address, session_id, created_at)
+        VALUES (${data.page}, ${data.userAgent}, ${data.ipAddress}, ${data.sessionId}, NOW())
+      `);
+    } catch (error) {
+      console.error('Page view tracking error:', error);
+    }
   }
 
   async getTodayUniqueVisitors(): Promise<number> {
