@@ -1,7 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./server/routes";
-import { initializeDatabase } from './server/init-db';
-import { checkDatabaseConnection, getDatabaseConfig } from './server/db';
+import { registerRoutes } from "./server/routes.js";
+import { initializeDatabase } from './server/init-db.js';
+import { checkDatabaseConnection, getDatabaseConfig } from './server/db.js';
 
 const app = express();
 app.use(express.json());
