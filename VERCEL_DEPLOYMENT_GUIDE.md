@@ -11,6 +11,11 @@
 - Fixed module resolution for TypeScript files
 - Updated `tsconfig.json` with proper configuration for Vercel
 
+### ✅ Runtime Configuration Fixed
+- Fixed "Function Runtimes must have a valid version" error
+- Removed invalid runtime specification from vercel.json
+- Added proper Node.js 20.x engine specification in api/package.json
+
 ### ✅ Database Connection Fixed
 - All database imports properly resolved
 - API endpoints tested and working on Replit
@@ -52,7 +57,8 @@ Make sure to set these environment variables in your Vercel dashboard:
 - Removed deprecated TypeScript options
 
 ### Vercel Configuration:
-- Added proper Node.js runtime specification
+- Fixed invalid runtime specification error by removing incorrect format
+- Added Node.js 20.x engine specification in api/package.json
 - Set up environment variables in `vercel.json`
 - Enhanced function timeout to 30 seconds
 

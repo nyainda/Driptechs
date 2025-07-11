@@ -180,7 +180,7 @@ Changelog:
   - Created database tables using Drizzle migration (db:push)
   - Fixed all Vercel API import issues by removing .js extensions from TypeScript imports
   - Updated tsconfig.json with proper module resolution for Vercel deployment
-  - Enhanced vercel.json with Node.js 20.x runtime and proper environment configuration
+  - Fixed Vercel runtime specification error by removing invalid format and adding Node.js 20.x in package.json
   - All API endpoints tested and working (login, pageview tracking, admin functions)
   - Created comprehensive Vercel deployment guide with troubleshooting steps
   - Migration complete with both Replit and Vercel deployment working perfectly
