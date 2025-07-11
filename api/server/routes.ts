@@ -5,7 +5,7 @@ import {
   insertProductSchema, insertQuoteSchema, insertProjectSchema, 
   insertBlogPostSchema, insertContactSchema, insertTeamMemberSchema, 
   insertSuccessStorySchema, loginSchema, insertUserSchema 
-} from "../vercel-fix.js";
+} from "../vercel-fix";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sql } from 'drizzle-orm';
