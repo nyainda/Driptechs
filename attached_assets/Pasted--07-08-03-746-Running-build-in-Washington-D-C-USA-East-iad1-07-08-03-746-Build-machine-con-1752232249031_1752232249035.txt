@@ -1,0 +1,72 @@
+[07:08:03.746] Running build in Washington, D.C., USA (East) – iad1
+[07:08:03.746] Build machine configuration: 2 cores, 8 GB
+[07:08:03.783] Cloning github.com/nyainda/Driptechs (Branch: main, Commit: 4c58471)
+[07:08:04.200] Cloning completed: 417.000ms
+[07:08:05.156] Restored build cache from previous deployment (6HZHrBBW3VcNfeTzesTpFYpBdc22)
+[07:08:05.555] Running "vercel build"
+[07:08:05.989] Vercel CLI 44.3.0
+[07:08:06.705] Installing dependencies...
+[07:08:08.052] 
+[07:08:08.053] up to date in 1s
+[07:08:08.053] 
+[07:08:08.053] 84 packages are looking for funding
+[07:08:08.054]   run `npm fund` for details
+[07:08:09.020] 
+[07:08:09.020] up to date, audited 340 packages in 894ms
+[07:08:09.021] 
+[07:08:09.021] 50 packages are looking for funding
+[07:08:09.021]   run `npm fund` for details
+[07:08:09.022] 
+[07:08:09.022] found 0 vulnerabilities
+[07:08:09.160] 
+[07:08:09.161] > driptech-client@1.0.0 build
+[07:08:09.161] > vite build
+[07:08:09.161] 
+[07:08:09.479] [36mvite v7.0.4 [32mbuilding for production...[36m[39m
+[07:08:09.844] transforming...
+[07:08:16.228] [32m✓[39m 1890 modules transformed.
+[07:08:16.541] rendering chunks...
+[07:08:16.806] computing gzip size...
+[07:08:16.830] [2mdist/[22m[32mindex.html                 [39m[1m[2m  0.90 kB[22m[1m[22m[2m │ gzip:   0.47 kB[22m
+[07:08:16.830] [2mdist/[22m[2massets/[22m[35mindex-PWTfEeR7.css  [39m[1m[2m147.87 kB[22m[1m[22m[2m │ gzip:  21.34 kB[22m
+[07:08:16.831] [2mdist/[22m[2massets/[22m[36mrouter-C3dNlie5.js  [39m[1m[2m  5.42 kB[22m[1m[22m[2m │ gzip:   2.68 kB[22m
+[07:08:16.831] [2mdist/[22m[2massets/[22m[36mui-DIvwBjVH.js      [39m[1m[2m 81.68 kB[22m[1m[22m[2m │ gzip:  27.57 kB[22m
+[07:08:16.831] [2mdist/[22m[2massets/[22m[36mvendor-DavUf6mE.js  [39m[1m[2m141.72 kB[22m[1m[22m[2m │ gzip:  45.48 kB[22m
+[07:08:16.831] [2mdist/[22m[2massets/[22m[36mindex-BJpyDaLS.js   [39m[1m[33m670.05 kB[39m[22m[2m │ gzip: 155.09 kB[22m
+[07:08:16.831] [33m
+[07:08:16.832] (!) Some chunks are larger than 500 kB after minification. Consider:
+[07:08:16.832] - Using dynamic import() to code-split the application
+[07:08:16.832] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[07:08:16.833] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[07:08:16.834] [32m✓ built in 7.02s[39m
+[07:08:17.519] 
+[07:08:17.520] up to date, audited 137 packages in 589ms
+[07:08:17.521] 
+[07:08:17.521] 21 packages are looking for funding
+[07:08:17.521]   run `npm fund` for details
+[07:08:17.521] 
+[07:08:17.521] found 0 vulnerabilities
+[07:08:17.551] Installing dependencies...
+[07:08:18.008] 
+[07:08:18.010] up to date in 388ms
+[07:08:18.010] 
+[07:08:18.011] 21 packages are looking for funding
+[07:08:18.011]   run `npm fund` for details
+[07:08:18.224] Using TypeScript 5.8.3 (local user-provided)
+[07:08:24.946] Using TypeScript 5.8.3 (local user-provided)
+[07:08:25.456] Using TypeScript 5.8.3 (local user-provided)
+[07:08:28.613] Using TypeScript 5.8.3 (local user-provided)
+[07:08:29.408] Using TypeScript 5.8.3 (local user-provided)
+[07:08:29.462] Using TypeScript 5.8.3 (local user-provided)
+[07:08:30.637] Using TypeScript 5.8.3 (local user-provided)
+[07:08:30.801] Using TypeScript 5.8.3 (local user-provided)
+[07:08:31.772] Using TypeScript 5.8.3 (local user-provided)
+[07:08:32.079] Using TypeScript 5.8.3 (local user-provided)
+[07:08:32.347] Using TypeScript 5.8.3 (local user-provided)
+[07:08:32.618] Using TypeScript 5.8.3 (local user-provided)
+[07:08:33.930] Using TypeScript 5.8.3 (local user-provided)
+[07:08:34.124] Build Completed in /vercel/output [27s]
+[07:08:34.547] Deploying outputs...
+[07:08:37.225] Error: No more than 12 Serverless Functions can be added to a Deployment on the Hobby plan. Create a team (Pro plan) to deploy more. Learn More: https://vercel.link/function-count-limit
+[07:08:38.016] 
+[07:08:40.513] Exiting build container
