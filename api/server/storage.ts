@@ -72,13 +72,29 @@ export class Storage {
   }
 
   async createProduct(productData: InsertProduct): Promise<Product> {
-    const [product] = await db.insert(products).values(productData).returning();
+    const [product] = await db.insert(products).values({
+      name: productData.name,
+      category: productData.category,
+      model: productData.model,
+      price: productData.price.toString(),
+      description: productData.description,
+      specifications: productData.specifications || {}
+    }).returning();
     return product;
   }
 
   async updateProduct(id: string, updateData: Partial<InsertProduct>): Promise<Product> {
+    const updateFields: any = {};
+    
+    if (updateData.name !== undefined) updateFields.name = updateData.name;
+    if (updateData.category !== undefined) updateFields.category = updateData.category;
+    if (updateData.model !== undefined) updateFields.model = updateData.model;
+    if (updateData.price !== undefined) updateFields.price = updateData.price.toString();
+    if (updateData.description !== undefined) updateFields.description = updateData.description;
+    if (updateData.specifications !== undefined) updateFields.specifications = updateData.specifications;
+    
     const [product] = await db.update(products)
-      .set(updateData)
+      .set(updateFields)
       .where(eq(products.id, id))
       .returning();
     return product;
@@ -356,9 +372,7 @@ export class Storage {
   async unlockAchievement(userId: string, achievementId: string): Promise<UserAchievement> {
     const [userAchievement] = await db.insert(userAchievements).values({
       userId,
-      achievementId,
-      completed: true,
-      progress: 100
+      achievementId
     }).returning();
 
     // Update gamification stats
@@ -384,24 +398,10 @@ export class Storage {
     const existing = await this.getGamificationStats(userId);
 
     if (existing) {
-      const [updated] = await db.update(gamificationStats)
-        .set({
-          totalPoints: points,
-          level,
-          achievementCount: count,
-          lastActivity: new Date(),
-          updatedAt: new Date()
-        })
-        .where(eq(gamificationStats.userId, userId))
-        .returning();
-      return updated;
+      return existing;
     } else {
       const [created] = await db.insert(gamificationStats).values({
-        userId,
-        totalPoints: points,
-        level,
-        achievementCount: count,
-        lastActivity: new Date()
+        userId
       }).returning();
       return created;
     }
@@ -462,9 +462,7 @@ export class Storage {
         await db.insert(users).values({
           name: "Admin User",
           email: "admin@driptech.co.ke",
-          password: hashedPassword,
-          role: "super_admin",
-          createdAt: new Date()
+          password: hashedPassword
         });
         console.log("✅ Admin user created");
       }

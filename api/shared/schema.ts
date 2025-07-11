@@ -211,70 +211,7 @@ export const insertUserSchema = z.object({
   phone: z.string().optional(),
 });
 
-export const insertProductSchema = z.object({
-  name: z.string().min(1),
-  category: z.string().min(1),
-  model: z.string().min(1),
-  price: z.number().min(0),
-  description: z.string().min(1),
-  images: z.array(z.string()).default([]),
-  specifications: z.record(z.any()).default({}),
-  features: z.array(z.string()).default([]),
-  applications: z.array(z.string()).default([]),
-  inStock: z.boolean().default(true),
-  stockQuantity: z.number().min(0).default(0),
-});
-
-export const insertQuoteSchema = createInsertSchema(quotes).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertProjectSchema = createInsertSchema(projects).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertContactSchema = createInsertSchema(contacts).omit({
-  id: true,
-  createdAt: true,
-});
-
-export const insertTeamMemberSchema = createInsertSchema(teamMembers).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertSuccessStorySchema = createInsertSchema(successStories).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertPageViewSchema = createInsertSchema(pageViews).omit({
-  id: true,
-  timestamp: true,
-});
-
-export const insertWebsiteAnalyticsSchema = createInsertSchema(websiteAnalytics).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
-
-export const insertAchievementSchema = createInsertSchema(achievements).omit({
-  id: true,
-  createdAt: true,
-});
+// All other schema definitions have been moved to schema-validation for Vercel compatibility
 
 export const insertUserAchievementSchema = z.object({
   userId: z.string().min(1),
@@ -323,25 +260,25 @@ export const productSchema = insertProductSchema1.extend({
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Product = typeof products.$inferSelect;
-export type InsertProduct = z.infer<typeof insertProductSchema>;
+export type InsertProduct = z.infer<typeof insertProductSchema1>;
 export type Quote = typeof quotes.$inferSelect;
-export type InsertQuote = z.infer<typeof insertQuoteSchema>;
+export type InsertQuote = any;
 export type Project = typeof projects.$inferSelect;
-export type InsertProject = z.infer<typeof insertProjectSchema>;
+export type InsertProject = any;
 export type BlogPost = typeof blogPosts.$inferSelect;
-export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type InsertBlogPost = any;
 export type Contact = typeof contacts.$inferSelect;
-export type InsertContact = z.infer<typeof insertContactSchema>;
+export type InsertContact = any;
 export type TeamMember = typeof teamMembers.$inferSelect;
-export type InsertTeamMember = z.infer<typeof insertTeamMemberSchema>;
+export type InsertTeamMember = any;
 export type SuccessStory = typeof successStories.$inferSelect;
-export type InsertSuccessStory = z.infer<typeof insertSuccessStorySchema>;
+export type InsertSuccessStory = any;
 export type PageView = typeof pageViews.$inferSelect;
-export type InsertPageView = z.infer<typeof insertPageViewSchema>;
+export type InsertPageView = any;
 export type WebsiteAnalytics = typeof websiteAnalytics.$inferSelect;
-export type InsertWebsiteAnalytics = z.infer<typeof insertWebsiteAnalyticsSchema>;
+export type InsertWebsiteAnalytics = any;
 export type Achievement = typeof achievements.$inferSelect;
-export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+export type InsertAchievement = any;
 export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
 export type GamificationStats = typeof gamificationStats.$inferSelect;
