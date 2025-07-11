@@ -1,21 +1,15 @@
-# Ignore specific files that might create extra functions
-api/server/index.ts
-api/server/vite.ts
-api/vercel-fix.ts
-
-# Ignore development files
+node_modules
+.env*
+.git
 *.log
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-
-# Ignore build artifacts
-node_modules/
-dist/
-.next/
-*.tsbuildinfo
-
-# Ignore OS files
-.DS_Store
-Thumbs.db
+dist
+server
+shared
+client/src
+client/public
+client/node_modules
+.replit
+replit.nix
+.gitignore
+README.md
+*.md
