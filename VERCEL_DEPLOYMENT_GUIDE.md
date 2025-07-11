@@ -1,124 +1,137 @@
-# DripTech Irrigation - Vercel Deployment Guide
+# Vercel Deployment Guide for DripTech
 
 ## Overview
-This guide walks you through deploying the DripTech Irrigation website to Vercel with both frontend and backend functionality.
+
+This guide covers deploying the DripTech irrigation website to Vercel. The project uses a single serverless function approach to stay within the free plan limits.
 
 ## Prerequisites
-1. Vercel account (free plan works)
-2. GitHub repository with your project
-3. PostgreSQL database (Neon recommended)
 
-## Environment Variables Required
-Set these in your Vercel dashboard under Project Settings > Environment Variables:
+1. **Vercel Account**: Sign up at [vercel.com](https://vercel.com)
+2. **GitHub Repository**: Your code should be in a GitHub repository
+3. **Environment Variables**: Prepare your environment variables
 
-```
-DATABASE_URL=your_postgresql_connection_string
+## Required Environment Variables
+
+Set these in your Vercel project settings:
+
+```bash
+DATABASE_URL=your_neon_postgresql_connection_string
 JWT_SECRET=your_jwt_secret_key
 SENDGRID_API_KEY=your_sendgrid_api_key (optional)
-NODE_ENV=production
 ```
 
 ## Deployment Steps
 
-### 1. Connect Repository
-1. Go to [vercel.com](https://vercel.com)
-2. Click "New Project"
-3. Import your GitHub repository
-4. Select the project
+### 1. Connect GitHub Repository
+
+1. Go to [vercel.com/new](https://vercel.com/new)
+2. Select "Import Git Repository"
+3. Choose your DripTech repository
+4. Click "Import"
 
 ### 2. Configure Build Settings
-Vercel should automatically detect the configuration from `vercel.json`, but ensure:
-- **Framework Preset**: Other
-- **Build Command**: `npm run build:frontend`
+
+Vercel will automatically detect the configuration from `vercel.json`:
+
+- **Build Command**: `npm run build`
 - **Output Directory**: `dist/public`
 - **Install Command**: `npm install`
 
 ### 3. Set Environment Variables
-In Project Settings > Environment Variables, add:
-- `DATABASE_URL`: Your PostgreSQL connection string
-- `JWT_SECRET`: A secure random string for JWT tokens
-- `NODE_ENV`: Set to `production`
-- `SENDGRID_API_KEY`: (Optional) For email functionality
+
+1. Go to your project settings in Vercel
+2. Navigate to "Environment Variables"
+3. Add the required variables listed above
 
 ### 4. Deploy
-Click "Deploy" and wait for the build to complete.
 
-## Database Setup
-1. **Create PostgreSQL Database**: Use Neon, Railway, or Supabase
-2. **Get Connection String**: Copy your database URL
-3. **Set Environment Variable**: Add `DATABASE_URL` in Vercel
-4. **Database Tables**: Tables will be created automatically on first deployment
+1. Click "Deploy"
+2. Wait for the build to complete
+3. Your site will be available at `https://your-project.vercel.app`
 
-## API Endpoints
-All API routes are available under `/api/` and will work seamlessly:
-- `/api/products` - Product catalog
-- `/api/quotes` - Quote management
-- `/api/login` - Admin authentication
-- `/api/projects` - Project portfolio
-- `/api/blog` - Blog posts
-- `/api/contacts` - Contact forms
+## Project Structure
 
-## Frontend Routes
-All client-side routes work correctly with SPA routing:
-- `/` - Homepage
-- `/products` - Product catalog
-- `/services` - Services page
-- `/projects` - Projects portfolio
-- `/about` - About page
-- `/contact` - Contact page
-- `/blog` - Blog
-- `/quote` - Quote request
-- `/admin` - Admin dashboard
+```
+project-root/
+├── api/
+│   ├── index.js          # Main serverless function
+│   ├── package.json      # API dependencies
+│   └── shared/
+│       └── schema.js     # Database schema
+├── client/               # React frontend
+├── vercel.json          # Vercel configuration
+├── .vercelignore        # Files to ignore during deployment
+└── package.json         # Root dependencies
+```
+
+## Key Features
+
+- **Single Serverless Function**: All API routes handled by `api/index.js`
+- **SPA Routing**: All client routes redirect to `index.html`
+- **PostgreSQL Support**: Uses Neon for database
+- **JWT Authentication**: Secure admin login
+- **Free Plan Compatible**: Stays within Vercel's free tier limits
+
+## Admin Access
+
+After deployment, you can access the admin dashboard at:
+- URL: `https://your-project.vercel.app/admin`
+- Email: `admin@driptech.co.ke`
+- Password: `admin123`
 
 ## Troubleshooting
 
 ### Build Errors
-- Ensure all dependencies are in `package.json`
-- Check that `dist/public` directory is created during build
-- Verify Node.js version compatibility (Node 20.x recommended)
 
-### API Not Working
-- Check environment variables are set correctly
-- Verify DATABASE_URL is accessible from Vercel
-- Check function logs in Vercel dashboard
+1. **"Failed to resolve /src/main.tsx"**: This was fixed by updating the build configuration
+2. **"Too many serverless functions"**: Resolved by using single function approach
+3. **Import/dependency issues**: All dependencies are included in `api/package.json`
 
-### 404 Errors
-- Ensure `vercel.json` is properly configured
-- Check that rewrites are directing correctly
-- Verify static files are in correct directory
+### Runtime Errors
 
-### Database Connection Issues
-- Test DATABASE_URL connection string
-- Ensure database allows connections from Vercel IPs
-- Check database is accessible from external sources
+1. **Database connection**: Ensure `DATABASE_URL` is properly set
+2. **404 on routes**: Check that `vercel.json` has proper SPA routing configuration
+3. **API errors**: Check function logs in Vercel dashboard
 
-## Performance Optimization
-- Static files are served from CDN
-- API functions are serverless (automatic scaling)
-- Database queries are optimized
-- Images are served as SVG placeholders (lightweight)
+### Performance Tips
 
-## Security Features
-- JWT authentication for admin routes
-- CORS properly configured
-- Environment variables secured
-- SQL injection protection via Drizzle ORM
+1. **Cold starts**: First request may be slower due to serverless cold start
+2. **Database connections**: Uses connection pooling for better performance
+3. **Static assets**: Automatically served from CDN
 
 ## Monitoring
-- Check Vercel dashboard for function logs
-- Monitor database performance
-- Review error logs for issues
+
+- **Vercel Analytics**: Built-in performance monitoring
+- **Function logs**: Available in Vercel dashboard
+- **Database metrics**: Monitor in Neon dashboard
 
 ## Support
+
 For deployment issues:
 1. Check Vercel function logs
 2. Verify environment variables
 3. Test database connectivity
-4. Contact support if needed
+4. Review build logs for errors
 
-## Database Admin Credentials
-Default admin account:
-- Email: admin@driptech.co.ke
-- Password: admin123
+## Updates
 
-Change these credentials after first login for security.
+To update the deployment:
+1. Push changes to your GitHub repository
+2. Vercel will automatically redeploy
+3. Check deployment status in Vercel dashboard
+
+## Cost Optimization
+
+This configuration is optimized for Vercel's free tier:
+- Single serverless function (limit: 12 functions)
+- Bandwidth efficient (limit: 100GB/month)
+- Fast builds (limit: 6000 build minutes/month)
+- No additional add-ons required
+
+## Security
+
+- Environment variables are encrypted
+- HTTPS by default
+- JWT tokens for authentication
+- SQL injection protection via Drizzle ORM
+- CORS configuration for API security

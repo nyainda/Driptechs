@@ -1,52 +1,500 @@
-import express from "express";
-import cors from "cors";
-import { storage } from "./server/storage.js";
-import { initializeDatabase } from "./server/init-db.js";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { sendQuoteEmail } from "./server/email.js";
+import { Pool } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-serverless';
+import express from 'express';
+import cors from 'cors';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { nanoid } from 'nanoid';
+import { eq, and, desc, asc } from 'drizzle-orm';
+import * as schema from './shared/schema.js';
 
+const { 
+  users, products, quotes, projects, blogPosts, contacts, 
+  teamMembers, successStories, pageViews, websiteAnalytics,
+  achievements, userAchievements, gamificationStats
+} = schema;
+
+// Initialize database
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const db = drizzle(pool, { schema });
+
+// Initialize Express app
 const app = express();
-const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
-
-// CORS configuration
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://driptech-irrigation.vercel.app', /\.vercel\.app$/]
-    : ['http://localhost:3000', 'http://localhost:5000', 'http://127.0.0.1:5000'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
+app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+
+// JWT Secret
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-here';
 
 // Authentication middleware
-const authenticate = async (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Authentication required' });
-    }
+const authenticateToken = (req, res, next) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
 
-    const token = authHeader.substring(7);
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await storage.getUser(decoded.userId);
-    
-    if (!user) {
-      return res.status(401).json({ error: 'User not found' });
-    }
+  if (!token) {
+    return res.status(401).json({ error: 'Access token required' });
+  }
 
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).json({ error: 'Invalid token' });
+    }
     req.user = user;
     next();
-  } catch (error) {
-    console.error('Authentication error:', error);
-    res.status(401).json({ error: 'Invalid token' });
-  }
+  });
 };
 
-// Auth routes
+// Storage class for database operations
+class Storage {
+  async getUsers() {
+    try {
+      return await db.select().from(users);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      return [];
+    }
+  }
+
+  async getUserByEmail(email) {
+    try {
+      const result = await db.select().from(users).where(eq(users.email, email));
+      return result[0] || null;
+    } catch (error) {
+      console.error('Error fetching user by email:', error);
+      return null;
+    }
+  }
+
+  async createUser(userData) {
+    try {
+      const id = nanoid();
+      const hashedPassword = await bcrypt.hash(userData.password, 10);
+      
+      const newUser = {
+        id,
+        ...userData,
+        password: hashedPassword,
+        createdAt: new Date()
+      };
+
+      await db.insert(users).values(newUser);
+      return newUser;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
+  }
+
+  async getProducts() {
+    try {
+      return await db.select().from(products).orderBy(asc(products.name));
+    } catch (error) {
+      console.error('Error fetching products:', error);
+      return [];
+    }
+  }
+
+  async getProduct(id) {
+    try {
+      const result = await db.select().from(products).where(eq(products.id, id));
+      return result[0] || null;
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      return null;
+    }
+  }
+
+  async createProduct(productData) {
+    try {
+      const id = nanoid();
+      const newProduct = {
+        id,
+        ...productData,
+        createdAt: new Date()
+      };
+
+      await db.insert(products).values(newProduct);
+      return newProduct;
+    } catch (error) {
+      console.error('Error creating product:', error);
+      throw error;
+    }
+  }
+
+  async updateProduct(id, updateData) {
+    try {
+      await db.update(products).set(updateData).where(eq(products.id, id));
+      return await this.getProduct(id);
+    } catch (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    }
+  }
+
+  async deleteProduct(id) {
+    try {
+      await db.delete(products).where(eq(products.id, id));
+    } catch (error) {
+      console.error('Error deleting product:', error);
+      throw error;
+    }
+  }
+
+  async getQuotes() {
+    try {
+      return await db.select().from(quotes).orderBy(desc(quotes.createdAt));
+    } catch (error) {
+      console.error('Error fetching quotes:', error);
+      return [];
+    }
+  }
+
+  async getQuote(id) {
+    try {
+      const result = await db.select().from(quotes).where(eq(quotes.id, id));
+      return result[0] || null;
+    } catch (error) {
+      console.error('Error fetching quote:', error);
+      return null;
+    }
+  }
+
+  async createQuote(quoteData) {
+    try {
+      const id = nanoid();
+      const newQuote = {
+        id,
+        ...quoteData,
+        status: 'pending',
+        createdAt: new Date()
+      };
+
+      await db.insert(quotes).values(newQuote);
+      return newQuote;
+    } catch (error) {
+      console.error('Error creating quote:', error);
+      throw error;
+    }
+  }
+
+  async updateQuote(id, updateData) {
+    try {
+      await db.update(quotes).set(updateData).where(eq(quotes.id, id));
+      return await this.getQuote(id);
+    } catch (error) {
+      console.error('Error updating quote:', error);
+      throw error;
+    }
+  }
+
+  async deleteQuote(id) {
+    try {
+      await db.delete(quotes).where(eq(quotes.id, id));
+    } catch (error) {
+      console.error('Error deleting quote:', error);
+      throw error;
+    }
+  }
+
+  async getProjects() {
+    try {
+      return await db.select().from(projects).orderBy(desc(projects.createdAt));
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      return [];
+    }
+  }
+
+  async createProject(projectData) {
+    try {
+      const id = nanoid();
+      const newProject = {
+        id,
+        ...projectData,
+        createdAt: new Date()
+      };
+
+      await db.insert(projects).values(newProject);
+      return newProject;
+    } catch (error) {
+      console.error('Error creating project:', error);
+      throw error;
+    }
+  }
+
+  async getBlogPosts() {
+    try {
+      return await db.select().from(blogPosts).orderBy(desc(blogPosts.createdAt));
+    } catch (error) {
+      console.error('Error fetching blog posts:', error);
+      return [];
+    }
+  }
+
+  async getBlogPostBySlug(slug) {
+    try {
+      const result = await db.select().from(blogPosts).where(eq(blogPosts.slug, slug));
+      return result[0] || null;
+    } catch (error) {
+      console.error('Error fetching blog post by slug:', error);
+      return null;
+    }
+  }
+
+  async createBlogPost(postData) {
+    try {
+      const id = nanoid();
+      const newPost = {
+        id,
+        ...postData,
+        createdAt: new Date()
+      };
+
+      await db.insert(blogPosts).values(newPost);
+      return newPost;
+    } catch (error) {
+      console.error('Error creating blog post:', error);
+      throw error;
+    }
+  }
+
+  async updateBlogPost(id, updateData) {
+    try {
+      await db.update(blogPosts).set(updateData).where(eq(blogPosts.id, id));
+      const result = await db.select().from(blogPosts).where(eq(blogPosts.id, id));
+      return result[0] || null;
+    } catch (error) {
+      console.error('Error updating blog post:', error);
+      throw error;
+    }
+  }
+
+  async deleteBlogPost(id) {
+    try {
+      await db.delete(blogPosts).where(eq(blogPosts.id, id));
+    } catch (error) {
+      console.error('Error deleting blog post:', error);
+      throw error;
+    }
+  }
+
+  async getContacts() {
+    try {
+      return await db.select().from(contacts).orderBy(desc(contacts.createdAt));
+    } catch (error) {
+      console.error('Error fetching contacts:', error);
+      return [];
+    }
+  }
+
+  async createContact(contactData) {
+    try {
+      const id = nanoid();
+      const newContact = {
+        id,
+        ...contactData,
+        createdAt: new Date()
+      };
+
+      await db.insert(contacts).values(newContact);
+      return newContact;
+    } catch (error) {
+      console.error('Error creating contact:', error);
+      throw error;
+    }
+  }
+
+  async getTeamMembers() {
+    try {
+      return await db.select().from(teamMembers).orderBy(asc(teamMembers.name));
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+      return [];
+    }
+  }
+
+  async createTeamMember(data) {
+    try {
+      const id = nanoid();
+      const newMember = {
+        id,
+        ...data,
+        createdAt: new Date()
+      };
+
+      await db.insert(teamMembers).values(newMember);
+      return newMember;
+    } catch (error) {
+      console.error('Error creating team member:', error);
+      throw error;
+    }
+  }
+
+  async updateTeamMember(id, data) {
+    try {
+      await db.update(teamMembers).set(data).where(eq(teamMembers.id, id));
+      const result = await db.select().from(teamMembers).where(eq(teamMembers.id, id));
+      return result[0] || null;
+    } catch (error) {
+      console.error('Error updating team member:', error);
+      throw error;
+    }
+  }
+
+  async deleteTeamMember(id) {
+    try {
+      await db.delete(teamMembers).where(eq(teamMembers.id, id));
+    } catch (error) {
+      console.error('Error deleting team member:', error);
+      throw error;
+    }
+  }
+
+  async getSuccessStories() {
+    try {
+      return await db.select().from(successStories).orderBy(desc(successStories.createdAt));
+    } catch (error) {
+      console.error('Error fetching success stories:', error);
+      return [];
+    }
+  }
+
+  async createSuccessStory(data) {
+    try {
+      const id = nanoid();
+      const newStory = {
+        id,
+        ...data,
+        createdAt: new Date()
+      };
+
+      await db.insert(successStories).values(newStory);
+      return newStory;
+    } catch (error) {
+      console.error('Error creating success story:', error);
+      throw error;
+    }
+  }
+
+  async updateSuccessStory(id, data) {
+    try {
+      await db.update(successStories).set(data).where(eq(successStories.id, id));
+      const result = await db.select().from(successStories).where(eq(successStories.id, id));
+      return result[0] || null;
+    } catch (error) {
+      console.error('Error updating success story:', error);
+      throw error;
+    }
+  }
+
+  async deleteSuccessStory(id) {
+    try {
+      await db.delete(successStories).where(eq(successStories.id, id));
+    } catch (error) {
+      console.error('Error deleting success story:', error);
+      throw error;
+    }
+  }
+
+  async trackPageView(data) {
+    try {
+      const id = nanoid();
+      const pageViewData = {
+        id,
+        ...data,
+        createdAt: new Date()
+      };
+
+      await db.insert(pageViews).values(pageViewData);
+      return pageViewData;
+    } catch (error) {
+      console.error('Error tracking page view:', error);
+      throw error;
+    }
+  }
+
+  async getTodayUniqueVisitors() {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const result = await db.select().from(pageViews);
+      const todayViews = result.filter(view => 
+        new Date(view.createdAt) >= today
+      );
+      
+      const uniqueSessionIds = new Set(todayViews.map(view => view.sessionId));
+      return uniqueSessionIds.size;
+    } catch (error) {
+      console.error('Error getting today unique visitors:', error);
+      return 0;
+    }
+  }
+
+  async getVisitorGrowth() {
+    try {
+      const today = new Date();
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      const result = await db.select().from(pageViews);
+      
+      const todayViews = result.filter(view => {
+        const viewDate = new Date(view.createdAt);
+        return viewDate >= today;
+      });
+      
+      const yesterdayViews = result.filter(view => {
+        const viewDate = new Date(view.createdAt);
+        return viewDate >= yesterday && viewDate < today;
+      });
+      
+      const todayUnique = new Set(todayViews.map(view => view.sessionId)).size;
+      const yesterdayUnique = new Set(yesterdayViews.map(view => view.sessionId)).size;
+      
+      if (yesterdayUnique === 0) return 0;
+      return Math.round(((todayUnique - yesterdayUnique) / yesterdayUnique) * 100);
+    } catch (error) {
+      console.error('Error getting visitor growth:', error);
+      return 0;
+    }
+  }
+
+  async initializeAdminUser() {
+    try {
+      const existingAdmin = await this.getUserByEmail('admin@driptech.co.ke');
+      if (existingAdmin) {
+        console.log('👤 Admin user already exists');
+        return;
+      }
+
+      await this.createUser({
+        name: 'Admin User',
+        email: 'admin@driptech.co.ke',
+        password: 'admin123',
+        role: 'admin'
+      });
+
+      console.log('👤 Admin user created successfully');
+    } catch (error) {
+      console.error('Error initializing admin user:', error);
+    }
+  }
+}
+
+const storage = new Storage();
+
+// Database initialization
+async function ensureInitialized() {
+  try {
+    await storage.initializeAdminUser();
+    console.log('✅ Database initialized successfully');
+  } catch (error) {
+    console.error('Database initialization failed:', error);
+  }
+}
+
+// Routes
 app.post('/api/login', async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -65,55 +513,35 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: '24h' });
-    
+    const token = jwt.sign(
+      { userId: user.id, email: user.email, role: user.role },
+      JWT_SECRET,
+      { expiresIn: '24h' }
+    );
+
     res.json({
       token,
       user: {
         id: user.id,
-        email: user.email,
         name: user.name,
+        email: user.email,
         role: user.role
       }
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Page tracking
-app.post('/api/track/pageview', async (req, res) => {
-  try {
-    const { page } = req.body;
-    const userAgent = req.headers['user-agent'] || '';
-    const ipAddress = req.ip || req.connection.remoteAddress || '';
-    const sessionId = req.headers['x-session-id'] || 'anonymous';
-
-    await storage.trackPageView({ page, userAgent, ipAddress, sessionId });
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Page tracking error:', error);
-    res.status(500).json({ error: 'Failed to track page view' });
-  }
-});
-
-// Products routes
+// Public routes
 app.get('/api/products', async (req, res) => {
   try {
-    const { category } = req.query;
-    let products;
-    
-    if (category) {
-      products = await storage.getProductsByCategory(category);
-    } else {
-      products = await storage.getProducts();
-    }
-    
+    const products = await storage.getProducts();
     res.json(products);
   } catch (error) {
     console.error('Error fetching products:', error);
-    res.status(500).json({ error: 'Failed to fetch products' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -126,120 +554,27 @@ app.get('/api/products/:id', async (req, res) => {
     res.json(product);
   } catch (error) {
     console.error('Error fetching product:', error);
-    res.status(500).json({ error: 'Failed to fetch product' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.post('/api/products', authenticate, async (req, res) => {
-  try {
-    const product = await storage.createProduct(req.body);
-    res.status(201).json(product);
-  } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ error: 'Failed to create product' });
-  }
-});
-
-app.put('/api/products/:id', authenticate, async (req, res) => {
-  try {
-    const product = await storage.updateProduct(req.params.id, req.body);
-    res.json(product);
-  } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(500).json({ error: 'Failed to update product' });
-  }
-});
-
-app.delete('/api/products/:id', authenticate, async (req, res) => {
-  try {
-    await storage.deleteProduct(req.params.id);
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    res.status(500).json({ error: 'Failed to delete product' });
-  }
-});
-
-// Quotes routes
-app.get('/api/quotes', authenticate, async (req, res) => {
-  try {
-    const quotes = await storage.getQuotes();
-    res.json(quotes);
-  } catch (error) {
-    console.error('Error fetching quotes:', error);
-    res.status(500).json({ error: 'Failed to fetch quotes' });
-  }
-});
-
-app.post('/api/quotes', async (req, res) => {
-  try {
-    const quote = await storage.createQuote(req.body);
-    res.status(201).json(quote);
-  } catch (error) {
-    console.error('Error creating quote:', error);
-    res.status(500).json({ error: 'Failed to create quote' });
-  }
-});
-
-app.put('/api/quotes/:id', authenticate, async (req, res) => {
-  try {
-    const quote = await storage.updateQuote(req.params.id, req.body);
-    res.json(quote);
-  } catch (error) {
-    console.error('Error updating quote:', error);
-    res.status(500).json({ error: 'Failed to update quote' });
-  }
-});
-
-app.post('/api/quotes/:id/send', authenticate, async (req, res) => {
-  try {
-    const quote = await storage.getQuote(req.params.id);
-    if (!quote) {
-      return res.status(404).json({ error: 'Quote not found' });
-    }
-
-    await sendQuoteEmail(quote);
-    await storage.updateQuote(req.params.id, { 
-      status: 'sent', 
-      sentAt: new Date().toISOString() 
-    });
-    
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error sending quote:', error);
-    res.status(500).json({ error: 'Failed to send quote' });
-  }
-});
-
-// Projects routes
 app.get('/api/projects', async (req, res) => {
   try {
     const projects = await storage.getProjects();
     res.json(projects);
   } catch (error) {
     console.error('Error fetching projects:', error);
-    res.status(500).json({ error: 'Failed to fetch projects' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.post('/api/projects', authenticate, async (req, res) => {
-  try {
-    const project = await storage.createProject(req.body);
-    res.status(201).json(project);
-  } catch (error) {
-    console.error('Error creating project:', error);
-    res.status(500).json({ error: 'Failed to create project' });
-  }
-});
-
-// Blog routes
 app.get('/api/blog', async (req, res) => {
   try {
     const posts = await storage.getBlogPosts();
     res.json(posts);
   } catch (error) {
     console.error('Error fetching blog posts:', error);
-    res.status(500).json({ error: 'Failed to fetch blog posts' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -252,28 +587,27 @@ app.get('/api/blog/:slug', async (req, res) => {
     res.json(post);
   } catch (error) {
     console.error('Error fetching blog post:', error);
-    res.status(500).json({ error: 'Failed to fetch blog post' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.post('/api/blog', authenticate, async (req, res) => {
+app.get('/api/team', async (req, res) => {
   try {
-    const post = await storage.createBlogPost(req.body);
-    res.status(201).json(post);
+    const team = await storage.getTeamMembers();
+    res.json(team);
   } catch (error) {
-    console.error('Error creating blog post:', error);
-    res.status(500).json({ error: 'Failed to create blog post' });
+    console.error('Error fetching team members:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Contacts routes
-app.get('/api/contacts', authenticate, async (req, res) => {
+app.get('/api/success-stories', async (req, res) => {
   try {
-    const contacts = await storage.getContacts();
-    res.json(contacts);
+    const stories = await storage.getSuccessStories();
+    res.json(stories);
   } catch (error) {
-    console.error('Error fetching contacts:', error);
-    res.status(500).json({ error: 'Failed to fetch contacts' });
+    console.error('Error fetching success stories:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -283,96 +617,212 @@ app.post('/api/contacts', async (req, res) => {
     res.status(201).json(contact);
   } catch (error) {
     console.error('Error creating contact:', error);
-    res.status(500).json({ error: 'Failed to create contact' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Team routes
-app.get('/api/team', async (req, res) => {
+app.post('/api/quotes', async (req, res) => {
   try {
-    const team = await storage.getTeamMembers();
-    res.json(team);
+    const quote = await storage.createQuote(req.body);
+    res.status(201).json(quote);
   } catch (error) {
-    console.error('Error fetching team:', error);
-    res.status(500).json({ error: 'Failed to fetch team' });
+    console.error('Error creating quote:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.post('/api/team', authenticate, async (req, res) => {
+app.post('/api/track/pageview', async (req, res) => {
+  try {
+    await storage.trackPageView(req.body);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error tracking page view:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Protected admin routes
+app.get('/api/admin/quotes', authenticateToken, async (req, res) => {
+  try {
+    const quotes = await storage.getQuotes();
+    res.json(quotes);
+  } catch (error) {
+    console.error('Error fetching quotes:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/api/admin/contacts', authenticateToken, async (req, res) => {
+  try {
+    const contacts = await storage.getContacts();
+    res.json(contacts);
+  } catch (error) {
+    console.error('Error fetching contacts:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.get('/api/admin/analytics', authenticateToken, async (req, res) => {
+  try {
+    const todayVisitors = await storage.getTodayUniqueVisitors();
+    const visitorGrowth = await storage.getVisitorGrowth();
+    
+    res.json({
+      todayVisitors,
+      visitorGrowth,
+      totalProducts: (await storage.getProducts()).length,
+      totalProjects: (await storage.getProjects()).length,
+      totalQuotes: (await storage.getQuotes()).length,
+      totalContacts: (await storage.getContacts()).length
+    });
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Admin CRUD operations
+app.post('/api/admin/products', authenticateToken, async (req, res) => {
+  try {
+    const product = await storage.createProduct(req.body);
+    res.status(201).json(product);
+  } catch (error) {
+    console.error('Error creating product:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
+  try {
+    const product = await storage.updateProduct(req.params.id, req.body);
+    res.json(product);
+  } catch (error) {
+    console.error('Error updating product:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.delete('/api/admin/products/:id', authenticateToken, async (req, res) => {
+  try {
+    await storage.deleteProduct(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting product:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.put('/api/admin/quotes/:id', authenticateToken, async (req, res) => {
+  try {
+    const quote = await storage.updateQuote(req.params.id, req.body);
+    res.json(quote);
+  } catch (error) {
+    console.error('Error updating quote:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.delete('/api/admin/quotes/:id', authenticateToken, async (req, res) => {
+  try {
+    await storage.deleteQuote(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting quote:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/api/admin/blog', authenticateToken, async (req, res) => {
+  try {
+    const post = await storage.createBlogPost(req.body);
+    res.status(201).json(post);
+  } catch (error) {
+    console.error('Error creating blog post:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.put('/api/admin/blog/:id', authenticateToken, async (req, res) => {
+  try {
+    const post = await storage.updateBlogPost(req.params.id, req.body);
+    res.json(post);
+  } catch (error) {
+    console.error('Error updating blog post:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.delete('/api/admin/blog/:id', authenticateToken, async (req, res) => {
+  try {
+    await storage.deleteBlogPost(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting blog post:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/api/admin/team', authenticateToken, async (req, res) => {
   try {
     const member = await storage.createTeamMember(req.body);
     res.status(201).json(member);
   } catch (error) {
     console.error('Error creating team member:', error);
-    res.status(500).json({ error: 'Failed to create team member' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Success stories routes
-app.get('/api/success-stories', async (req, res) => {
+app.put('/api/admin/team/:id', authenticateToken, async (req, res) => {
   try {
-    const stories = await storage.getSuccessStories();
-    res.json(stories);
+    const member = await storage.updateTeamMember(req.params.id, req.body);
+    res.json(member);
   } catch (error) {
-    console.error('Error fetching success stories:', error);
-    res.status(500).json({ error: 'Failed to fetch success stories' });
+    console.error('Error updating team member:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.post('/api/success-stories', authenticate, async (req, res) => {
+app.delete('/api/admin/team/:id', authenticateToken, async (req, res) => {
+  try {
+    await storage.deleteTeamMember(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting team member:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+app.post('/api/admin/success-stories', authenticateToken, async (req, res) => {
   try {
     const story = await storage.createSuccessStory(req.body);
     res.status(201).json(story);
   } catch (error) {
     console.error('Error creating success story:', error);
-    res.status(500).json({ error: 'Failed to create success story' });
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Analytics routes
-app.get('/api/analytics', authenticate, async (req, res) => {
+app.put('/api/admin/success-stories/:id', authenticateToken, async (req, res) => {
   try {
-    const analytics = await storage.getAnalytics();
-    res.json(analytics);
+    const story = await storage.updateSuccessStory(req.params.id, req.body);
+    res.json(story);
   } catch (error) {
-    console.error('Error fetching analytics:', error);
-    res.status(500).json({ error: 'Failed to fetch analytics' });
+    console.error('Error updating success story:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// Placeholder image route
-app.get('/api/placeholder/:width/:height', (req, res) => {
-  const { width, height } = req.params;
-  const svg = \`<svg width="\${width}" height="\${height}" xmlns="http://www.w3.org/2000/svg">
-    <rect width="100%" height="100%" fill="#f0f0f0"/>
-    <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="16" fill="#999" text-anchor="middle" dy=".3em">\${width}x\${height}</text>
-  </svg>\`;
-  
-  res.setHeader('Content-Type', 'image/svg+xml');
-  res.send(svg);
-});
-
-// Error handling
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
-
-// Initialize database on first run
-let isInitialized = false;
-
-async function ensureInitialized() {
-  if (!isInitialized) {
-    try {
-      await initializeDatabase();
-      isInitialized = true;
-    } catch (error) {
-      console.error('Database initialization failed:', error);
-    }
+app.delete('/api/admin/success-stories/:id', authenticateToken, async (req, res) => {
+  try {
+    await storage.deleteSuccessStory(req.params.id);
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting success story:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
-}
+});
 
-// For Vercel serverless function
+// Vercel serverless function handler
 export default async function handler(req, res) {
   await ensureInitialized();
   return app(req, res);
