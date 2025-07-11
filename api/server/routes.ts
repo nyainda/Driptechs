@@ -1,11 +1,16 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage.js";
+//import { 
+ // insertProductSchema, insertQuoteSchema, insertProjectSchema, 
+ // insertBlogPostSchema, insertContactSchema, insertTeamMemberSchema, 
+ // insertSuccessStorySchema, loginSchema, insertUserSchema 
+//} from "../vercel-fix";
 import { 
   insertProductSchema, insertQuoteSchema, insertProjectSchema, 
   insertBlogPostSchema, insertContactSchema, insertTeamMemberSchema, 
   insertSuccessStorySchema, loginSchema, insertUserSchema 
-} from "../vercel-fix";
+} from "../vercel-fix.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sql } from 'drizzle-orm';
