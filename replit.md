@@ -174,6 +174,10 @@ Changelog:
   - Fixed Vercel /admin 404 error by updating vercel.json configuration
   - Replaced routes with rewrites for proper SPA routing on Vercel
   - All client-side routes (including /admin) now properly redirect to index.html
+  - Added complete dark/light mode toggle functionality in header
+  - Enhanced dark mode styling with proper color schemes for all UI elements
+  - Fixed Vercel serverless function initialization with proper async handling
+  - Created database tables using Drizzle migration (db:push)
   - Migration complete with both Replit and Vercel deployment working
 ```
 

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X, Droplets, Phone, Mail, MapPin, ChevronDown } from "lucide-react";
+import { Menu, X, Droplets, Phone, Mail, MapPin, ChevronDown, Moon, Sun } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import {
   DropdownMenu,
@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useTheme } from "@/components/theme-provider";
 
 const navigation = [
   { name: "Home", href: "/" },
@@ -34,6 +35,7 @@ export default function Header() {
   const [location] = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,7 +50,7 @@ export default function Header() {
   return (
     <>
       {/* Top Bar */}
-      <div className="bg-blue-600 text-white py-2 hidden md:block">
+      <div className="bg-blue-600 dark:bg-blue-800 text-white py-2 hidden md:block">
         <div className="container mx-auto px-4">
           <div className="flex justify-between items-center text-sm">
             <div className="flex items-center space-x-6">
@@ -72,8 +74,8 @@ export default function Header() {
       {/* Main Navigation */}
       <header className={`sticky top-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? "bg-white/95 backdrop-blur-md shadow-lg border-b" 
-          : "bg-white border-b"
+          ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-lg border-b" 
+          : "bg-white dark:bg-gray-900 border-b"
       }`}>
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
@@ -83,7 +85,7 @@ export default function Header() {
                 <Droplets className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-blue-600">DripTech</h1>
+                <h1 className="text-xl font-bold text-blue-600 dark:text-blue-400">DripTech</h1>
                 <p className="text-xs text-muted-foreground hidden sm:block">Smart Irrigation Solutions</p>
               </div>
             </Link>
@@ -96,10 +98,10 @@ export default function Header() {
                     <DropdownMenuTrigger asChild>
                       <Button
                         variant="ghost"
-                        className={`h-10 px-3 text-sm font-medium transition-colors hover:bg-blue-50 hover:text-blue-600 ${
+                        className={`h-10 px-3 text-sm font-medium transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 ${
                           location.startsWith(item.href) 
-                            ? "bg-blue-50 text-blue-600" 
-                            : "text-gray-700"
+                            ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400" 
+                            : "text-gray-700 dark:text-gray-300"
                         }`}
                       >
                         {item.name}
@@ -123,10 +125,10 @@ export default function Header() {
                   <Link key={item.name} href={item.href}>
                     <Button
                       variant="ghost"
-                      className={`h-10 px-3 text-sm font-medium transition-colors hover:bg-blue-50 hover:text-blue-600 ${
+                      className={`h-10 px-3 text-sm font-medium transition-colors hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400 ${
                         location === item.href 
-                          ? "bg-blue-50 text-blue-600" 
-                          : "text-gray-700"
+                          ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400" 
+                          : "text-gray-700 dark:text-gray-300"
                       }`}
                     >
                       {item.name}
@@ -138,6 +140,19 @@ export default function Header() {
 
             {/* CTA Buttons */}
             <div className="hidden lg:flex items-center space-x-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleTheme}
+                className="h-9 w-9 px-0"
+              >
+                {theme === "light" ? (
+                  <Moon className="h-4 w-4" />
+                ) : (
+                  <Sun className="h-4 w-4" />
+                )}
+                <span className="sr-only">Toggle theme</span>
+              </Button>
               <Link href="/quote">
                 <Button size="sm" className="bg-green-600 hover:bg-green-700">
                   Get Quote
@@ -200,6 +215,23 @@ export default function Header() {
                 </nav>
 
                 <div className="mt-6 space-y-3">
+                  <Button
+                    variant="outline"
+                    onClick={toggleTheme}
+                    className="w-full justify-start"
+                  >
+                    {theme === "light" ? (
+                      <>
+                        <Moon className="h-4 w-4 mr-2" />
+                        Dark Mode
+                      </>
+                    ) : (
+                      <>
+                        <Sun className="h-4 w-4 mr-2" />
+                        Light Mode
+                      </>
+                    )}
+                  </Button>
                   <Link href="/quote" onClick={closeSheet}>
                     <Button className="w-full bg-green-600 hover:bg-green-700">
                       Get Quote
