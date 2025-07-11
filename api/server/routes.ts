@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage } from "./storage.js";
 import { 
   insertProductSchema, insertQuoteSchema, insertProjectSchema, 
   insertBlogPostSchema, insertContactSchema, insertTeamMemberSchema, 
@@ -9,7 +9,7 @@ import {
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sql } from 'drizzle-orm';
-import { sendQuoteEmail } from "./email";
+import { sendQuoteEmail } from "./email.js";
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Invoice generation function

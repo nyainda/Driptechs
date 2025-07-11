@@ -1,7 +1,7 @@
-import { db } from "./db";
-import { users, products, quotes, projects, blogPosts, contacts, teamMembers, successStories, pageViews, websiteAnalytics, achievements, userAchievements, gamificationStats } from "../shared/schema-simple";
+import { db } from "./db.js";
+import { users, products, quotes, projects, blogPosts, contacts, teamMembers, successStories, pageViews, websiteAnalytics, achievements, userAchievements, gamificationStats } from "../shared/schema-simple.js";
 import { eq, asc, sql } from "drizzle-orm";
-import { NotificationService } from "./notifications";
+import { NotificationService } from "./notifications.js";
 import type { 
   Product, Quote, Project, BlogPost, Contact, User,
   InsertProduct, InsertQuote, InsertProject, InsertBlogPost, InsertContact, InsertUser, TeamMember, InsertTeamMember,
@@ -125,7 +125,7 @@ export class Storage {
   }
 
   async sendQuoteToCustomer(quote: Quote): Promise<void> {
-    const { sendQuoteEmail } = await import("./email");
+    const { sendQuoteEmail } = await import("./email.js");
     const success = await sendQuoteEmail(quote);
     if (!success) {
       throw new Error("Failed to send quote email");
