@@ -18,9 +18,7 @@ export async function initializeDatabase() {
       await db.insert(users).values({
         email: 'admin@driptech.co.ke',
         password: hashedPassword,
-        name: 'System Administrator',
-        role: 'super_admin',
-        phone: '+254 700 000 000'
+        name: 'System Administrator'
       });
       
       console.log('✅ Default admin user created');

@@ -202,17 +202,27 @@ export const gamificationStats = pgTable("gamification_stats", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Schema validation
-export const insertUserSchema = createInsertSchema(users).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+// Schema validation - simplified for Vercel compatibility
+export const insertUserSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(6),
+  name: z.string().min(1),
+  role: z.enum(['user', 'admin', 'super_admin']).default('user'),
+  phone: z.string().optional(),
 });
 
-export const insertProductSchema = createInsertSchema(products).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const insertProductSchema = z.object({
+  name: z.string().min(1),
+  category: z.string().min(1),
+  model: z.string().min(1),
+  price: z.number().min(0),
+  description: z.string().min(1),
+  images: z.array(z.string()).default([]),
+  specifications: z.record(z.any()).default({}),
+  features: z.array(z.string()).default([]),
+  applications: z.array(z.string()).default([]),
+  inStock: z.boolean().default(true),
+  stockQuantity: z.number().min(0).default(0),
 });
 
 export const insertQuoteSchema = createInsertSchema(quotes).omit({
@@ -266,15 +276,21 @@ export const insertAchievementSchema = createInsertSchema(achievements).omit({
   createdAt: true,
 });
 
-export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
-  id: true,
-  unlockedAt: true,
+export const insertUserAchievementSchema = z.object({
+  userId: z.string().min(1),
+  achievementId: z.string().min(1),
+  progress: z.number().min(0).default(0),
+  completed: z.boolean().default(false),
 });
 
-export const insertGamificationStatsSchema = createInsertSchema(gamificationStats).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
+export const insertGamificationStatsSchema = z.object({
+  userId: z.string().min(1),
+  totalPoints: z.number().min(0).default(0),
+  level: z.number().min(1).default(1),
+  experiencePoints: z.number().min(0).default(0),
+  achievementCount: z.number().min(0).default(0),
+  streak: z.number().min(0).default(0),
+  lastActivity: z.string().optional(),
 });
 
 export const loginSchema = z.object({

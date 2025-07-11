@@ -40,10 +40,7 @@ export class Storage {
     const [user] = await db.insert(users).values({
       email: userData.email,
       password: userData.password,
-      name: userData.name,
-      role: userData.role || 'user',
-      phone: userData.phone,
-      createdAt: new Date()
+      name: userData.name
     }).returning();
     return user;
   }

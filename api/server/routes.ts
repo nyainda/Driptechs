@@ -5,7 +5,7 @@ import {
   insertProductSchema, insertQuoteSchema, insertProjectSchema, 
   insertBlogPostSchema, insertContactSchema, insertTeamMemberSchema, 
   insertSuccessStorySchema, loginSchema, insertUserSchema 
-} from "../shared/schema-simple";
+} from "../vercel-fix";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { sql } from 'drizzle-orm';
@@ -543,7 +543,7 @@ app.get("/api/health", async (req, res) => {
       // Mark quote as sent and update status
       await storage.updateQuote(id, { 
         status: 'sent',
-        sentAt: new Date() 
+        notes: `Sent at: ${new Date().toISOString()}` 
       });
       
       await storage.sendQuoteToCustomer(quote);

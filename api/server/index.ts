@@ -116,11 +116,10 @@ const setupApp = async () => {
     }
   });
 
-  // Setup static serving
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+  // Setup static serving - simplified for Vercel
+  if (process.env.NODE_ENV === 'production') {
+    // Vercel handles static files
+    app.use(express.static('dist/public'));
   }
 
   // Start server only in development
@@ -131,7 +130,7 @@ const setupApp = async () => {
       host: "0.0.0.0",
       reusePort: true,
     }, () => {
-      log(`serving on port ${port}`);
+      console.log(`serving on port ${port}`);
     });
   }
 
