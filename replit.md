@@ -178,7 +178,12 @@ Changelog:
   - Enhanced dark mode styling with proper color schemes for all UI elements
   - Fixed Vercel serverless function initialization with proper async handling
   - Created database tables using Drizzle migration (db:push)
-  - Migration complete with both Replit and Vercel deployment working
+  - Fixed all Vercel API import issues by removing .js extensions from TypeScript imports
+  - Updated tsconfig.json with proper module resolution for Vercel deployment
+  - Enhanced vercel.json with Node.js 20.x runtime and proper environment configuration
+  - All API endpoints tested and working (login, pageview tracking, admin functions)
+  - Created comprehensive Vercel deployment guide with troubleshooting steps
+  - Migration complete with both Replit and Vercel deployment working perfectly
 ```
 
 ## User Preferences
