@@ -225,8 +225,9 @@ app.use(cors());
 app.use(express.json());
 
 // JWT Secret - auto-generate if not provided
+import crypto from 'crypto';
+
 const generateJWTSecret = () => {
-  const crypto = require('crypto');
   return crypto.randomBytes(64).toString('hex');
 };
 
