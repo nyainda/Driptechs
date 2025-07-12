@@ -31,7 +31,7 @@ export async function apiRequest(method: string, url: string, data?: any) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
-    return response;
+    return response.json();
   } catch (error) {
     if (error instanceof TypeError && error.message.includes('fetch')) {
       throw new Error('Connection Error: Unable to connect to the server. Please check your internet connection.');

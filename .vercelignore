@@ -1,12 +1,9 @@
 # Build outputs  
 dist/
 build/
-client/dist/
-client/build/
 
 # Dependencies
 node_modules/
-client/node_modules/
 
 # Development files
 .env
@@ -18,13 +15,13 @@ client/node_modules/
 # Development server files
 server/
 shared/
-*.ts
-*.tsx
-vite.config.ts
-tsconfig.json
-tailwind.config.ts
-postcss.config.js
 drizzle.config.ts
+tsx
+generate-jwt-secret.js
+build.js
+build-client.js
+build-simple.js
+build.sh
 
 # Git
 .git/

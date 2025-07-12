@@ -5,15 +5,14 @@
       "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
-        "runtime": "nodejs18.x"
+        "runtime": "nodejs20.x"
       }
     },
     {
       "src": "client/package.json",
       "use": "@vercel/static-build",
       "config": {
-        "distDir": "dist",
-        "framework": "vite"
+        "distDir": "dist"
       }
     }
   ],

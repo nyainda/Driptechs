@@ -1,5 +1,5 @@
 // client/src/api.ts
-const API_BASE_URL = import.meta.env.PROD 
+const API_BASE_URL = (import.meta.env as any).PROD 
   ? '' // When deployed, API calls will be relative to the deployed domain
   : 'http://localhost:5000'; // Your local development server
 
