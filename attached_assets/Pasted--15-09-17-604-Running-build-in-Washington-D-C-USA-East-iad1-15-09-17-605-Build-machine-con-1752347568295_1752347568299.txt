@@ -1,0 +1,46 @@
+[15:09:17.604] Running build in Washington, D.C., USA (East) – iad1
+[15:09:17.605] Build machine configuration: 2 cores, 8 GB
+[15:09:17.644] Cloning github.com/nyainda/Driptechs (Branch: main, Commit: c2dfc80)
+[15:09:18.381] Cloning completed: 737.000ms
+[15:09:18.423] Found .vercelignore
+[15:09:18.440] Removed 58 ignored files defined in .vercelignore
+[15:09:18.441]   /.env
+[15:09:18.441]   /.git/config
+[15:09:18.441]   /.git/description
+[15:09:18.441]   /.git/FETCH_HEAD
+[15:09:18.441]   /.git/HEAD
+[15:09:18.441]   /.git/hooks/applypatch-msg.sample
+[15:09:18.441]   /.git/hooks/commit-msg.sample
+[15:09:18.441]   /.git/hooks/fsmonitor-watchman.sample
+[15:09:18.441]   /.git/hooks/post-update.sample
+[15:09:18.441]   /.git/hooks/pre-applypatch.sample
+[15:09:18.507] Restored build cache from previous deployment (7n9uzyb57WVCKDnsZVSeuvs4HxeM)
+[15:09:18.921] Running "vercel build"
+[15:09:19.388] Vercel CLI 44.3.0
+[15:09:19.567] WARN! Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply. Learn More: https://vercel.link/unused-build-settings
+[15:09:20.121] Installing dependencies...
+[15:09:54.471] 
+[15:09:54.471] added 339 packages in 34s
+[15:09:54.473] 
+[15:09:54.473] 50 packages are looking for funding
+[15:09:54.473]   run `npm fund` for details
+[15:09:54.536] Running "npm run vercel-build"
+[15:09:54.653] 
+[15:09:54.653] > driptech-client@1.0.0 vercel-build
+[15:09:54.653] > vite build
+[15:09:54.654] 
+[15:09:54.944] [36mvite v7.0.4 [32mbuilding for production...[36m[39m
+[15:09:55.253] transforming...
+[15:09:58.527] [32m✓[39m 1706 modules transformed.
+[15:09:58.532] [31m✗[39m Build failed in 3.56s
+[15:09:58.533] [31merror during build:
+[15:09:58.533] [31m[vite:load-fallback] Could not load /vercel/path1/client/src/shared/schema (imported by src/components/admin/product-form.tsx): ENOENT: no such file or directory, open '/vercel/path1/client/src/shared/schema'[31m
+[15:09:58.533]     at async open (node:internal/fs/promises:639:25)
+[15:09:58.533]     at async Object.readFile (node:internal/fs/promises:1243:14)
+[15:09:58.533]     at async Object.handler (file:///vercel/path1/client/node_modules/vite/dist/node/chunks/dep-DZ2tZksn.js:33854:21)
+[15:09:58.534]     at async PluginDriver.hookFirstAndGetPlugin (file:///vercel/path1/client/node_modules/rollup/dist/es/shared/node-entry.js:22173:28)
+[15:09:58.534]     at async file:///vercel/path1/client/node_modules/rollup/dist/es/shared/node-entry.js:21177:33
+[15:09:58.534]     at async Queue.work (file:///vercel/path1/client/node_modules/rollup/dist/es/shared/node-entry.js:22401:32)[39m
+[15:09:58.580] Error: Command "npm run vercel-build" exited with 1
+[15:09:58.817] 
+[15:10:01.675] Exiting build container

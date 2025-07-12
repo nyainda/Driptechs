@@ -1,4 +1,4 @@
-import type { Quote, Product } from "@shared/schema";
+import type { Quote, Product } from "@shared/schema.ts";
 
 // PDF generation utilities for DripTech documents
 export class PDFGenerator {

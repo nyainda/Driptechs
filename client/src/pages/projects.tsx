@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import { MapPin, Calendar, DollarSign, TrendingUp, CheckCircle, ArrowRight, Droplets, Leaf, Award, Users } from "lucide-react";
-import type { Project } from "@shared/schema";
+import type { Project } from "@shared/schema.ts";
 
 export default function Projects() {
   const { data: projects, isLoading, error } = useQuery<Project[]>({

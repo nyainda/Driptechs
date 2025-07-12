@@ -15,7 +15,7 @@ import { Plus, Edit, Trash2, Eye, FileText, Download, Calculator, DollarSign, Se
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import type { Quote, Product } from "@shared/schema";
+import type { Quote, Product } from "@shared/schema.ts";
 import EnhancedQuoteEditor from "./enhanced-quote-editor";
 
 const quoteSchema = z.object({

@@ -1,4 +1,4 @@
-import type { User } from "@shared/schema";
+import type { User } from "@shared/schema.ts";
 
 const TOKEN_KEY = "driptech_auth_token";
 const USER_KEY = "driptech_auth_user";
