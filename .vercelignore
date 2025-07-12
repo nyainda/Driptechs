@@ -107,3 +107,7 @@ replit.nix
 !index.html
 !assets/
 !api/
+
+# Make sure these are included
+index.html
+assets/

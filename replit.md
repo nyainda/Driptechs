@@ -249,6 +249,15 @@ Changelog:
   - Updated all 24+ component files to use client-side schema imports
   - Build now completes successfully without external dependency conflicts
   - Ready for successful Vercel deployment with zero build errors
+- July 12, 2025. Vercel 404 Deployment Fix (Final)
+  - Fixed critical 404 "NOT_FOUND" error preventing Vercel deployment
+  - Moved static files to public/ directory for proper Vercel serving
+  - Updated vercel.json to use rewrites instead of routes for SPA routing
+  - Fixed Node.js runtime version from 22.x to 20.x for compatibility
+  - Configured proper asset path mapping (/assets/* → /public/assets/*)
+  - Created comprehensive build process copying client files to public/
+  - All routes (/, /admin, /api) now properly configured for Vercel deployment
+  - Ready for successful deployment with working frontend and API
 ```
 
 ## User Preferences
