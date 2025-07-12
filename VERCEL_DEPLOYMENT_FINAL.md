@@ -37,13 +37,11 @@ api/
       }
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/index.js"
-    }
-  ],
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
     {
       "source": "/assets/(.*)",
       "destination": "/public/assets/$1"
@@ -81,6 +79,7 @@ cd client && npm run vercel-build
 3. **Fixed Node.js runtime version** - Changed from 22.x to 20.x
 4. **Proper asset path mapping** - `/assets/*` maps to `/public/assets/*`
 5. **SPA routing configuration** - All routes redirect to `/public/index.html`
+6. **Fixed mixed routing properties error** - Removed `routes` section, using only `rewrites`
 
 ## 🚀 DEPLOYMENT VERIFICATION
 

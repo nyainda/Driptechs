@@ -257,6 +257,7 @@ Changelog:
   - Configured proper asset path mapping (/assets/* → /public/assets/*)
   - Created comprehensive build process copying client files to public/
   - All routes (/, /admin, /api) now properly configured for Vercel deployment
+  - Fixed "mixed routing properties" error by removing routes section
   - Ready for successful deployment with working frontend and API
 ```
 
