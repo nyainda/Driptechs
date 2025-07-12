@@ -14,7 +14,22 @@ const {
   achievements, userAchievements, gamificationStats
 } = schema;
 
-// Initialize database
+// Initialize database with Supabase support
+const getDatabaseConfig = () => {
+  const dbUrl = process.env.DATABASE_URL;
+  
+  if (dbUrl.includes('supabase.co')) {
+    console.log('🔗 Using Supabase PostgreSQL');
+    return { provider: 'supabase', url: dbUrl };
+  } else if (dbUrl.includes('neon.tech')) {
+    console.log('🔗 Using Neon PostgreSQL');
+    return { provider: 'neon', url: dbUrl };
+  } else {
+    console.log('🔗 Using Generic PostgreSQL');
+    return { provider: 'generic', url: dbUrl };
+  }
+};
+
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const db = drizzle(pool, { schema });
 
