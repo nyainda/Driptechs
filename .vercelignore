@@ -1,6 +1,6 @@
 # Build outputs  
-dist/
-build/
+client/dist/
+client/build/
 
 # Dependencies
 node_modules/
@@ -102,3 +102,8 @@ jspm_packages/
 .replit
 replit.nix
 .local/
+
+# Keep these files for deployment
+!index.html
+!assets/
+!api/
