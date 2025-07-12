@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import { Search, Calendar, User, ArrowRight, BookOpen, TrendingUp, Sparkles, Eye } from "lucide-react";
-import type { BlogPost } from "../../types/schema";
+import type { BlogPost } from "../../types/client-schema";
 
 export default function Blog() {
   const [searchTerm, setSearchTerm] = useState("");

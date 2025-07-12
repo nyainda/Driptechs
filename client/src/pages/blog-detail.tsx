@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "wouter";
 import { ArrowLeft, Calendar, User, Clock, Share2 } from "lucide-react";
-import type { BlogPost } from "../../types/schema";
+import type { BlogPost } from "../../types/client-schema";
 
 export default function BlogDetail() {
   const { slug } = useParams();

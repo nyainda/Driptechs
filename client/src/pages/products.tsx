@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Search, Filter, Grid3X3, List, Droplets, Zap, Settings, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Star, Heart, TrendingUp, Award, Phone, Mail } from "lucide-react";
 import ProductCard from "@/components/product-card";
-import type { Product } from "../../types/schema";
+import type { Product } from "../../types/client-schema";
 
 export default function Products() {
   const [searchTerm, setSearchTerm] = useState("");

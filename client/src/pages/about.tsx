@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import type { TeamMember } from "../../types/schema";
+import type { TeamMember } from "../../types/client-schema";
 import { 
   Award, 
   Leaf, 

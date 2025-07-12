@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight, Droplets, Leaf, TrendingUp, CheckCircle, Wrench, Award, Phone, Mail, Calendar, User, BookOpen, Star, Package, Users, Trophy } from "lucide-react";
 import { Link } from "wouter";
-import type { Product, Project, BlogPost, TeamMember, SuccessStory } from "../../types/schema";
+import type { Product, Project, BlogPost, TeamMember, SuccessStory } from "../../types/client-schema";
 
 // Helper component for a more advanced product card.
 // The 'isFeatured' prop is no longer used in the main layout but kept for potential future use.

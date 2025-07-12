@@ -29,7 +29,7 @@ import {
   Filter
 } from "lucide-react";
 import { Link } from "wouter";
-import type { BlogPost } from "../../types/schema";
+import type { BlogPost } from "../../types/client-schema";
 
 export default function AdminBlog() {
   const [, setLocation] = useLocation();

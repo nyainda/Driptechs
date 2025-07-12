@@ -10,8 +10,8 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { insertBlogPostSchema } from "../../types/schema";
-import type { BlogPost } from "../../types/schema";
+import { insertBlogPostSchema } from "../../types/client-schema";
+import type { BlogPost } from "../../types/client-schema";
 import { z } from "zod";
 import { Save, Upload, Image as ImageIcon } from "lucide-react";
 

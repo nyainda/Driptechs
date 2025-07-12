@@ -27,7 +27,7 @@ import {
   Phone,
   UserPlus
 } from "lucide-react";
-import type { User } from "../../types/schema";
+import type { User } from "../../types/client-schema";
 
 const userSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),

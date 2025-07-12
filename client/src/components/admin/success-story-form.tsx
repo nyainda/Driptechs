@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import type { SuccessStory } from "../../types/schema";
+import type { SuccessStory } from "../../types/client-schema";
 
 const successStorySchema = z.object({
   title: z.string().min(1, "Title is required"),

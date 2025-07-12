@@ -34,7 +34,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Link } from "wouter";
 import QuotePDF from "@/components/admin/quote-pdf";
-import type { Quote } from "../../types/schema";
+import type { Quote } from "../../types/client-schema";
 
 export default function AdminQuotes() {
   const [, setLocation] = useLocation();

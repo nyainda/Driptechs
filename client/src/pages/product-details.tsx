@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
-import type { Product } from "../../types/schema";
+import type { Product } from "../../types/client-schema";
 
 export default function ProductDetails() {
   const { id } = useParams<{ id: string }>();

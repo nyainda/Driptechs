@@ -1,4 +1,4 @@
-import type { Quote, Product } from "../../types/schema";
+import type { Quote, Product } from "../../types/client-schema";
 
 // PDF generation utilities for DripTech documents
 export class PDFGenerator {

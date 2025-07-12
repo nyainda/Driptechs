@@ -34,7 +34,7 @@ import {
   MoreHorizontal
 } from "lucide-react";
 import { Link } from "wouter";
-import type { Quote, Product, Contact } from "../../types/schema";
+import type { Quote, Product, Contact } from "../../types/client-schema";
 import { apiRequest } from "@/lib/queryClient";
 import { getAuthToken, getUser, clearAuth } from "@/lib/auth";
 import QuickSuccessStory from "@/components/admin/quick-success-story";
