@@ -35,7 +35,7 @@ import {
   LayoutGrid
 } from "lucide-react";
 import { Link } from "wouter";
-import type { Product } from "@shared/schema.ts";
+import type { Product } from "../../types/schema";
 
 export default function AdminProducts() {
   const [, setLocation] = useLocation();

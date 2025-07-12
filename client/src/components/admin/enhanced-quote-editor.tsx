@@ -12,7 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Plus, Edit, Trash2, Save, Calculator, Download, FileText, Send, DollarSign, Package } from "lucide-react";
-import type { Quote, Product } from "@shared/schema.ts";
+import type { Quote, Product } from "../../types/schema";
 
 interface QuoteItem {
   id: string;

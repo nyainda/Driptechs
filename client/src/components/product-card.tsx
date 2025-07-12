@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { getAuthHeaders } from "@/lib/auth";
 import { Link } from "wouter";
-import type { Product } from "@shared/schema.ts";
+import type { Product } from "../../types/schema";
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useLocation } from "wouter";

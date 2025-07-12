@@ -12,7 +12,7 @@ import { Download, Printer, Edit, Mail, Plus, Trash2, Save, X } from "lucide-rea
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import type { Quote } from "@shared/schema.ts";
+import type { Quote } from "../../types/schema";
 
 interface QuoteItem {
   id?: string;
