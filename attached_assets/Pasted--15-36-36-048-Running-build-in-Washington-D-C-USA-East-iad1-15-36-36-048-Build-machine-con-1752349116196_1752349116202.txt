@@ -1,0 +1,61 @@
+[15:36:36.048] Running build in Washington, D.C., USA (East) – iad1
+[15:36:36.048] Build machine configuration: 2 cores, 8 GB
+[15:36:36.077] Cloning github.com/nyainda/Driptechs (Branch: main, Commit: 2440d83)
+[15:36:36.440] Cloning completed: 363.000ms
+[15:36:36.478] Found .vercelignore
+[15:36:36.500] Removed 57 ignored files defined in .vercelignore
+[15:36:36.500]   /.env
+[15:36:36.500]   /.git/config
+[15:36:36.500]   /.git/description
+[15:36:36.500]   /.git/FETCH_HEAD
+[15:36:36.500]   /.git/HEAD
+[15:36:36.501]   /.git/hooks/applypatch-msg.sample
+[15:36:36.501]   /.git/hooks/commit-msg.sample
+[15:36:36.501]   /.git/hooks/fsmonitor-watchman.sample
+[15:36:36.501]   /.git/hooks/post-update.sample
+[15:36:36.501]   /.git/hooks/pre-applypatch.sample
+[15:36:36.576] Restored build cache from previous deployment (7n9uzyb57WVCKDnsZVSeuvs4HxeM)
+[15:36:36.967] Running "vercel build"
+[15:36:37.423] Vercel CLI 44.3.0
+[15:36:37.604] WARN! Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply. Learn More: https://vercel.link/unused-build-settings
+[15:36:38.250] Installing dependencies...
+[15:37:06.768] 
+[15:37:06.769] added 339 packages in 28s
+[15:37:06.770] 
+[15:37:06.770] 50 packages are looking for funding
+[15:37:06.770]   run `npm fund` for details
+[15:37:06.838] Running "npm run vercel-build"
+[15:37:06.952] 
+[15:37:06.952] > driptech-client@1.0.0 vercel-build
+[15:37:06.953] > vite build
+[15:37:06.953] 
+[15:37:07.300] [36mvite v7.0.4 [32mbuilding for production...[36m[39m
+[15:37:07.617] transforming...
+[15:37:12.731] [32m✓[39m 1777 modules transformed.
+[15:37:13.003] rendering chunks...
+[15:37:13.237] computing gzip size...
+[15:37:13.259] [2mdist/[22m[32mindex.html                 [39m[1m[2m  0.90 kB[22m[1m[22m[2m │ gzip:   0.47 kB[22m
+[15:37:13.260] [2mdist/[22m[2massets/[22m[35mindex-PWTfEeR7.css  [39m[1m[2m147.87 kB[22m[1m[22m[2m │ gzip:  21.34 kB[22m
+[15:37:13.260] [2mdist/[22m[2massets/[22m[36mrouter-C3dNlie5.js  [39m[1m[2m  5.42 kB[22m[1m[22m[2m │ gzip:   2.68 kB[22m
+[15:37:13.261] [2mdist/[22m[2massets/[22m[36mui-DIvwBjVH.js      [39m[1m[2m 81.68 kB[22m[1m[22m[2m │ gzip:  27.57 kB[22m
+[15:37:13.261] [2mdist/[22m[2massets/[22m[36mvendor-DavUf6mE.js  [39m[1m[2m141.72 kB[22m[1m[22m[2m │ gzip:  45.48 kB[22m
+[15:37:13.261] [2mdist/[22m[2massets/[22m[36mindex-nxf7keJ3.js   [39m[1m[33m571.44 kB[39m[22m[2m │ gzip: 130.77 kB[22m
+[15:37:13.261] [32m✓ built in 5.93s[39m
+[15:37:13.264] [33m
+[15:37:13.265] (!) Some chunks are larger than 500 kB after minification. Consider:
+[15:37:13.265] - Using dynamic import() to code-split the application
+[15:37:13.265] - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+[15:37:13.265] - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[15:37:13.367] Installing dependencies...
+[15:37:13.893] 
+[15:37:13.893] up to date in 464ms
+[15:37:13.894] 
+[15:37:13.894] 33 packages are looking for funding
+[15:37:13.894]   run `npm fund` for details
+[15:37:16.749] Build Completed in /vercel/output [39s]
+[15:37:16.893] Deploying outputs...
+[15:37:22.700] 
+[15:37:22.839] Deployment completed
+[15:37:42.619] Uploading build cache [69.68 MB]...
+[15:37:43.322] Build cache uploaded: 702.509ms
+[15:37:45.582] Exiting build container
