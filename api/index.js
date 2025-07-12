@@ -1,3 +1,4 @@
+
 import { Pool } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-serverless';
 import express from 'express';
@@ -6,13 +7,192 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { nanoid } from 'nanoid';
 import { eq, and, desc, asc } from 'drizzle-orm';
-import * as schema from './shared/schema.js';
+import { pgTable, text, serial, integer, boolean, decimal, timestamp, jsonb, uuid } from "drizzle-orm/pg-core";
 
-const { 
-  users, products, quotes, projects, blogPosts, contacts, 
-  teamMembers, successStories, pageViews, websiteAnalytics,
-  achievements, userAchievements, gamificationStats
-} = schema;
+// Define schema directly in this file to avoid import issues
+const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  name: text("name").notNull(),
+  role: text("role").notNull().default("user"),
+  phone: text("phone"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+const products = pgTable("products", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  category: text("category").notNull(),
+  model: text("model").notNull(),
+  description: text("description").notNull(),
+  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("KSH"),
+  images: text("images").array().default([]),
+  specifications: jsonb("specifications").notNull(),
+  features: text("features").array().default([]),
+  applications: text("applications").array().default([]),
+  inStock: boolean("in_stock").default(true),
+  stockQuantity: integer("stock_quantity").default(0),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+const quotes = pgTable("quotes", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  customerName: text("customer_name").notNull(),
+  customerEmail: text("customer_email").notNull(),
+  customerPhone: text("customer_phone").notNull(),
+  projectType: text("project_type").notNull(),
+  areaSize: text("area_size").notNull(),
+  cropType: text("crop_type"),
+  location: text("location").notNull(),
+  waterSource: text("water_source"),
+  distanceToFarm: text("distance_to_farm"),
+  numberOfBeds: integer("number_of_beds"),
+  soilType: text("soil_type"),
+  budgetRange: text("budget_range"),
+  timeline: text("timeline"),
+  requirements: text("requirements"),
+  status: text("status").notNull().default("pending"),
+  totalAmount: decimal("total_amount", { precision: 12, scale: 2 }),
+  vatAmount: decimal("vat_amount", { precision: 12, scale: 2 }),
+  finalTotal: decimal("final_total", { precision: 12, scale: 2 }),
+  currency: text("currency").notNull().default("KSH"),
+  items: jsonb("items").default([]),
+  notes: text("notes"),
+  assignedTo: uuid("assigned_to").references(() => users.id),
+  sentAt: timestamp("sent_at"),
+  deliveryMethod: text("delivery_method").default("email"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+const projects = pgTable("projects", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  location: text("location").notNull(),
+  projectType: text("project_type").notNull(),
+  areaSize: text("area_size").notNull(),
+  value: decimal("value", { precision: 12, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("KSH"),
+  status: text("status").notNull().default("planning"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  images: text("images").array().default([]),
+  results: jsonb("results"),
+  clientId: uuid("client_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+const blogPosts = pgTable("blog_posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  content: text("content").notNull(),
+  excerpt: text("excerpt").notNull(),
+  category: text("category").notNull(),
+  tags: text("tags").array().default([]),
+  featuredImage: text("featured_image"),
+  published: boolean("published").default(false),
+  authorId: uuid("author_id").references(() => users.id),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+const contacts = pgTable("contacts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  status: text("status").notNull().default("new"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+const teamMembers = pgTable("team_members", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  position: text("position").notNull(),
+  bio: text("bio").notNull(),
+  photoUrl: text("photo_url"),
+  image: text("image"),
+  email: text("email"),
+  linkedin: text("linkedin"),
+  order: integer("order").default(0),
+  active: boolean("active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+const successStories = pgTable("success_stories", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: text("title").notNull(),
+  clientName: text("client_name").notNull(),
+  projectType: text("project_type").notNull(),
+  areaSize: text("area_size").notNull(),
+  location: text("location").notNull(),
+  challenge: text("challenge").notNull(),
+  solution: text("solution").notNull(),
+  results: text("results").notNull(),
+  image: text("image"),
+  clientTestimonial: text("client_testimonial"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+const pageViews = pgTable("page_views", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  page: text("page").notNull(),
+  userAgent: text("user_agent"),
+  ipAddress: text("ip_address"),
+  sessionId: text("session_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+const websiteAnalytics = pgTable("website_analytics", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  metric: text("metric").notNull(),
+  value: integer("value").notNull(),
+  date: timestamp("date").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+const achievements = pgTable("achievements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  icon: text("icon").notNull(),
+  category: text("category").notNull(),
+  points: integer("points").notNull().default(0),
+  requirement: jsonb("requirement").notNull(),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+const userAchievements = pgTable("user_achievements", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id),
+  achievementId: uuid("achievement_id").references(() => achievements.id),
+  unlockedAt: timestamp("unlocked_at").defaultNow(),
+  progress: jsonb("progress").default({}),
+});
+
+const gamificationStats = pgTable("gamification_stats", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id").references(() => users.id),
+  totalPoints: integer("total_points").default(0),
+  level: integer("level").default(1),
+  streak: integer("streak").default(0),
+  lastActivityAt: timestamp("last_activity_at").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
 
 // Initialize database with Supabase support
 const getDatabaseConfig = () => {
@@ -31,7 +211,13 @@ const getDatabaseConfig = () => {
 };
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-const db = drizzle(pool, { schema });
+const db = drizzle(pool, { 
+  schema: {
+    users, products, quotes, projects, blogPosts, contacts, 
+    teamMembers, successStories, pageViews, websiteAnalytics,
+    achievements, userAchievements, gamificationStats
+  }
+});
 
 // Initialize Express app
 const app = express();
@@ -657,187 +843,6 @@ app.post('/api/track/pageview', async (req, res) => {
     res.json({ success: true });
   } catch (error) {
     console.error('Error tracking page view:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Protected admin routes
-app.get('/api/admin/quotes', authenticateToken, async (req, res) => {
-  try {
-    const quotes = await storage.getQuotes();
-    res.json(quotes);
-  } catch (error) {
-    console.error('Error fetching quotes:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.get('/api/admin/contacts', authenticateToken, async (req, res) => {
-  try {
-    const contacts = await storage.getContacts();
-    res.json(contacts);
-  } catch (error) {
-    console.error('Error fetching contacts:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.get('/api/admin/analytics', authenticateToken, async (req, res) => {
-  try {
-    const todayVisitors = await storage.getTodayUniqueVisitors();
-    const visitorGrowth = await storage.getVisitorGrowth();
-    
-    res.json({
-      todayVisitors,
-      visitorGrowth,
-      totalProducts: (await storage.getProducts()).length,
-      totalProjects: (await storage.getProjects()).length,
-      totalQuotes: (await storage.getQuotes()).length,
-      totalContacts: (await storage.getContacts()).length
-    });
-  } catch (error) {
-    console.error('Error fetching analytics:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Admin CRUD operations
-app.post('/api/admin/products', authenticateToken, async (req, res) => {
-  try {
-    const product = await storage.createProduct(req.body);
-    res.status(201).json(product);
-  } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.put('/api/admin/products/:id', authenticateToken, async (req, res) => {
-  try {
-    const product = await storage.updateProduct(req.params.id, req.body);
-    res.json(product);
-  } catch (error) {
-    console.error('Error updating product:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.delete('/api/admin/products/:id', authenticateToken, async (req, res) => {
-  try {
-    await storage.deleteProduct(req.params.id);
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting product:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.put('/api/admin/quotes/:id', authenticateToken, async (req, res) => {
-  try {
-    const quote = await storage.updateQuote(req.params.id, req.body);
-    res.json(quote);
-  } catch (error) {
-    console.error('Error updating quote:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.delete('/api/admin/quotes/:id', authenticateToken, async (req, res) => {
-  try {
-    await storage.deleteQuote(req.params.id);
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting quote:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.post('/api/admin/blog', authenticateToken, async (req, res) => {
-  try {
-    const post = await storage.createBlogPost(req.body);
-    res.status(201).json(post);
-  } catch (error) {
-    console.error('Error creating blog post:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.put('/api/admin/blog/:id', authenticateToken, async (req, res) => {
-  try {
-    const post = await storage.updateBlogPost(req.params.id, req.body);
-    res.json(post);
-  } catch (error) {
-    console.error('Error updating blog post:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.delete('/api/admin/blog/:id', authenticateToken, async (req, res) => {
-  try {
-    await storage.deleteBlogPost(req.params.id);
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting blog post:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.post('/api/admin/team', authenticateToken, async (req, res) => {
-  try {
-    const member = await storage.createTeamMember(req.body);
-    res.status(201).json(member);
-  } catch (error) {
-    console.error('Error creating team member:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.put('/api/admin/team/:id', authenticateToken, async (req, res) => {
-  try {
-    const member = await storage.updateTeamMember(req.params.id, req.body);
-    res.json(member);
-  } catch (error) {
-    console.error('Error updating team member:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.delete('/api/admin/team/:id', authenticateToken, async (req, res) => {
-  try {
-    await storage.deleteTeamMember(req.params.id);
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting team member:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.post('/api/admin/success-stories', authenticateToken, async (req, res) => {
-  try {
-    const story = await storage.createSuccessStory(req.body);
-    res.status(201).json(story);
-  } catch (error) {
-    console.error('Error creating success story:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.put('/api/admin/success-stories/:id', authenticateToken, async (req, res) => {
-  try {
-    const story = await storage.updateSuccessStory(req.params.id, req.body);
-    res.json(story);
-  } catch (error) {
-    console.error('Error updating success story:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-app.delete('/api/admin/success-stories/:id', authenticateToken, async (req, res) => {
-  try {
-    await storage.deleteSuccessStory(req.params.id);
-    res.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting success story:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
