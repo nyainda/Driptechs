@@ -842,6 +842,66 @@ app.delete('/api/admin/success-stories/:id', authenticateToken, async (req, res)
   }
 });
 
+// Basic HTML response for root access
+app.get('/', (req, res) => {
+  res.send(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>DripTech Irrigation Solutions</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
+          .container { max-width: 800px; margin: 0 auto; background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+          h1 { color: #22c55e; text-align: center; }
+          .api-list { background: #f8f9fa; padding: 20px; border-radius: 5px; margin: 20px 0; }
+          .api-item { margin: 10px 0; padding: 10px; background: white; border-radius: 3px; }
+          .method { color: #22c55e; font-weight: bold; margin-right: 10px; }
+          .admin-link { display: inline-block; background: #22c55e; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+          .admin-link:hover { background: #16a34a; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>🌱 DripTech Irrigation Solutions</h1>
+          <p>Welcome to DripTech API - Your comprehensive irrigation management system.</p>
+          
+          <h2>Available API Endpoints</h2>
+          <div class="api-list">
+            <div class="api-item"><span class="method">GET</span> /api/products - View all products</div>
+            <div class="api-item"><span class="method">GET</span> /api/projects - View all projects</div>
+            <div class="api-item"><span class="method">GET</span> /api/blog - View blog posts</div>
+            <div class="api-item"><span class="method">GET</span> /api/team - View team members</div>
+            <div class="api-item"><span class="method">GET</span> /api/success-stories - View success stories</div>
+            <div class="api-item"><span class="method">POST</span> /api/contacts - Submit contact form</div>
+            <div class="api-item"><span class="method">POST</span> /api/quotes - Request quote</div>
+            <div class="api-item"><span class="method">POST</span> /api/login - Admin login</div>
+          </div>
+          
+          <h2>Admin Dashboard</h2>
+          <p>Access the admin dashboard to manage your irrigation business:</p>
+          <a href="/admin" class="admin-link">Go to Admin Dashboard</a>
+          
+          <h2>Credentials</h2>
+          <p><strong>Email:</strong> admin@driptech.co.ke<br>
+          <strong>Password:</strong> admin123</p>
+          
+          <h2>Features</h2>
+          <ul>
+            <li>Product catalog management</li>
+            <li>Quote generation and tracking</li>
+            <li>Project portfolio showcase</li>
+            <li>Customer contact management</li>
+            <li>Blog content management</li>
+            <li>Team member profiles</li>
+            <li>Success story tracking</li>
+            <li>Real-time analytics</li>
+          </ul>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
 // Vercel serverless function handler
 export default async function handler(req, res) {
   await ensureInitialized();
