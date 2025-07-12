@@ -38,8 +38,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// JWT Secret
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-here';
+// JWT Secret - auto-generate if not provided
+const generateJWTSecret = () => {
+  const crypto = require('crypto');
+  return crypto.randomBytes(64).toString('hex');
+};
+
+const JWT_SECRET = process.env.JWT_SECRET || generateJWTSecret();
 
 // Authentication middleware
 const authenticateToken = (req, res, next) => {
