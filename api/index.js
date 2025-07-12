@@ -848,6 +848,25 @@ app.post('/api/track/pageview', async (req, res) => {
   }
 });
 
+// API root endpoint
+app.get('/api', (req, res) => {
+  res.json({
+    message: 'DripTech Irrigation API',
+    version: '1.0.0',
+    status: 'online',
+    endpoints: [
+      'GET /api/products - View all products',
+      'GET /api/projects - View all projects', 
+      'GET /api/blog - View blog posts',
+      'GET /api/team - View team members',
+      'GET /api/success-stories - View success stories',
+      'POST /api/contacts - Submit contact form',
+      'POST /api/quotes - Request quote',
+      'POST /api/login - Admin login'
+    ]
+  });
+});
+
 // Basic HTML response for root access
 app.get('/', (req, res) => {
   res.send(`

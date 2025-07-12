@@ -1,85 +1,188 @@
-<!DOCTYPE html>
+
+<old_str><!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>DripTech - Irrigation Solutions</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DripTech Irrigation Solutions</title>
     <style>
-      /* Basic loading styles */
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        margin: 0;
-        padding: 0;
-        background: #ffffff;
-        color: #333;
-      }
-      .loading {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        flex-direction: column;
-      }
-      .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid #f3f3f3;
-        border-top: 4px solid #22c55e;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-      .error-message {
-        color: #dc2626;
-        text-align: center;
-        padding: 20px;
-        max-width: 600px;
-        margin: 0 auto;
-      }
-      .retry-button {
-        background: #22c55e;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 5px;
-        cursor: pointer;
-        margin-top: 10px;
-      }
-      .retry-button:hover {
-        background: #16a34a;
-      }
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 0; 
+            padding: 0; 
+            background: #f5f5f5; 
+        }
+        .header {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 40px 20px; 
+        }
+        .hero {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #1f2937;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            color: #6b7280;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .feature-card h3 {
+            color: #22c55e;
+            margin-bottom: 15px;
+        }
+        .api-status {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-online { background: #22c55e; }
+        .status-offline { background: #ef4444; }
+        .cta-button {
+            display: inline-block;
+            background: #22c55e;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+            margin: 20px 10px;
+            transition: background 0.3s;
+        }
+        .cta-button:hover {
+            background: #16a34a;
+        }
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            .container { padding: 20px 10px; }
+        }
     </style>
-  </head>
-  <body>
-    <div id="root">
-      <div class="loading">
-        <div class="spinner"></div>
-        <p>Loading DripTech...</p>
-      </div>
+</head>
+<body>
+    <div class="header">
+        <h1>🌱 DripTech Irrigation Solutions</h1>
+        <p>Professional Irrigation Systems for Modern Agriculture</p>
     </div>
     
+    <div class="container">
+        <div class="hero">
+            <h1>Welcome to DripTech</h1>
+            <p>Your premier destination for cutting-edge irrigation solutions that maximize crop yield while conserving water resources.</p>
+        </div>
+
+        <div class="api-status">
+            <h3>System Status</h3>
+            <div id="api-status">
+                <span class="status-indicator status-offline"></span>
+                <span>Checking connection...</span>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <h3>🚀 Advanced Technology</h3>
+                <p>State-of-the-art drip irrigation systems with smart sensors and automated controls for optimal water distribution.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>💧 Water Conservation</h3>
+                <p>Reduce water usage by up to 60% while maintaining superior crop quality and yield through precision irrigation.</p>
+            </div>
+            
+            <div class="feature-card">
+                <h3>📈 Increased Yields</h3>
+                <p>Proven track record of increasing crop yields by 25-40% through optimized nutrient and water delivery systems.</p>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 40px 0;">
+            <a href="/admin" class="cta-button">Admin Dashboard</a>
+            <a href="#contact" class="cta-button">Get Quote</a>
+        </div>
+
+        <div class="feature-card" id="contact">
+            <h3>Contact Information</h3>
+            <p><strong>Email:</strong> info@driptech.co.ke</p>
+            <p><strong>Phone:</strong> +254 700 000 000</p>
+            <p><strong>Location:</strong> Nairobi, Kenya</p>
+        </div>
+    </div>
+
     <script>
-      // Basic error handling for production
-      window.addEventListener('error', function(e) {
-        console.error('Application error:', e.error);
-        document.getElementById('root').innerHTML = `
-          <div class="error-message">
-            <h2>Something went wrong</h2>
-            <p>We're having trouble loading the application. Please try refreshing the page.</p>
-            <button class="retry-button" onclick="window.location.reload()">Refresh Page</button>
-          </div>
-        `;
-      });
-      
-      // Redirect to API for now (fallback)
-      setTimeout(() => {
-        if (document.getElementById('root').innerHTML.includes('Loading DripTech')) {
-          window.location.href = '/api/';
+        // Check API connection
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch('/api');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    document.getElementById('api-status').innerHTML = `
+                        <span class="status-indicator status-online"></span>
+                        <span>API Online - ${data.message}</span>
+                    `;
+                } else {
+                    throw new Error('API offline');
+                }
+            } catch (error) {
+                document.getElementById('api-status').innerHTML = `
+                    <span class="status-indicator status-offline"></span>
+                    <span>API Connection Failed</span>
+                `;
+            }
         }
-      }, 3000);
+
+        // Check status on page load
+        checkAPIStatus();
+        
+        // Periodically check status
+        setInterval(checkAPIStatus, 30000);
     </script>
-  </body>
-</html>
+</body>
+</html></old_str>
+<new_str><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DripTech Irrigation Solutions</title>
+  <script type="module" crossorigin src="/assets/index.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index.css">
+</head>
+<body>
+  <div id="root"></div>
+</body>
+</html></new_str>
