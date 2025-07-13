@@ -40,6 +40,7 @@ import { getAuthToken, getUser, clearAuth } from "@/lib/auth";
 import QuickSuccessStory from "@/components/admin/quick-success-story";
 import GamificationDashboard from "@/components/admin/gamification-dashboard";
 
+
 export default function AdminDashboard() {
   const [, setLocation] = useLocation();
   const [quotesFilter, setQuotesFilter] = useState("all");
