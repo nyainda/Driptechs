@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { initializeDatabase } from './init-db';
 import { checkDatabaseConnection, getDatabaseConfig } from './db';
+import path from 'path';
 
 const app = express();
 app.use(express.json());
@@ -60,7 +61,7 @@ const initializeApp = async () => {
   } catch (error) {
     initError = error as Error;
     console.error('❌ Database initialization failed:', error);
-    
+
     if (process.env.NODE_ENV !== 'production') {
       process.exit(1);
     }
@@ -75,14 +76,14 @@ app.use('/api', (req, res, next) => {
       message: initError.message 
     });
   }
-  
+
   if (!isInitialized) {
     return res.status(503).json({ 
       error: 'Service temporarily unavailable',
       message: 'Database is still initializing...' 
     });
   }
-  
+
   next();
 });
 
@@ -99,7 +100,7 @@ app.get('/api/health', (req, res) => {
 const setupApp = async () => {
   // Initialize database first
   await initializeApp();
-  
+
   // Register routes
   const server = await registerRoutes(app);
 
@@ -109,7 +110,7 @@ const setupApp = async () => {
     const message = err.message || "Internal Server Error";
 
     res.status(status).json({ message });
-    
+
     // Only throw in development
     if (process.env.NODE_ENV !== 'production') {
       throw err;
