@@ -7,20 +7,27 @@
       "config": {
         "runtime": "nodejs20.x"
       }
+    },
+    {
+      "src": "client/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "client/dist"
+      }
     }
   ],
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
     },
     {
-      "source": "/assets/(.*)",
-      "destination": "/public/assets/$1"
+      "src": "/assets/(.*)",
+      "dest": "/client/dist/assets/$1"
     },
     {
-      "source": "/(.*)",
-      "destination": "/public/index.html"
+      "src": "/(.*)",
+      "dest": "/client/dist/index.html"
     }
   ]
 }

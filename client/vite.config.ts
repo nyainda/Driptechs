@@ -9,7 +9,7 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
       "@shared": path.resolve(__dirname, "./src/types"),
-      "@assets": path.resolve(__dirname, "../attached_assets"),
+      "@assets": path.resolve(__dirname, "./public/assets"), // Adjust if assets are elsewhere
     },
   },
   build: {
@@ -22,12 +22,9 @@ export default defineConfig({
         manualChunks: {
           vendor: ["react", "react-dom"],
           router: ["wouter"],
-          ui: ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu"]
-        }
-      }
-    }
+          ui: ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu"],
+        },
+      },
+    },
   },
-  define: {
-    'process.env.NODE_ENV': '"production"'
-  }
 });
