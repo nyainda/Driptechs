@@ -1,0 +1,61 @@
+[06:58:36.158] Running build in Washington, D.C., USA (East) – iad1
+[06:58:36.159] Build machine configuration: 2 cores, 8 GB
+[06:58:36.198] Cloning github.com/nyainda/Driptechs (Branch: main, Commit: c319842)
+[06:58:36.551] Cloning completed: 352.000ms
+[06:58:36.909] Found .vercelignore
+[06:58:36.927] Removed 63 ignored files defined in .vercelignore
+[06:58:36.927]   /.env
+[06:58:36.928]   /.git/config
+[06:58:36.928]   /.git/description
+[06:58:36.928]   /.git/FETCH_HEAD
+[06:58:36.928]   /.git/HEAD
+[06:58:36.928]   /.git/hooks/applypatch-msg.sample
+[06:58:36.928]   /.git/hooks/commit-msg.sample
+[06:58:36.928]   /.git/hooks/fsmonitor-watchman.sample
+[06:58:36.928]   /.git/hooks/post-update.sample
+[06:58:36.928]   /.git/hooks/pre-applypatch.sample
+[06:58:36.998] Restored build cache from previous deployment (GW5gYpyETjBYUPjbSQ2wL1WSqikL)
+[06:58:37.494] Running "vercel build"
+[06:58:37.931] Vercel CLI 44.3.0
+[06:58:38.171] WARN! Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply. Learn More: https://vercel.link/unused-build-settings
+[06:58:38.775] Installing dependencies...
+[06:58:44.619] npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+[06:58:44.685] npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+[06:58:50.930] 
+[06:58:50.931] added 633 packages in 12s
+[06:58:50.931] 
+[06:58:50.932] 84 packages are looking for funding
+[06:58:50.932]   run `npm fund` for details
+[06:58:50.984] Running "npm run vercel-build"
+[06:58:51.171] 
+[06:58:51.172] > rest-express@1.0.0 vercel-build
+[06:58:51.172] > cd client && npm install && npm run build
+[06:58:51.172] 
+[06:59:22.565] 
+[06:59:22.566] added 334 packages, and audited 335 packages in 31s
+[06:59:22.567] 
+[06:59:22.567] 48 packages are looking for funding
+[06:59:22.567]   run `npm fund` for details
+[06:59:22.572] 
+[06:59:22.573] 2 moderate severity vulnerabilities
+[06:59:22.573] 
+[06:59:22.573] To address all issues (including breaking changes), run:
+[06:59:22.573]   npm audit fix --force
+[06:59:22.574] 
+[06:59:22.574] Run `npm audit` for details.
+[06:59:22.707] 
+[06:59:22.708] > driptech-client@1.0.0 build
+[06:59:22.708] > vite build
+[06:59:22.708] 
+[06:59:23.006] [36mvite v5.4.19 [32mbuilding for production...[36m[39m
+[06:59:23.038] [32m✓[39m 0 modules transformed.
+[06:59:23.041] [31mx[39m Build failed in 9ms
+[06:59:23.041] [31merror during build:
+[06:59:23.041] [31mCould not resolve entry module "index.html".[31m
+[06:59:23.041]     at getRollupError (file:///vercel/path1/client/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+[06:59:23.042]     at error (file:///vercel/path1/client/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+[06:59:23.042]     at ModuleLoader.loadEntryModule (file:///vercel/path1/client/node_modules/rollup/dist/es/shared/node-entry.js:21451:20)
+[06:59:23.042]     at async Promise.all (index 0)[39m
+[06:59:23.062] Error: Command "npm run vercel-build" exited with 1
+[06:59:23.462] 
+[06:59:26.932] Exiting build container
