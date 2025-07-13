@@ -21,15 +21,6 @@ export default defineConfig({
     emptyOutDir: true,
     sourcemap: process.env.NODE_ENV === "production" ? false : true,
     minify: "esbuild",
-    rollupOptions: {
-      input: path.resolve(__dirname, "client/index.html"),
-      output: {
-        manualChunks: {
-          vendor: ["react", "react-dom", "wouter"],
-          ui: ["lucide-react"],
-        },
-      },
-    },
   },
   server: {
     fs: {
