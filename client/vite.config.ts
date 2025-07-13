@@ -4,28 +4,34 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react()],
-  base: "/", // Serve assets from root
-  root: "public", // Look for index.html in /client/public
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@shared": path.resolve(__dirname, "./src/types"),
-      "@assets": path.resolve(__dirname, "./public/assets"), // Points to /client/public/assets
+      "@shared": path.resolve(__dirname, "../shared"),
+      "@assets": path.resolve(__dirname, "./public/assets"),
     },
   },
   build: {
-    outDir: "../dist", // Outputs to /client/dist
+    outDir: "dist",
     emptyOutDir: true,
-    sourcemap: false,
-    minify: true,
+    sourcemap: process.env.NODE_ENV === "production" ? false : true,
+    minify: "esbuild",
     rollupOptions: {
       output: {
         manualChunks: {
-          vendor: ["react", "react-dom"],
-          router: ["wouter"],
-          ui: ["@radix-ui/react-dialog", "@radix-ui/react-dropdown-menu"],
+          vendor: ["react", "react-dom", "wouter"],
+          ui: ["lucide-react"],
         },
       },
     },
+  },
+  server: {
+    fs: {
+      strict: true,
+      deny: ["**/.*"],
+    },
+  },
+  optimizeDeps: {
+    include: ["react", "react-dom", "wouter", "lucide-react"],
   },
 });
