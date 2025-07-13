@@ -17,6 +17,7 @@ export default defineConfig({
     sourcemap: process.env.NODE_ENV === "production" ? false : true,
     minify: "esbuild",
     rollupOptions: {
+      input: path.resolve(__dirname, "index.html"),
       output: {
         manualChunks: {
           vendor: ["react", "react-dom", "wouter"],
