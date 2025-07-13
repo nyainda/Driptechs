@@ -1,4 +1,3 @@
-
 {
   "compilerOptions": {
     "target": "ES2020",
@@ -13,7 +12,6 @@
     "noImplicitAny": false,
     "noImplicitReturns": false,
     "noImplicitThis": false,
-
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
@@ -22,10 +20,11 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@shared/*": ["./src/types/*"]
+      "@/*": ["src/*"],
+      "@shared/*": ["src/types/*"],
+      "@assets/*": ["public/assets/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src/**/*", "public/index.html"],
   "exclude": ["node_modules", "dist", "build"]
 }
